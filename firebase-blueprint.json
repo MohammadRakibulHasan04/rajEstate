@@ -1,0 +1,89 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User profile representation in the real estate media platform",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "maxLength": 128 },
+        "email": { "type": "string", "maxLength": 256 },
+        "displayName": { "type": "string", "maxLength": 128 },
+        "role": { "type": "string", "enum": ["client", "agent", "admin"] },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "email", "role", "createdAt"]
+    },
+    "Property": {
+      "title": "Property",
+      "description": "High-end real estate listing with architectural media and 3D tour assets",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string", "maxLength": 160 },
+        "tagline": { "type": "string", "maxLength": 240 },
+        "description": { "type": "string", "maxLength": 5000 },
+        "propertyType": { "type": "string", "enum": ["villa", "penthouse", "residence", "estate", "architectural"] },
+        "price": { "type": "number" },
+        "city": { "type": "string", "maxLength": 100 },
+        "location": { "type": "string", "maxLength": 150 },
+        "bedrooms": { "type": "number" },
+        "bathrooms": { "type": "number" },
+        "sqft": { "type": "number" },
+        "architect": { "type": "string", "maxLength": 120 },
+        "status": { "type": "string", "enum": ["available", "reserved", "completed"] },
+        "featured": { "type": "boolean" },
+        "heroImage": { "type": "string", "maxLength": 1000 },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["title", "propertyType", "price", "city", "status"]
+    },
+    "Inquiry": {
+      "title": "Inquiry",
+      "description": "Client private inquiry or 3D private viewing reservation",
+      "type": "object",
+      "properties": {
+        "propertyId": { "type": "string", "maxLength": 128 },
+        "propertyTitle": { "type": "string", "maxLength": 160 },
+        "userId": { "type": "string", "maxLength": 128 },
+        "fullName": { "type": "string", "maxLength": 100 },
+        "email": { "type": "string", "maxLength": 256 },
+        "phone": { "type": "string", "maxLength": 50 },
+        "tourType": { "type": "string", "enum": ["virtual-3d", "in-person", "architectural-consultation"] },
+        "preferredDate": { "type": "string", "maxLength": 50 },
+        "message": { "type": "string", "maxLength": 2000 },
+        "status": { "type": "string", "enum": ["pending", "confirmed", "completed"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["propertyId", "fullName", "email", "tourType", "createdAt"]
+    },
+    "SavedItem": {
+      "title": "SavedItem",
+      "description": "User saved property bookmark",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "maxLength": 128 },
+        "propertyId": { "type": "string", "maxLength": 128 },
+        "savedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "propertyId", "savedAt"]
+    }
+  },
+  "firestore": {
+    "/properties/{propertyId}": {
+      "schema": "Property",
+      "description": "Public collection of real estate architectural listings and media"
+    },
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "User profile collection isolated to the authenticated user"
+    },
+    "/inquiries/{inquiryId}": {
+      "schema": "Inquiry",
+      "description": "Client private tour bookings and private inquiries"
+    },
+    "/users/{userId}/saved/{savedId}": {
+      "schema": "SavedItem",
+      "description": "Subcollection of saved listings for an authenticated user"
+    }
+  }
+}

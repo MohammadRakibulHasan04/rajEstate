@@ -1,0 +1,6 @@
+{
+  "name": "AURA Real Estate & Architectural Media",
+  "description": "Modern architectural and luxury real estate media platform featuring interactive 3D virtual tours, blueprint-to-existence narrative scrolling, and property showcase.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

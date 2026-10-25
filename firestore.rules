@@ -1,0 +1,80 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      return isSignedIn() && (
+        request.auth.token.email == "business.rifat04@gmail.com" ||
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid))
+      );
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Legacy collection: public read, admin-only write.
+    match /properties/{propertyId} {
+      allow get, list: if true;
+      allow create, update, delete: if isAdmin();
+    }
+
+    // A user may check whether they themselves are an admin.
+    match /admins/{uid} {
+      allow get: if isOwner(uid);
+    }
+
+    function isValidListing() {
+      let d = incoming();
+      return d.title is string && d.title.size() > 0 && d.title.size() <= 160
+        && d.slug is string && d.slug.matches('^[a-z0-9-]{1,80}$')
+        && d.kind in ['single', 'project']
+        && d.publish in ['draft', 'published', 'archived'];
+    }
+
+    // Listings: the public sees published only; admins manage everything.
+    match /listings/{listingId} {
+      allow get, list: if resource.data.publish == 'published' || isAdmin();
+      allow create, update: if isAdmin() && isValidListing();
+      allow delete: if isAdmin();
+    }
+
+    match /users/{userId} {
+      allow get: if isOwner(userId) || isAdmin();
+      allow list: if isAdmin();
+      allow create, update: if isOwner(userId) || isAdmin();
+      allow delete: if isAdmin();
+
+      match /saved/{savedId} {
+        allow read, write: if isOwner(userId);
+      }
+    }
+
+    match /inquiries/{inquiryId} {
+      allow create: if true;
+      allow get: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow list: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow update, delete: if isAdmin();
+    }
+  }
+}
