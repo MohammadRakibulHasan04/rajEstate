@@ -1,66 +1,45 @@
-import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { ArrowRight, Compass } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { FRAME_COUNT } from '../../lib/frames';
 
 gsap.registerPlugin(ScrollTrigger);
 
 interface Chapter {
-  no: string;
-  kicker: string;
   title: [string, string];
   body: string;
-  meta: { label: string; value: string }[];
   /** Window of overall hero scroll progress (0..1) where this chapter is on screen. */
   at: [number, number];
 }
 
 const CHAPTERS: Chapter[] = [
   {
-    no: '01',
-    kicker: 'The Blueprint',
-    title: ['প্রতিটি রেখায়,', 'সুনির্দিষ্ট উদ্দেশ্য।'],
-    body: 'কাগজে শুরু হয় সব: সূর্যের আলো আর জায়গার মাপ অনুযায়ী নকশা, যা নিখুঁত না হওয়া পর্যন্ত চলতে থাকে।',
-    meta: [
-      { label: 'Drafting scale', value: '1:50' },
-      { label: 'Site datum', value: '+142.50 m' },
-    ],
-    at: [0.1, 0.31],
+    title: ['আমরা আছি,', 'আপনার পাশে'],
+    body: '',
+    at: [0.12, 0.33],
   },
   {
-    no: '02',
-    kicker: 'The Foundation',
-    title: ['গভীরে নিহিত,', 'নিঃশব্দ নির্ভুলতা।'],
-    body: 'নকশা থেকে উঠে আসে মজবুত কংক্রিট আর বিশাল কাচের দেয়াল, যার প্রতিটি মিলিমিটার মাপা।',
-    meta: [
-      { label: 'Structure', value: 'C50 Concrete' },
-      { label: 'Glazing', value: 'Low-iron, triple' },
-    ],
-    at: [0.34, 0.53],
+    title: ['শুধু তালিকা নয়,', 'সাথে সহযোগিতা'],
+    body: '',
+    at: [0.36, 0.56],
   },
   {
-    no: '03',
-    kicker: 'The Material',
-    title: ['কাঠ, পাথর', 'এবং প্রাকৃতিক আলো।'],
-    body: 'সিডার কাঠ, অখণ্ড দেয়াল আর ফ্রেমহীন কাচ—সবকিছু সাজানো হয়েছে এমনভাবে, যা সময়ের সাথে আরও সুন্দর হয়ে ওঠে।',
-    meta: [
-      { label: 'Cladding', value: 'Western red cedar' },
-      { label: 'Envelope', value: 'Passivhaus' },
-    ],
-    at: [0.56, 0.76],
+    title: ['প্রতারণা থেকে দূরে থাকুন', 'নিশ্চিন্তে এগিয়ে চলুন'],
+    body: '',
+    at: [0.59, 0.78],
   },
   {
-    no: '04',
-    kicker: 'The Residence',
-    title: ['একটি বাড়ি,', 'অবশেষে বাস্তব।'],
-    body: 'অলিভ বাগান, অনন্ত সীমানা আর দিনের শেষ আলো। এখানেই স্থাপত্য হয়ে ওঠে জীবনযাপনের এক অনন্য উপায়।',
-    meta: [
-      { label: 'Living area', value: '6,450 sq ft' },
-      { label: 'Certification', value: 'LEED Platinum' },
-    ],
-    at: [0.8, 1],
+    title: ['খুঁজুন, যাচাই করুন', 'তারপর সিদ্ধান্ত নিন'],
+    body: '',
+    at: [0.81, 1],
   },
+];
+
+/** Quantized scroll progress stops: Intro (0) + each chapter phase (ending at 1). */
+const PHASE_SNAP_POINTS: number[] = [
+  0,
+  ...CHAPTERS.map(({ at: [s, e] }, i) => (i === CHAPTERS.length - 1 ? 1 : Number(((s + e) / 2).toFixed(4)))),
 ];
 
 interface CinematicHeroProps {
@@ -89,12 +68,10 @@ export const CinematicHero: React.FC<CinematicHeroProps> = ({ images, ready, onE
   const introSubRef = useRef<HTMLDivElement>(null);
   const chapterRefs = useRef<(HTMLDivElement | null)[]>([]);
   const railFillRef = useRef<HTMLDivElement>(null);
-  const cueRef = useRef<HTMLDivElement>(null);
 
   const frameState = useRef({ frame: 0 });
   const lastDrawn = useRef(-1);
-  const activeRef = useRef(-1);
-  const [active, setActive] = useState(-1);
+  const wasReadyOnMount = useRef(ready);
 
   /** Paints the current (fractional) frame, cross-fading neighbours for buttery motion. */
   const render = (force = false) => {
@@ -104,7 +81,7 @@ export const CinematicHero: React.FC<CinematicHeroProps> = ({ images, ready, onE
     if (!canvas || !ctx || !imgs.length) return;
 
     const f = Math.min(FRAME_COUNT - 1, Math.max(0, frameState.current.frame));
-    if (!force && Math.abs(f - lastDrawn.current) < 0.002) return;
+    if (!force && Math.abs(f - lastDrawn.current) < 0.001) return;
 
     const i = Math.floor(f);
     const t = f - i;
@@ -112,8 +89,11 @@ export const CinematicHero: React.FC<CinematicHeroProps> = ({ images, ready, onE
     const b = imgs[Math.min(i + 1, imgs.length - 1)];
     if (!a || !a.complete || !a.naturalWidth) return;
 
+    ctx.fillStyle = '#070b14';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
     drawCover(ctx, a, canvas.width, canvas.height, 1);
-    if (t > 0.01 && b && b !== a && b.complete && b.naturalWidth) {
+    if (t > 0.005 && b && b !== a && b.complete && b.naturalWidth) {
       drawCover(ctx, b, canvas.width, canvas.height, t);
     }
     lastDrawn.current = f;
@@ -149,32 +129,56 @@ export const CinematicHero: React.FC<CinematicHeroProps> = ({ images, ready, onE
     if (!section) return;
 
     const ctx = gsap.context(() => {
-      // Hidden until the preloader hands off
-      gsap.set(section.querySelectorAll('[data-intro-line]'), { yPercent: 115 });
-      gsap.set(section.querySelectorAll('[data-intro-fade]'), { autoAlpha: 0, y: 24 });
-      gsap.set(canvasRef.current, { autoAlpha: 0 });
+      if (wasReadyOnMount.current) {
+        gsap.set(section.querySelectorAll('[data-intro-line]'), { yPercent: 0 });
+        gsap.set(section.querySelectorAll('[data-intro-fade]'), { autoAlpha: 1, y: 0 });
+        gsap.set(canvasRef.current, { autoAlpha: 1 });
+      } else {
+        // Hidden until the preloader hands off
+        gsap.set(section.querySelectorAll('[data-intro-line]'), { yPercent: 115 });
+        gsap.set(section.querySelectorAll('[data-intro-fade]'), { autoAlpha: 0, y: 24 });
+        gsap.set(canvasRef.current, { autoAlpha: 0 });
+      }
 
       const tl = gsap.timeline({
         defaults: { ease: 'none' },
         scrollTrigger: {
           trigger: section,
           start: 'top top',
-          end: () => `+=${window.innerHeight * 4.5}`,
+          end: () => `+=${Math.round(window.innerHeight * (window.innerWidth < 768 ? 1.25 : 1.6))}`,
           pin: true,
-          scrub: 1,
+          scrub: 0.5,
           anticipatePin: 1,
           refreshPriority: 1,
+          snap: {
+            snapTo: (value, self) => {
+              const threshold = 0.005;
+              const dir = self?.direction ?? 0;
+              if (dir > 0) {
+                for (let i = 0; i < PHASE_SNAP_POINTS.length; i++) {
+                  if (PHASE_SNAP_POINTS[i] >= value - threshold) {
+                    return PHASE_SNAP_POINTS[i];
+                  }
+                }
+                return PHASE_SNAP_POINTS[PHASE_SNAP_POINTS.length - 1];
+              }
+              if (dir < 0) {
+                for (let i = PHASE_SNAP_POINTS.length - 1; i >= 0; i--) {
+                  if (PHASE_SNAP_POINTS[i] <= value + threshold) {
+                    return PHASE_SNAP_POINTS[i];
+                  }
+                }
+                return PHASE_SNAP_POINTS[0];
+              }
+              return gsap.utils.snap(PHASE_SNAP_POINTS, value);
+            },
+            inertia: false,
+            duration: { min: 0.25, max: 0.55 },
+            delay: 0.05,
+            ease: 'power2.inOut',
+          },
           onUpdate: (self) => {
             if (railFillRef.current) railFillRef.current.style.transform = `scaleY(${self.progress})`;
-            const p = self.progress;
-            let idx = -1;
-            CHAPTERS.forEach((c, i) => {
-              if (p >= c.at[0] - 0.02) idx = i;
-            });
-            if (idx !== activeRef.current) {
-              activeRef.current = idx;
-              setActive(idx);
-            }
           },
         },
       });
@@ -187,38 +191,34 @@ export const CinematicHero: React.FC<CinematicHeroProps> = ({ images, ready, onE
         0
       );
 
-      // 2. Slow camera push-out for depth
-      tl.fromTo(stageRef.current, { scale: 1.14 }, { scale: 1, duration: 1 }, 0);
+      // 2. Subtle camera push-out for depth
+      tl.fromTo(stageRef.current, { scale: 1.08 }, { scale: 1, duration: 1 }, 0);
 
-      // 3. Intro exits with layered parallax (title outruns the copy)
-      tl.fromTo(introTitleRef.current, { yPercent: 0 }, { yPercent: -55, duration: 0.14 }, 0)
-        .fromTo(introSubRef.current, { y: 0 }, { y: -40, duration: 0.14 }, 0)
-        .fromTo(introRef.current, { autoAlpha: 1 }, { autoAlpha: 0, duration: 0.08 }, 0.035)
-        .fromTo(cueRef.current, { autoAlpha: 1 }, { autoAlpha: 0, duration: 0.05 }, 0.02);
+      // 3. Intro exits with crisp parallax
+      tl.fromTo(introTitleRef.current, { yPercent: 0 }, { yPercent: -40, duration: 0.12 }, 0)
+        .fromTo(introSubRef.current, { y: 0 }, { y: -30, duration: 0.12 }, 0)
+        .fromTo(introRef.current, { autoAlpha: 1 }, { autoAlpha: 0, duration: 0.08 }, 0.02);
 
       // 4. Blueprint grid dissolves as materials arrive
-      tl.fromTo(gridRef.current, { autoAlpha: 1, scale: 1 }, { autoAlpha: 0, scale: 1.12, duration: 0.25 }, 0.38);
+      tl.fromTo(gridRef.current, { autoAlpha: 1, scale: 1 }, { autoAlpha: 0, scale: 1.08, duration: 0.22 }, 0.28);
 
-      // 5. Chapters: three depth layers drifting at different speeds
+      // 5. Chapters: gentle depth layers drifting cleanly
       chapterRefs.current.forEach((el, i) => {
         if (!el) return;
         const [s, e] = CHAPTERS[i].at;
         const span = e - s;
         const isLast = i === CHAPTERS.length - 1;
-        const num = el.querySelector('[data-ch-num]');
         const title = el.querySelector('[data-ch-title]');
         const body = el.querySelector('[data-ch-body]');
 
-        tl.fromTo(el, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.04 }, s);
+        tl.fromTo(el, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.03 }, s);
         if (isLast) {
-          tl.fromTo(title, { y: 70 }, { y: 0, duration: 0.12, ease: 'power2.out' }, s)
-            .fromTo(body, { y: 50 }, { y: 0, duration: 0.14, ease: 'power2.out' }, s)
-            .fromTo(num, { y: 140 }, { y: 0, duration: 0.16, ease: 'power2.out' }, s);
+          tl.fromTo(title, { y: 50 }, { y: 0, duration: 0.09, ease: 'power2.out' }, s);
+          if (body) tl.fromTo(body, { y: 35 }, { y: 0, duration: 0.1, ease: 'power2.out' }, s);
         } else {
-          tl.fromTo(title, { y: 80 }, { y: -40, duration: span }, s)
-            .fromTo(body, { y: 50 }, { y: -12, duration: span }, s)
-            .fromTo(num, { y: 180 }, { y: -160, duration: span }, s)
-            .to(el, { autoAlpha: 0, duration: 0.04 }, e - 0.04);
+          tl.fromTo(title, { y: 50 }, { y: -25, duration: span }, s);
+          if (body) tl.fromTo(body, { y: 30 }, { y: -10, duration: span }, s);
+          tl.to(el, { autoAlpha: 0, duration: 0.035 }, e - 0.035);
         }
       });
     }, section);
@@ -231,6 +231,10 @@ export const CinematicHero: React.FC<CinematicHeroProps> = ({ images, ready, onE
   useEffect(() => {
     if (!ready || !sectionRef.current) return;
     render(true);
+    if (wasReadyOnMount.current) {
+      ScrollTrigger.refresh();
+      return;
+    }
     const section = sectionRef.current;
     const tl = gsap.timeline();
     tl.to(canvasRef.current, { autoAlpha: 1, duration: 1.6, ease: 'power2.out' }, 0)
@@ -264,29 +268,26 @@ export const CinematicHero: React.FC<CinematicHeroProps> = ({ images, ready, onE
       {/* Layer 2: intro */}
       <div
         ref={introRef}
-        className="absolute inset-0 z-20 flex flex-col justify-end px-6 md:px-12 lg:px-20 pb-28 md:pb-[13vh]"
+        className="absolute inset-0 z-20 flex flex-col justify-end px-6 md:px-12 lg:px-20 pb-16 sm:pb-20 md:pb-[15vh] lg:pb-[14vh]"
       >
-        <div className="eyebrow mb-7" data-intro-fade>
-          Architectural Residences · Collection 2026
-        </div>
         <h1
           ref={introTitleRef}
-          className="font-display font-light text-[13vw] sm:text-[10vw] lg:text-[8.2vw] leading-[0.92] tracking-[-0.02em] max-w-[14ch]"
+          className="font-display font-light text-[8.5vw] sm:text-[6.5vw] lg:text-[5vw] xl:text-[4.4vw] leading-[1.3] tracking-[-0.01em] max-w-[20ch]"
         >
           <span className="reveal-line">
-            <span data-intro-line>যেখানে কল্পনা</span>
+            <span data-intro-line>রাজশাহীতে</span>
+          </span>
+          <span className="reveal-line">
+            <span data-intro-line>খুঁজছেন</span>
           </span>
           <span className="reveal-line">
             <span data-intro-line>
-              হয়ে ওঠে <em className="italic text-gradient-gold pr-[0.06em]">বাড়ি।</em>
+              মনের মতো <em className="italic text-gradient-gold pr-[0.06em]">ঠিকানা?</em>
             </span>
           </span>
         </h1>
-        <div ref={introSubRef} className="mt-8 flex flex-col lg:flex-row lg:items-end gap-8 lg:gap-16">
-          <p data-intro-fade className="max-w-md text-[15px] leading-relaxed text-slate-300/90 font-light">
-            আমরা স্থপতিদের নকশা করা সেরা বাড়িগুলো নির্বাচন করি এবং একটি সাধারণ রেখা থেকে শুরু করে পূর্ণাঙ্গ রূপ পাওয়া পর্যন্ত প্রতিটি স্থাপত্যের গল্প বলি।
-          </p>
-          <div data-intro-fade className="flex flex-wrap items-center gap-3">
+        <div ref={introSubRef} className="mt-8 md:mt-12 flex flex-col items-start gap-6 sm:gap-7 max-w-sm sm:max-w-[400px]">
+          <div data-intro-fade className="flex items-center">
             <button id="hero-explore-btn" onClick={onExplore} className="btn-gold">
               Explore Residences <ArrowRight className="w-4 h-4" />
             </button>
@@ -295,75 +296,48 @@ export const CinematicHero: React.FC<CinematicHeroProps> = ({ images, ready, onE
       </div>
 
       {/* Layer 3: chapters */}
-      {CHAPTERS.map((c, i) => (
-        <div
-          key={c.no}
-          ref={(el) => {
-            chapterRefs.current[i] = el;
-          }}
-          className="pointer-events-none absolute inset-0 z-20 flex items-end px-6 md:px-12 lg:px-20 pb-28 md:pb-[14vh]"
-        >
-          <span
-            data-ch-num
-            aria-hidden="true"
-            className="text-outline font-display font-light absolute right-[8vw] bottom-[8vh] hidden md:block text-[28vw] lg:text-[22vw] leading-none select-none"
+      {CHAPTERS.map((c, i) => {
+        const isLast = i === CHAPTERS.length - 1;
+        return (
+          <div
+            key={i}
+            ref={(el) => {
+              chapterRefs.current[i] = el;
+            }}
+            className="pointer-events-none absolute inset-0 z-20 flex items-center px-6 md:px-12 lg:px-20 pt-20 pb-16"
           >
-            {c.no}
-          </span>
-
-          <div className="relative max-w-xl">
-            <div data-ch-title>
-              <div className="eyebrow mb-6">
-                Chapter {c.no} — {c.kicker}
+            <div className="relative max-w-2xl">
+              <div data-ch-title>
+                <h2 className="font-display font-light text-5xl sm:text-6xl lg:text-7xl leading-[1.35] tracking-[-0.01em]">
+                  <span className="inline-block py-[0.08em]">{c.title[0]}</span>
+                  <br />
+                  <em className="italic text-gradient-gold inline-block py-[0.12em] pr-[0.12em]">{c.title[1]}</em>
+                </h2>
               </div>
-              <h2 className="font-display font-light text-5xl sm:text-6xl lg:text-7xl leading-[0.98] tracking-[-0.02em]">
-                {c.title[0]}
-                <br />
-                <em className="italic text-gradient-gold">{c.title[1]}</em>
-              </h2>
-            </div>
-            <div data-ch-body className="mt-7">
-              <p className="text-[15px] leading-relaxed text-slate-300/90 font-light max-w-md">{c.body}</p>
-              <dl className="mt-7 flex gap-10 border-t border-white/10 pt-5">
-                {c.meta.map((m) => (
-                  <div key={m.label}>
-                    <dt className="text-[10px] font-mono tracking-[0.28em] uppercase text-slate-500">{m.label}</dt>
-                    <dd className="mt-1.5 font-display text-xl text-[#f4efe6]">{m.value}</dd>
-                  </div>
-                ))}
-              </dl>
-              {i === CHAPTERS.length - 1 && (
-                <div className="pointer-events-auto mt-9 flex flex-wrap gap-3">
-                  <button id="hero-final-explore-btn" onClick={onExplore} className="btn-gold">
-                    View the Collection <ArrowRight className="w-4 h-4" />
-                  </button>
+              {(c.body || isLast) && (
+                <div data-ch-body className="mt-7">
+                  {c.body && (
+                    <p className="text-[17px] sm:text-lg lg:text-xl leading-[1.75] text-slate-200 font-normal max-w-lg">{c.body}</p>
+                  )}
+                  {isLast && (
+                    <div className="pointer-events-auto mt-9 flex flex-wrap gap-3">
+                      <button id="hero-final-explore-btn" onClick={onExplore} className="btn-gold">
+                        View the Collection <ArrowRight className="w-4 h-4" />
+                      </button>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
           </div>
-        </div>
-      ))}
+        );
+      })}
 
       {/* Layer 4: progress rail */}
       <aside
         aria-hidden="true"
-        className="absolute right-6 lg:right-10 top-1/2 -translate-y-1/2 z-30 hidden md:flex items-stretch gap-5"
+        className="absolute right-6 lg:right-10 top-1/2 -translate-y-1/2 z-30 hidden md:block"
       >
-        <ol className="flex flex-col justify-between py-1 text-right">
-          {CHAPTERS.map((c, i) => (
-            <li
-              key={c.no}
-              className={`font-mono text-[10px] tracking-[0.28em] uppercase transition-all duration-700 ${
-                active === i ? 'text-[#d1ad7a] translate-x-0' : 'text-slate-500/70 translate-x-1'
-              }`}
-            >
-              <span className="mr-3 opacity-60">{c.no}</span>
-              <span className={`inline-block transition-all duration-700 ${active === i ? 'opacity-100' : 'opacity-0 lg:opacity-60'}`}>
-                {c.kicker.replace('The ', '')}
-              </span>
-            </li>
-          ))}
-        </ol>
         <div className="relative w-px h-[38vh] bg-white/10">
           <div
             ref={railFillRef}
@@ -372,16 +346,6 @@ export const CinematicHero: React.FC<CinematicHeroProps> = ({ images, ready, onE
           />
         </div>
       </aside>
-
-      {/* Layer 5: footer meta */}
-      <div className="absolute bottom-0 inset-x-0 z-30 flex items-end justify-between px-6 md:px-12 lg:px-20 pb-7 text-[10px] font-mono tracking-[0.3em] uppercase text-slate-400">
-        <div ref={cueRef}>
-          <div className="flex items-center gap-4" data-intro-fade>
-            <div className="scroll-cue" />
-            <span>Scroll to build</span>
-          </div>
-        </div>
-      </div>
     </section>
   );
 };

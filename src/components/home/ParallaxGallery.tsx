@@ -1,4 +1,4 @@
-import React, { useLayoutEffect, useRef } from 'react';
+  import React, { useLayoutEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { frameUrl } from '../../lib/frames';
@@ -18,23 +18,23 @@ const COLUMNS: { speed: number; offset: string; figures: Figure[] }[] = [
     offset: 'md:mt-0',
     figures: [
       { frame: 1, caption: 'Schematic massing', aspect: 'aspect-[4/5]' },
-      { frame: 18, caption: 'Slab & glazing line', aspect: 'aspect-[4/3]' },
+      { frame: 2, caption: 'Structural wireframe', aspect: 'aspect-[4/3]' },
     ],
   },
   {
     speed: 22,
     offset: 'md:mt-40',
     figures: [
-      { frame: 10, caption: 'Dimensioned elevation', aspect: 'aspect-[3/4]' },
-      { frame: 30, caption: 'Material study, dusk', aspect: 'aspect-[4/5]' },
+      { frame: 3, caption: 'Foundation & datum', aspect: 'aspect-[3/4]' },
+      { frame: 4, caption: 'Material envelope', aspect: 'aspect-[4/5]' },
     ],
   },
   {
     speed: 13,
     offset: 'md:mt-16',
     figures: [
-      { frame: 25, caption: 'Roof plane installation', aspect: 'aspect-[4/5]' },
-      { frame: 37, caption: 'The residence, golden hour', aspect: 'aspect-square' },
+      { frame: 5, caption: 'Glazing & light study', aspect: 'aspect-[4/5]' },
+      { frame: 6, caption: 'The residence, golden hour', aspect: 'aspect-square' },
     ],
   },
 ];

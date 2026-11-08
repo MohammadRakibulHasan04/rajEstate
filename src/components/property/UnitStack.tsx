@@ -1,12 +1,17 @@
 import React, { useMemo, useState } from 'react';
-import { ArrowRight, Compass, Layers, Ruler, BedDouble, Bath } from 'lucide-react';
+import { ArrowRight, ArrowUpRight, Compass, Layers, Ruler, BedDouble, Bath } from 'lucide-react';
 import { Listing, Unit, UnitStatus } from '../../types/listing';
 import { facingWhy, floorWhy, unitStats } from '../../lib/significance';
 import { formatBdt, formatNumber, ordinal } from '../../lib/format';
+import { Link } from '../../lib/router';
 
 interface Props {
   listing: Listing;
   onInquireUnit: (u: Unit) => void;
+  /** unitId → apartment listing with its own detail page. */
+  unitPages?: Record<string, Listing>;
+  /** Pre-select a unit by code (e.g. arriving from an apartment page). */
+  initialUnitCode?: string;
 }
 
 const STATUS_LABEL: Record<UnitStatus, string> = { available: 'Available', booked: 'Booked', sold: 'Sold' };
@@ -16,14 +21,19 @@ const STATUS_LABEL: Record<UnitStatus, string> = { available: 'Available', booke
  * are all readable at a glance, and selecting a unit explains what its
  * floor and orientation mean for daily life.
  */
-export const UnitStack: React.FC<Props> = ({ listing, onInquireUnit }) => {
+export const UnitStack: React.FC<Props> = ({ listing, onInquireUnit, unitPages = {}, initialUnitCode }) => {
   const units = listing.units;
   const stats = unitStats(listing);
   const [onlyAvailable, setOnlyAvailable] = useState(false);
   const [beds, setBeds] = useState<number | 'all'>('all');
-  const firstAvailable = units.find((u) => u.status === 'available') ?? units[0];
-  const [selectedId, setSelectedId] = useState<string | undefined>(firstAvailable?.id);
+  const initial =
+    (initialUnitCode && units.find((u) => u.code.toLowerCase() === initialUnitCode.toLowerCase())) ||
+    units.find((u) => u.status === 'available') ||
+    units[0];
+  const [selectedId, setSelectedId] = useState<string | undefined>(initial?.id);
   const selected = units.find((u) => u.id === selectedId);
+  const selectedPage = selected ? unitPages[selected.id] : undefined;
+  const pageCount = units.filter((u) => unitPages[u.id]).length;
 
   const floors = useMemo(() => {
     const map = new Map<number, Unit[]>();
@@ -64,13 +74,19 @@ export const UnitStack: React.FC<Props> = ({ listing, onInquireUnit }) => {
       <div className="grid lg:grid-cols-12 gap-8">
         {/* Building */}
         <div className="lg:col-span-7 panel p-5 md:p-8">
-          <div className="flex items-center gap-5 mb-6 text-[10px] font-mono tracking-[0.2em] uppercase text-slate-400">
+          <div className="flex flex-wrap items-center gap-5 mb-6 text-[10px] font-mono tracking-[0.2em] uppercase text-slate-400">
             {(['available', 'booked', 'sold'] as const).map((s) => (
               <span key={s} className="flex items-center gap-2">
                 <span className="unit-cell !min-w-0 !w-4 !h-4 !rounded" data-status={s} />
                 {STATUS_LABEL[s]} · {stats[s]}
               </span>
             ))}
+            {pageCount > 0 && (
+              <span className="flex items-center gap-2">
+                <span className="unit-page-dot !static inline-block" aria-hidden="true" />
+                Detailed page · {pageCount}
+              </span>
+            )}
           </div>
           <div className="max-h-[560px] overflow-y-auto pr-2 space-y-2" role="grid" aria-label="Units by floor">
             {floors.map(({ floor, list }) => (
@@ -87,9 +103,10 @@ export const UnitStack: React.FC<Props> = ({ listing, onInquireUnit }) => {
                       data-selected={u.id === selectedId}
                       data-dim={!matches(u)}
                       onClick={() => setSelectedId(u.id)}
-                      aria-label={`Unit ${u.code}, ${STATUS_LABEL[u.status]}, ${u.sizeSqft} square feet`}
+                      aria-label={`Unit ${u.code}, ${STATUS_LABEL[u.status]}, ${u.sizeSqft} square feet${unitPages[u.id] ? ', has a detailed page' : ''}`}
                     >
                       {u.code}
+                      {unitPages[u.id] && <span className="unit-page-dot" aria-hidden="true" />}
                     </button>
                   ))}
                 </div>
@@ -165,11 +182,21 @@ export const UnitStack: React.FC<Props> = ({ listing, onInquireUnit }) => {
                 </a>
               )}
 
+              {selectedPage && (
+                <Link
+                  to={`/property/${selectedPage.slug}`}
+                  id="unit-page-link"
+                  className="btn-gold w-full justify-center mt-8"
+                >
+                  Explore home {selected.code} <ArrowUpRight className="w-4 h-4" />
+                </Link>
+              )}
+
               <button
                 id="unit-inquire-btn"
                 onClick={() => onInquireUnit(selected)}
                 disabled={selected.status === 'sold'}
-                className="btn-gold w-full justify-center mt-8"
+                className={`${selectedPage ? 'btn-quiet mt-3' : 'btn-gold mt-8'} w-full justify-center`}
               >
                 {selected.status === 'sold' ? 'This home is sold' : `Ask about ${selected.code}`} <ArrowRight className="w-4 h-4" />
               </button>

@@ -57,6 +57,36 @@ export interface StoryChapter {
 
 export type NearbyType = 'school' | 'hospital' | 'mosque' | 'market' | 'park' | 'transit' | 'other';
 
+export type AmenityIconKey =
+  | 'elevator'
+  | 'security'
+  | 'generator'
+  | 'gas'
+  | 'intercom'
+  | 'cctv'
+  | 'fire-safety'
+  | 'rooftop-garden'
+  | 'parking'
+  | 'gym'
+  | 'pool'
+  | 'community-hall'
+  | 'prayer-room'
+  | 'playground'
+  | 'wifi'
+  | 'solar'
+  | 'water-filter'
+  | 'ev-charging'
+  | 'concierge'
+  | 'balcony'
+  | 'air-conditioning'
+  | 'sparkles';
+
+export interface AmenityItem {
+  label: string;
+  icon?: AmenityIconKey;
+  detail?: string;
+}
+
 export interface NearbyPlace {
   name: string;
   type: NearbyType;
@@ -84,10 +114,25 @@ export interface CoreSpecs {
   handover?: string;
 }
 
+/**
+ * Links a single listing (e.g. one apartment) to the project it belongs to.
+ * Only the id is stored; slug/title are resolved at runtime so renaming a
+ * project never leaves stale links behind.
+ */
+export interface ParentLink {
+  /** Document id of the project listing. */
+  id: string;
+  /** Id of the matching row in the project's `units`. When set, size, rooms,
+   *  floor, facing, price and availability come from that unit. */
+  unitId?: string;
+}
+
 export interface Listing {
   id: string;
   slug: string;
   kind: ListingKind;
+  /** Set when this listing is one home inside a multi-unit project. */
+  parent?: ParentLink;
   category: ListingCategory;
   publish: PublishState;
   construction: ConstructionState;
@@ -125,7 +170,7 @@ export interface Listing {
 
   chapters: StoryChapter[];
   nearby: NearbyPlace[];
-  amenities: string[];
+  amenities: AmenityItem[];
 
   trust: {
     developer: string;

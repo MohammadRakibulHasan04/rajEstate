@@ -167,7 +167,9 @@ export function deriveCoreFacts(l: Listing): DerivedFact[] {
     out.push(make('land', 'Land Area', 'জমি', `${c.landKatha} katha`, `About ${formatNumber(Math.round(c.landKatha * 720))} sq ft of land.`, 'defining'));
   }
 
-  const amen = l.amenities.map((a) => a.toLowerCase()).join(' ');
+  const amen = l.amenities
+    .map((a) => (typeof a === 'string' ? a : a.label).toLowerCase())
+    .join(' ');
   if (/generator|জেনারেটর/.test(amen)) {
     out.push(make('backup', 'Backup Power', 'ব্যাকআপ', 'Full generator', 'Lifts, lights and water keep running through load-shedding.', 'reference'));
   }

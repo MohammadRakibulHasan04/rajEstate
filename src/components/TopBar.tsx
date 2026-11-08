@@ -10,7 +10,6 @@ interface TopBarProps {
 
 const NAV_ITEMS = [
   { id: 'manifesto', label: 'Philosophy' },
-  { id: 'process', label: 'Process' },
   { id: 'showcase', label: 'Residences' },
   { id: 'advisory', label: 'Advisory' },
 ];

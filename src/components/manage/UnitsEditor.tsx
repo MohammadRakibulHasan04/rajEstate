@@ -1,19 +1,25 @@
 import React, { useState } from 'react';
-import { Plus, Trash2, Wand2 } from 'lucide-react';
-import { Unit, UnitStatus } from '../../types/listing';
+import { Eye, FilePlus2, Pencil, Plus, Trash2, Wand2 } from 'lucide-react';
+import { Listing, Unit, UnitStatus } from '../../types/listing';
 import { formatBdt } from '../../lib/format';
+import { Link } from '../../lib/router';
 
 const FACINGS = ['South', 'South-East', 'East', 'North-East', 'North', 'North-West', 'West', 'South-West'];
 
 interface Props {
   units: Unit[];
   onChange: (u: Unit[]) => void;
+  /** unitId → apartment listing with its own detail page. */
+  unitPages?: Record<string, Listing>;
+  /** Creates a dedicated apartment listing linked to this unit. */
+  onCreateUnitPage?: (u: Unit) => void;
+  creatingUnitId?: string | null;
 }
 
 const uid = () => Math.random().toString(36).slice(2, 9);
 
 /** Units table with a bulk generator for whole floors. */
-export const UnitsEditor: React.FC<Props> = ({ units, onChange }) => {
+export const UnitsEditor: React.FC<Props> = ({ units, onChange, unitPages = {}, onCreateUnitPage, creatingUnitId }) => {
   const [gen, setGen] = useState({ fromFloor: 2, toFloor: 10, letters: 'A,B', sizeSqft: 1500, beds: 3, baths: 3, balconies: 2, facing: 'South', basePrice: 15000000, perFloor: 200000 });
   const [open, setOpen] = useState(units.length === 0);
 
@@ -92,16 +98,18 @@ export const UnitsEditor: React.FC<Props> = ({ units, onChange }) => {
 
       {units.length > 0 && (
         <div className="overflow-x-auto rounded-xl border border-white/[0.08]">
-          <table className="w-full text-sm min-w-[880px]">
+          <table className="w-full text-sm min-w-[980px]">
             <thead>
               <tr className="text-left border-b border-white/[0.08] bg-white/[0.02]">
-                {['Code', 'Floor', 'Sq ft', 'Bed', 'Bath', 'Facing', 'Price ৳', 'Status', 'Plan URL', ''].map((h) => (
+                {['Code', 'Floor', 'Sq ft', 'Bed', 'Bath', 'Facing', 'Price ৳', 'Status', 'Plan URL', 'Detail Page', ''].map((h) => (
                   <th key={h} className="px-3 py-3 mono-label font-normal">{h}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
-              {units.map((u) => (
+              {units.map((u) => {
+                const page = unitPages[u.id];
+                return (
                 <tr key={u.id} className="border-b border-white/[0.05] hover:bg-white/[0.015]">
                   <td className="px-2 py-1.5 w-20"><input className="lux-input !py-1.5 !px-2 !text-[13px]" value={u.code} onChange={(e) => update(u.id, { code: e.target.value })} /></td>
                   <td className="px-2 py-1.5 w-20"><input type="number" className="lux-input !py-1.5 !px-2 !text-[13px]" value={u.floor} onChange={(e) => update(u.id, { floor: num(e.target.value) })} /></td>
@@ -129,13 +137,52 @@ export const UnitsEditor: React.FC<Props> = ({ units, onChange }) => {
                     </select>
                   </td>
                   <td className="px-2 py-1.5"><input className="lux-input !py-1.5 !px-2 !text-[13px]" placeholder="https://" value={u.floorPlanUrl ?? ''} onChange={(e) => update(u.id, { floorPlanUrl: e.target.value || undefined })} /></td>
+                  <td className="px-2 py-1.5 w-44">
+                    {page ? (
+                      <div className="flex items-center gap-1.5">
+                        <Link
+                          to={`/manage/edit/${page.id}`}
+                          className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-[11px] font-mono uppercase tracking-wider transition-colors ${
+                            page.publish === 'published'
+                              ? 'border-emerald-500/40 bg-emerald-500/10 text-emerald-300 hover:border-emerald-400'
+                              : 'border-[#d1ad7a]/40 bg-[#d1ad7a]/10 text-[#f1dfbd] hover:border-[#d1ad7a]'
+                          }`}
+                          title={`Edit ${page.title} (${page.publish})`}
+                        >
+                          <Pencil className="w-3 h-3" />
+                          <span>{page.publish === 'published' ? 'Live' : 'Draft'}</span>
+                        </Link>
+                        <a
+                          href={`/property/${page.slug}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="p-1.5 rounded-lg border border-white/10 text-slate-400 hover:text-white hover:border-white/30 transition-colors"
+                          title="Preview unit detail page"
+                        >
+                          <Eye className="w-3.5 h-3.5" />
+                        </a>
+                      </div>
+                    ) : onCreateUnitPage ? (
+                      <button
+                        type="button"
+                        disabled={creatingUnitId === u.id}
+                        onClick={() => onCreateUnitPage(u)}
+                        className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-white/15 bg-white/[0.03] hover:border-[#d1ad7a]/60 hover:text-[#f1dfbd] text-[11px] font-mono uppercase tracking-wider text-slate-300 transition-colors cursor-pointer disabled:opacity-50"
+                        title={`Create dedicated detail page for Unit ${u.code}`}
+                      >
+                        <FilePlus2 className="w-3.5 h-3.5 text-[#d1ad7a]" />
+                        <span>{creatingUnitId === u.id ? 'Creating…' : '+ Page'}</span>
+                      </button>
+                    ) : null}
+                  </td>
                   <td className="px-2 py-1.5 w-10">
                     <button type="button" onClick={() => onChange(units.filter((x) => x.id !== u.id))} className="p-1.5 text-slate-500 hover:text-red-300 cursor-pointer" aria-label={`Remove unit ${u.code}`}>
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>
                   </td>
                 </tr>
-              ))}
+              );
+              })}
             </tbody>
           </table>
         </div>

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   Plus,
   Search,
@@ -8,6 +8,8 @@ import {
   Trash2,
   Sparkles,
   Building,
+  Building2,
+  CornerDownRight,
   Home,
   CheckCircle2,
   Clock,
@@ -29,6 +31,7 @@ import {
   setInquiryStatus,
 } from '../../lib/listings';
 import { scoreListing, priceLabel } from '../../lib/significance';
+import { linkedUnit, withParent } from '../../lib/hierarchy';
 import { useAuth } from '../../context/AuthContext';
 import { Link, navigate } from '../../lib/router';
 import { Listing, PublishState } from '../../types/listing';
@@ -56,19 +59,46 @@ export const ManageDashboard: React.FC = () => {
   }, 0);
   const pendingInquiries = inquiries.filter((i) => i.status === 'pending').length;
 
+  const byId = useMemo(() => new Map(listings.map((l) => [l.id, l])), [listings]);
+  const childrenByProject = useMemo(() => {
+    const map = new Map<string, Listing[]>();
+    for (const l of listings) {
+      if (l.parent?.id) {
+        map.set(l.parent.id, [...(map.get(l.parent.id) ?? []), l]);
+      }
+    }
+    return map;
+  }, [listings]);
+
   // Filter listings
   const filteredListings = listings.filter((l) => {
+    const eff = l.parent ? withParent(l, byId.get(l.parent.id)) : l;
     if (filterState !== 'all' && l.publish !== filterState) return false;
     if (filterKind !== 'all' && l.kind !== filterKind) return false;
     if (search.trim()) {
       const q = search.toLowerCase();
-      const matchTitle = l.title.toLowerCase().includes(q) || l.titleBn.toLowerCase().includes(q);
-      const matchArea = l.location.area.toLowerCase().includes(q) || l.location.areaBn.toLowerCase().includes(q);
-      const matchDev = l.trust.developer.toLowerCase().includes(q);
+      const matchTitle = eff.title.toLowerCase().includes(q) || eff.titleBn.toLowerCase().includes(q);
+      const matchArea = eff.location.area.toLowerCase().includes(q) || eff.location.areaBn.toLowerCase().includes(q);
+      const matchDev = eff.trust.developer.toLowerCase().includes(q);
       if (!matchTitle && !matchArea && !matchDev) return false;
     }
     return true;
   });
+
+  // Group child apartment pages directly under their project when both are in filteredListings
+  const orderedRows = useMemo(() => {
+    const filteredIds = new Set(filteredListings.map((l) => l.id));
+    const rows: { listing: Listing; nested: boolean }[] = [];
+    for (const l of filteredListings) {
+      if (l.parent?.id && filteredIds.has(l.parent.id)) continue; // will be rendered under its parent project
+      rows.push({ listing: l, nested: false });
+      if (l.kind === 'project') {
+        const kids = filteredListings.filter((k) => k.parent?.id === l.id);
+        for (const k of kids) rows.push({ listing: k, nested: true });
+      }
+    }
+    return rows;
+  }, [filteredListings]);
 
   const handleDuplicate = async (listing: Listing) => {
     try {
@@ -324,19 +354,28 @@ export const ManageDashboard: React.FC = () => {
               </div>
             ) : (
               <div className="space-y-4">
-                {filteredListings.map((listing) => {
-                  const { score } = scoreListing(listing);
+                {orderedRows.map(({ listing, nested }) => {
+                  const parent = listing.parent?.id ? byId.get(listing.parent.id) : undefined;
+                  const effective = parent ? withParent(listing, parent) : listing;
+                  const unit = parent ? linkedUnit(listing, parent) : undefined;
+                  const projectChildren = listing.kind === 'project' ? childrenByProject.get(listing.id) ?? [] : [];
+                  const { score } = scoreListing(effective);
                   return (
                     <div
                       key={listing.id}
-                      className="panel p-5 md:p-6 transition-all duration-300 hover:border-white/20 flex flex-col md:flex-row md:items-center justify-between gap-6"
+                      className={`panel p-5 md:p-6 transition-all duration-300 hover:border-white/20 flex flex-col md:flex-row md:items-center justify-between gap-6 ${
+                        nested ? 'ml-6 md:ml-12 border-l-2 border-l-[#d1ad7a]/50 bg-white/[0.015]' : ''
+                      }`}
                     >
                       {/* Thumbnail & Info */}
                       <div className="flex items-start gap-5 min-w-0">
+                        {nested && (
+                          <CornerDownRight className="w-4 h-4 text-[#d1ad7a] shrink-0 mt-7 hidden sm:block" />
+                        )}
                         <div className="w-24 h-20 rounded-xl overflow-hidden bg-black/60 shrink-0 border border-white/10 relative">
-                          {listing.media.hero.url ? (
+                          {effective.media.hero.url ? (
                             <img
-                              src={listing.media.hero.url}
+                              src={effective.media.hero.url}
                               alt={listing.title}
                               className="w-full h-full object-cover"
                             />
@@ -349,10 +388,12 @@ export const ManageDashboard: React.FC = () => {
                             className={`absolute top-1.5 left-1.5 px-2 py-0.5 rounded text-[8px] font-mono uppercase tracking-wider font-bold ${
                               listing.kind === 'project'
                                 ? 'bg-sky-500 text-slate-950'
+                                : unit
+                                ? 'bg-emerald-400 text-slate-950'
                                 : 'bg-[#d1ad7a] text-slate-950'
                             }`}
                           >
-                            {listing.kind}
+                            {listing.kind === 'project' ? 'project' : unit ? `unit ${unit.code}` : 'single'}
                           </span>
                         </div>
 
@@ -366,13 +407,25 @@ export const ManageDashboard: React.FC = () => {
                                 · {listing.titleBn}
                               </span>
                             )}
+                            {parent && (
+                              <Link
+                                to={`/manage/edit/${parent.id}`}
+                                className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full border border-[#d1ad7a]/35 bg-[#d1ad7a]/10 text-[10px] font-mono uppercase tracking-wider text-[#f1dfbd] hover:border-[#d1ad7a]"
+                              >
+                                <Building2 className="w-3 h-3 text-[#d1ad7a]" />
+                                <span>
+                                  {parent.title}
+                                  {unit ? ` · ${unit.code}` : ''}
+                                </span>
+                              </Link>
+                            )}
                           </div>
 
                           <div className="flex flex-wrap items-center gap-4 text-xs font-mono text-slate-400 mt-2">
-                            <span>{listing.location.area || listing.location.city}</span>
+                            <span>{effective.location.area || effective.location.city}</span>
                             <span>·</span>
                             <span className="text-gradient-gold font-medium">
-                              {priceLabel(listing)}
+                              {priceLabel(effective)}
                             </span>
                             {listing.kind === 'project' && (
                               <>
@@ -380,6 +433,20 @@ export const ManageDashboard: React.FC = () => {
                                 <span className="text-slate-300">
                                   {(listing.units || []).length} Units ({(listing.units || []).filter((u) => u.status === 'available').length} Avail)
                                 </span>
+                                {projectChildren.length > 0 && (
+                                  <>
+                                    <span>·</span>
+                                    <span className="text-[#f1dfbd]">
+                                      {projectChildren.length} Unit {projectChildren.length === 1 ? 'Page' : 'Pages'}
+                                    </span>
+                                  </>
+                                )}
+                                <Link
+                                  to={`/manage/new?parent=${listing.id}`}
+                                  className="text-[#d1ad7a] hover:text-[#f1dfbd] underline underline-offset-4"
+                                >
+                                  + Add Apartment Page
+                                </Link>
                               </>
                             )}
                           </div>
@@ -565,6 +632,11 @@ export const ManageDashboard: React.FC = () => {
               <p className="text-sm text-slate-400 mt-2">
                 Are you sure you wish to permanently delete <strong className="text-white">"{deleteModalListing.title}"</strong>? This action cannot be undone.
               </p>
+              {deleteModalListing.kind === 'project' && (childrenByProject.get(deleteModalListing.id)?.length ?? 0) > 0 && (
+                <p className="text-xs font-mono text-amber-300 bg-amber-500/10 border border-amber-500/30 rounded-xl p-3 mt-3">
+                  Note: {childrenByProject.get(deleteModalListing.id)!.length} apartment page(s) are linked to this project and will become standalone if you delete it.
+                </p>
+              )}
             </div>
             <div className="flex items-center justify-center gap-3">
               <button

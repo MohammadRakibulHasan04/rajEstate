@@ -1,17 +1,59 @@
 /* ------------------------------------------------------------------
-   Minimal history-API router. No dependency; just pushState,
-   popstate and a <Link>. Supports `:param` segments.
+   Minimal history-API router with scroll-position memory.
+   No dependency; just pushState, popstate and a <Link>.
 ------------------------------------------------------------------- */
 import React, { useSyncExternalStore } from 'react';
 
 const listeners = new Set<() => void>();
+const scrollPositions = new Map<string, number>();
+let currentRouteKey = typeof window !== 'undefined' ? window.location.pathname + window.location.search : '/';
+let inAppHistoryDepth = 0;
+let pendingScrollRestore: number | null = null;
+
+function routeKey() {
+  return window.location.pathname + window.location.search;
+}
 
 function emit() {
   listeners.forEach((l) => l());
 }
 
 if (typeof window !== 'undefined') {
-  window.addEventListener('popstate', emit);
+  if ('scrollRestoration' in window.history) {
+    window.history.scrollRestoration = 'manual';
+  }
+
+  window.addEventListener(
+    'scroll',
+    () => {
+      scrollPositions.set(currentRouteKey, window.scrollY);
+    },
+    { passive: true }
+  );
+
+  window.addEventListener('popstate', () => {
+    const nextKey = routeKey();
+    const saved = scrollPositions.get(nextKey);
+    currentRouteKey = nextKey;
+    inAppHistoryDepth = Math.max(0, inAppHistoryDepth - 1);
+    pendingScrollRestore = saved ?? 0;
+    emit();
+    restorePendingScroll();
+  });
+}
+
+export function restorePendingScroll() {
+  if (pendingScrollRestore === null) return;
+  const targetY = pendingScrollRestore;
+  pendingScrollRestore = null;
+  // Apply immediately and once more after layout/ScrollTrigger pin calculation
+  window.scrollTo({ top: targetY, behavior: 'instant' as ScrollBehavior });
+  requestAnimationFrame(() => {
+    window.scrollTo({ top: targetY, behavior: 'instant' as ScrollBehavior });
+    setTimeout(() => {
+      window.scrollTo({ top: targetY, behavior: 'instant' as ScrollBehavior });
+    }, 60);
+  });
 }
 
 function subscribe(cb: () => void) {
@@ -29,10 +71,50 @@ export function usePath(): string {
 
 export function navigate(to: string, opts: { replace?: boolean; keepScroll?: boolean } = {}) {
   if (to === window.location.pathname + window.location.search + window.location.hash) return;
-  if (opts.replace) window.history.replaceState({}, '', to);
-  else window.history.pushState({}, '', to);
-  if (!opts.keepScroll && !to.includes('#')) window.scrollTo(0, 0);
+  // Save current scroll before leaving
+  scrollPositions.set(currentRouteKey, window.scrollY);
+
+  if (opts.replace) {
+    window.history.replaceState({}, '', to);
+  } else {
+    window.history.pushState({}, '', to);
+    inAppHistoryDepth += 1;
+  }
+  currentRouteKey = routeKey();
+
+  const hashIdx = to.indexOf('#');
+  const hashId = hashIdx >= 0 ? to.slice(hashIdx + 1) : '';
+
+  if (opts.keepScroll) {
+    // keep current scroll
+  } else if (hashId) {
+    emit();
+    requestAnimationFrame(() => {
+      const el = document.getElementById(hashId);
+      if (el) el.scrollIntoView({ behavior: 'instant' as ScrollBehavior });
+      setTimeout(() => {
+        const el2 = document.getElementById(hashId);
+        if (el2) el2.scrollIntoView({ behavior: 'instant' as ScrollBehavior });
+      }, 60);
+    });
+    return;
+  } else {
+    // If navigating back to "/" and we have a saved scroll position on "/", restore it if requested
+    window.scrollTo(0, 0);
+  }
   emit();
+}
+
+/**
+ * Navigates back in history if the user arrived via in-app navigation
+ * (restoring exact scroll position), or falls back to `fallbackTo`.
+ */
+export function goBack(fallbackTo = '/#showcase') {
+  if (inAppHistoryDepth > 0 || (window.history.length > 1 && scrollPositions.has('/'))) {
+    window.history.back();
+  } else {
+    navigate(fallbackTo);
+  }
 }
 
 /** Returns params on match, otherwise null. Pattern: "/property/:slug" */

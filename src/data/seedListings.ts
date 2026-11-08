@@ -151,7 +151,16 @@ export const BARAKAH: Listing = {
     { name: 'Kuril Flyover / Airport Road', type: 'transit', minutes: 14, mode: 'drive' },
   ],
 
-  amenities: ['লিফট', '২৪/৭ নিরাপত্তা', 'জেনারেটর', 'গ্যাস লাইন', 'ইন্টারকম', 'সিসিটিভি', 'ফায়ার সেফটি', 'ছাদ বাগান'],
+  amenities: [
+    { label: 'লিফট', icon: 'elevator', detail: 'High-speed passenger lift' },
+    { label: '২৪/৭ নিরাপত্তা', icon: 'security', detail: 'Guarded entry & patrol' },
+    { label: 'জেনারেটর', icon: 'generator', detail: 'Full backup power' },
+    { label: 'গ্যাস লাইন', icon: 'gas', detail: 'Dedicated kitchen supply' },
+    { label: 'ইন্টারকম', icon: 'intercom', detail: 'Gate-to-residence line' },
+    { label: 'সিসিটিভি', icon: 'cctv', detail: '24-hour camera coverage' },
+    { label: 'ফায়ার সেফটি', icon: 'fire-safety', detail: 'Detection & extinguishers' },
+    { label: 'ছাদ বাগান', icon: 'rooftop-garden', detail: 'Landscaped roof terrace' },
+  ],
 
   trust: {
     developer: 'Total Barakah Housing',
@@ -233,4 +242,45 @@ export const DEMO_PROJECT: Listing = {
   seo: {},
 };
 
-export const SEED_LISTINGS: Listing[] = [BARAKAH, DEMO_PROJECT];
+/**
+ * One apartment of the demo project with its own detail page. Size, rooms,
+ * floor, facing, price and availability come from unit 7A of the project;
+ * location, developer, contact and amenities are inherited because they
+ * are left empty here.
+ */
+export const DEMO_UNIT_7A: Listing = {
+  id: 'seed-demo-unit-7a',
+  slug: 'nirob-heights-demo-7a',
+  kind: 'single',
+  parent: { id: DEMO_PROJECT.id, unitId: 'u-7A' },
+  category: 'apartment',
+  publish: 'draft',
+  construction: DEMO_PROJECT.construction,
+  featured: false,
+  title: 'Nirob Heights · Unit 7A (Demo)',
+  titleBn: 'নীরব হাইটস · ইউনিট ৭এ',
+  taglineBn: 'দক্ষিণের বাতাসে সাজানো একটি ঘর।',
+  summary:
+    'A demo apartment page linked to unit 7A of Nirob Heights. Its size, price and availability are read from the project\'s units table, so updating the unit updates this page. Add a gallery and story here to make it its own.',
+  location: { areaBn: '', area: '', city: '', address: '' },
+  price: { amount: 0, negotiable: false },
+  core: {},
+  facts: [],
+  units: [],
+  media: {
+    hero: { url: '' },
+    gallery: BARAKAH.media.gallery.slice(0, 4),
+    floorPlans: [],
+  },
+  chapters: [],
+  nearby: [],
+  amenities: [],
+  trust: { developer: '', milestones: [] },
+  contact: { phone: '' },
+  seo: {},
+  createdAt: NOW,
+  updatedAt: NOW,
+  createdBy: 'seed',
+};
+
+export const SEED_LISTINGS: Listing[] = [BARAKAH, DEMO_PROJECT, DEMO_UNIT_7A];

@@ -1,16 +1,22 @@
 import React, { useLayoutEffect, useRef } from 'react';
 import gsap from 'gsap';
-import { ArrowRight, Images, MapPin } from 'lucide-react';
-import { Listing, CONSTRUCTION_LABELS } from '../../types/listing';
+import { ArrowRight, ArrowUpRight, Building2, Images, MapPin } from 'lucide-react';
+import { Listing, Unit, UnitStatus, CONSTRUCTION_LABELS } from '../../types/listing';
 import { factsByTier, priceLabel, unitStats } from '../../lib/significance';
+import { Link } from '../../lib/router';
+import { projectHref } from './ProjectLink';
+
+const STATUS_LABEL: Record<UnitStatus, string> = { available: 'Available', booked: 'Booked', sold: 'Sold' };
 
 interface Props {
   listing: Listing;
+  parent?: Listing | null;
+  unit?: Unit;
   onInquire: () => void;
   onGallery: () => void;
 }
 
-export const PropertyHero: React.FC<Props> = ({ listing, onInquire, onGallery }) => {
+export const PropertyHero: React.FC<Props> = ({ listing, parent, unit, onInquire, onGallery }) => {
   const rootRef = useRef<HTMLElement>(null);
   const imgRef = useRef<HTMLImageElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
@@ -54,8 +60,35 @@ export const PropertyHero: React.FC<Props> = ({ listing, onInquire, onGallery })
         ref={contentRef}
         className="absolute inset-0 z-10 flex flex-col justify-end px-6 md:px-12 lg:px-20 pb-16 md:pb-20 max-w-[90rem] mx-auto"
       >
-        <div className="eyebrow mb-6" data-hero-fade>
-          {CONSTRUCTION_LABELS[listing.construction]} · {listing.location.area}
+        <div className="flex flex-wrap items-center gap-3 mb-6" data-hero-fade>
+          <div className="eyebrow">
+            {CONSTRUCTION_LABELS[listing.construction]} · {listing.location.area}
+          </div>
+          {parent && (
+            <Link
+              to={projectHref(parent, unit?.code)}
+              id="hero-project-pill"
+              className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full panel-glass text-[10px] font-mono tracking-[0.22em] uppercase text-[#f1dfbd] hover:border-[#d1ad7a] transition-colors"
+            >
+              <Building2 className="w-3.5 h-3.5 text-[#d1ad7a]" />
+              <span>Part of {parent.titleBn || parent.title}</span>
+              {unit && <span className="text-[#d1ad7a]">· Unit {unit.code}</span>}
+              <ArrowUpRight className="w-3 h-3 text-[#d1ad7a]" />
+            </Link>
+          )}
+          {unit && (
+            <span
+              className={`px-3 py-1 rounded-full text-[9.5px] font-mono tracking-[0.2em] uppercase border ${
+                unit.status === 'available'
+                  ? 'border-emerald-400/50 bg-emerald-400/10 text-emerald-300'
+                  : unit.status === 'booked'
+                  ? 'border-amber-400/50 bg-amber-400/10 text-amber-300'
+                  : 'border-white/15 bg-white/5 text-slate-400'
+              }`}
+            >
+              {STATUS_LABEL[unit.status]}
+            </span>
+          )}
         </div>
 
         <h1 className="font-display font-light text-[13vw] sm:text-[9vw] lg:text-[6.4vw] leading-[0.92] tracking-[-0.02em] max-w-[16ch]">

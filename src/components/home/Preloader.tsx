@@ -48,7 +48,7 @@ export const Preloader: React.FC<PreloaderProps> = ({ progress, loaded, onComple
     const root = rootRef.current;
 
     const tl = gsap.timeline({
-      delay: 0.5,
+      delay: 0.2,
       onComplete: () => {
         document.body.style.overflow = '';
         onComplete();
@@ -58,12 +58,12 @@ export const Preloader: React.FC<PreloaderProps> = ({ progress, loaded, onComple
     tl.to(root.querySelectorAll('[data-pl-fade]'), {
       opacity: 0,
       y: -20,
-      duration: 0.6,
-      stagger: 0.05,
+      duration: 0.45,
+      stagger: 0.04,
       ease: 'power2.in',
     })
-      .to(root.querySelector('[data-pl-word]'), { yPercent: -110, duration: 0.8, ease: 'expo.in' }, '<')
-      .to(root, { yPercent: -100, duration: 1.1, ease: 'expo.inOut' }, '-=0.25')
+      .to(root.querySelector('[data-pl-word]'), { yPercent: -110, duration: 0.6, ease: 'expo.in' }, '<')
+      .to(root, { yPercent: -100, duration: 0.8, ease: 'expo.inOut' }, '-=0.2')
       .set(root, { display: 'none' });
   }, [loaded, onComplete]);
 

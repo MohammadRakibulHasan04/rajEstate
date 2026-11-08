@@ -4,9 +4,10 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { ArrowLeft, Bookmark, Check, Pencil, Share2 } from 'lucide-react';
 
 import { useAuth } from '../context/AuthContext';
-import { Link, navigate, useDocumentMeta } from '../lib/router';
-import { useListingBySlug, usePublishedListings } from '../lib/listings';
+import { Link, goBack, restorePendingScroll, useDocumentMeta } from '../lib/router';
+import { useChildListings, useListingBySlug, useParentListing, usePublishedListings } from '../lib/listings';
 import { factsByTier, priceLabel } from '../lib/significance';
+import { isTopLevel, linkedUnit, unitPageMap, withParent } from '../lib/hierarchy';
 import { Unit } from '../types/listing';
 
 import { PropertyHero } from '../components/property/PropertyHero';
@@ -20,13 +21,25 @@ import { SpecLedger } from '../components/property/SpecLedger';
 import { InquiryPanel } from '../components/property/InquiryPanel';
 import { ActionDock } from '../components/property/ActionDock';
 import { ListingCard } from '../components/property/ListingCard';
+import { ProjectLink, projectHref } from '../components/property/ProjectLink';
 
 gsap.registerPlugin(ScrollTrigger);
 
 export const PropertyPage: React.FC<{ slug: string }> = ({ slug }) => {
   const { isAdmin, adminChecking, isPropertySaved, toggleSaveProperty } = useAuth();
-  const { listing, loading } = useListingBySlug(slug, isAdmin);
+  const { listing: raw, loading } = useListingBySlug(slug, isAdmin);
   const { listings: published } = usePublishedListings();
+
+  /* Hierarchy: an apartment reads its project; a project reads its apartment pages. */
+  const parentId = raw?.parent?.id;
+  const { listing: parent, loading: parentLoading } = useParentListing(parentId);
+  const familyId = raw ? (raw.kind === 'project' ? raw.id : parentId) : undefined;
+  const { listings: family } = useChildListings(familyId, isAdmin);
+  const listing = useMemo(() => (raw ? withParent(raw, parent) : null), [raw, parent]);
+  const project = raw?.kind === 'project' ? raw : parent && parentId ? parent : null;
+  const unitPages = useMemo(() => unitPageMap(family), [family]);
+  const ownUnit = raw && parent ? linkedUnit(raw, parent) : undefined;
+  const initialUnitCode = useMemo(() => new URLSearchParams(window.location.search).get('unit') || undefined, [slug]);
 
   const rootRef = useRef<HTMLDivElement>(null);
   const progressRef = useRef<HTMLDivElement>(null);
@@ -92,30 +105,23 @@ export const PropertyPage: React.FC<{ slug: string }> = ({ slug }) => {
         once: true,
         onEnter: (els) => gsap.to(els, { autoAlpha: 1, y: 0, duration: 1.2, stagger: 0.08, ease: 'expo.out', overwrite: true }),
       });
-
-      root.querySelectorAll<HTMLElement>('[data-chapter]').forEach((el) => {
-        const img = el.querySelector('[data-ch-img]');
-        const fig = el.querySelector('[data-ch-fig]');
-        const text = el.querySelector('[data-ch-text]');
-        const num = el.querySelector('[data-ch-num]');
-        const line = el.querySelector('[data-ch-line]');
-        if (img) gsap.fromTo(img, { yPercent: -8, scale: 1.1 }, { yPercent: 8, scale: 1, ease: 'none', scrollTrigger: { trigger: el, start: 'top bottom', end: 'bottom top', scrub: true } });
-        if (fig) gsap.fromTo(fig, { clipPath: 'inset(18% 10% 18% 10%)' }, { clipPath: 'inset(0% 0% 0% 0%)', duration: 1.8, ease: 'expo.out', scrollTrigger: { trigger: fig, start: 'top 88%', once: true } });
-        if (text) gsap.from(text.children, { y: 50, autoAlpha: 0, duration: 1.3, stagger: 0.1, ease: 'expo.out', scrollTrigger: { trigger: text, start: 'top 85%', once: true } });
-        if (num) gsap.fromTo(num, { yPercent: 30 }, { yPercent: -30, ease: 'none', scrollTrigger: { trigger: el, start: 'top bottom', end: 'bottom top', scrub: true } });
-        if (line) gsap.fromTo(line, { scaleX: 0 }, { scaleX: 1, duration: 1.6, ease: 'expo.out', scrollTrigger: { trigger: line, start: 'top 88%', once: true } });
-      });
     }, root);
-    const t = setTimeout(() => ScrollTrigger.refresh(), 400);
+    const t = setTimeout(() => {
+      ScrollTrigger.refresh();
+      restorePendingScroll();
+      if (window.location.hash === '#plan' || initialUnitCode) {
+        document.getElementById('plan')?.scrollIntoView({ behavior: 'smooth' });
+      }
+    }, 120);
     return () => {
       clearTimeout(t);
       ctx.revert();
     };
-  }, [listing?.id, listing?.updatedAt]);
+  }, [listing?.id, listing?.updatedAt, initialUnitCode]);
 
   /* ── States ──────────────────────────────────────────────────── */
 
-  if (loading || (adminChecking && !listing)) {
+  if (loading || (parentId && parentLoading) || (adminChecking && !listing)) {
     return (
       <div className="min-h-screen bg-[#070b14] p-6 md:p-20 flex flex-col justify-end gap-6" aria-busy="true">
         <div className="skeleton h-4 w-48 rounded" />
@@ -138,7 +144,7 @@ export const PropertyPage: React.FC<{ slug: string }> = ({ slug }) => {
 
   const isDraft = listing.publish !== 'published';
   const saved = isPropertySaved(listing.id);
-  const related = published.filter((l) => l.slug !== listing.slug).slice(0, 3);
+  const related = published.filter((l) => isTopLevel(l) && l.slug !== listing.slug && l.id !== parentId).slice(0, 3);
   const allImages = listing.media.hero.url ? [listing.media.hero, ...listing.media.gallery] : listing.media.gallery;
 
   return (
@@ -162,20 +168,36 @@ export const PropertyPage: React.FC<{ slug: string }> = ({ slug }) => {
         aria-label="Property navigation"
       >
         <div className="max-w-[90rem] mx-auto px-6 md:px-12 lg:px-20 flex items-center justify-between gap-6">
-          <button
-            id="property-back"
-            onClick={() => (window.history.length > 1 ? window.history.back() : navigate('/'))}
-            className="group inline-flex items-center gap-3 text-[11px] font-mono tracking-[0.26em] uppercase text-slate-300 hover:text-[#d1ad7a] transition-colors cursor-pointer"
-          >
-            <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform duration-500" />
-            Back
-          </button>
+          <div className="flex items-center gap-4">
+            <button
+              id="property-back"
+              onClick={() => goBack(parent ? projectHref(parent, ownUnit?.code) : '/#showcase')}
+              className="group inline-flex items-center gap-3 text-[11px] font-mono tracking-[0.26em] uppercase text-slate-300 hover:text-[#d1ad7a] transition-colors cursor-pointer"
+            >
+              <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform duration-500" />
+              Back
+            </button>
+            {parent && parentId && (
+              <>
+                <span className="text-white/15 font-mono text-xs">/</span>
+                <Link
+                  to={projectHref(parent, ownUnit?.code)}
+                  id="nav-project-link"
+                  className="text-[11px] font-mono tracking-[0.22em] uppercase text-[#d1ad7a] hover:text-[#f1dfbd] transition-colors truncate max-w-[180px] sm:max-w-xs"
+                >
+                  {parent.title}
+                </Link>
+              </>
+            )}
+          </div>
 
           <div className="hidden lg:flex items-center gap-8 text-[10.5px] font-mono tracking-[0.24em] uppercase text-slate-400">
             {[
               ['why', 'Why', tiers.signature.length > 0],
+              ['story', 'Chapters', listing.chapters.length > 0],
               ['gallery', 'Rooms', listing.media.gallery.length > 0],
               ['plan', listing.kind === 'project' ? 'Homes' : 'Plan', true],
+              ['building', 'Building', !!(parent && parentId)],
               ['neighbourhood', 'Area', listing.nearby.length > 0],
               ['specification', 'Details', true],
             ]
@@ -209,11 +231,25 @@ export const PropertyPage: React.FC<{ slug: string }> = ({ slug }) => {
       </nav>
 
       <main>
-        <PropertyHero listing={listing} onInquire={() => scrollTo('inquiry')} onGallery={() => setGalleryAt(0)} />
+        <PropertyHero
+          listing={listing}
+          parent={parent && parentId ? parent : undefined}
+          unit={ownUnit}
+          onInquire={() => scrollTo('inquiry')}
+          onGallery={() => setGalleryAt(0)}
+        />
         <SignatureFacts facts={tiers.signature} summary={listing.summary} />
         <StoryChapters chapters={listing.chapters} />
         <MediaGallery hero={listing.media.hero} images={listing.media.gallery} openAt={galleryAt} setOpenAt={setGalleryAt} />
-        <PlanAndFacts listing={listing} facts={tiers.defining} onInquireUnit={inquireUnit} onOpenPlan={setPlanUrl} />
+        <PlanAndFacts
+          listing={listing}
+          facts={tiers.defining}
+          onInquireUnit={inquireUnit}
+          onOpenPlan={setPlanUrl}
+          unitPages={unitPages}
+          initialUnitCode={initialUnitCode}
+        />
+        {parent && parentId && <ProjectLink project={parent} unit={ownUnit} unitPages={unitPages} currentId={listing.id} />}
         <ProximityRings listing={listing} />
         <TrustLedger listing={listing} />
         <SpecLedger listing={listing} facts={tiers.all} />
@@ -240,7 +276,7 @@ export const PropertyPage: React.FC<{ slug: string }> = ({ slug }) => {
 
       <footer className="border-t border-white/10 bg-[#05080f] px-6 md:px-12 lg:px-20 pt-14 pb-28">
         <div className="max-w-[90rem] mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
-          <Link to="/" className="group inline-flex items-center gap-3 text-sm text-slate-300 hover:text-[#d1ad7a] transition-colors">
+          <Link to="/#showcase" className="group inline-flex items-center gap-3 text-sm text-slate-300 hover:text-[#d1ad7a] transition-colors">
             <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform duration-500" /> All residences
           </Link>
           <span aria-hidden="true" className="font-display font-light text-6xl tracking-[0.04em] text-transparent bg-clip-text bg-gradient-to-b from-white/[0.14] to-white/0 select-none">

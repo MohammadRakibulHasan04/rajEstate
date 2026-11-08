@@ -7,10 +7,12 @@ interface Props {
   facts: Fact[];
   onInquireUnit: (u: Unit) => void;
   onOpenPlan: (url: string) => void;
+  unitPages?: Record<string, Listing>;
+  initialUnitCode?: string;
 }
 
 /** Floor plans alongside the defining facts, each with its reason. */
-export const PlanAndFacts: React.FC<Props> = ({ listing, facts, onInquireUnit, onOpenPlan }) => {
+export const PlanAndFacts: React.FC<Props> = ({ listing, facts, onInquireUnit, onOpenPlan, unitPages, initialUnitCode }) => {
   const plans = listing.media.floorPlans;
   const [active, setActive] = useState(0);
   const plan = plans[active];
@@ -83,7 +85,9 @@ export const PlanAndFacts: React.FC<Props> = ({ listing, facts, onInquireUnit, o
           )}
         </div>
 
-        {listing.kind === 'project' && <UnitStack listing={listing} onInquireUnit={onInquireUnit} />}
+        {listing.kind === 'project' && (
+          <UnitStack listing={listing} onInquireUnit={onInquireUnit} unitPages={unitPages} initialUnitCode={initialUnitCode} />
+        )}
       </div>
     </section>
   );

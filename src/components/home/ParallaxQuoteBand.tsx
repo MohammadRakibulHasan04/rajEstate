@@ -48,7 +48,7 @@ export const ParallaxQuoteBand: React.FC<ParallaxQuoteBandProps> = ({ onBook }) 
     >
       <div data-bg className="absolute inset-0 will-change-transform">
         <img
-          src={frameUrl(37)}
+          src={frameUrl(6)}
           alt="Finished modern residence with infinity pool and olive trees at golden hour"
           loading="lazy"
           decoding="async"

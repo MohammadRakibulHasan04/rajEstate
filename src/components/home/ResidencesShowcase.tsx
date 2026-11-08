@@ -1,12 +1,20 @@
 import React, { useState, useMemo } from 'react';
 import { ArrowUpRight, Compass, Filter, Sparkles } from 'lucide-react';
 import { usePublishedListings } from '../../lib/listings';
+import { isTopLevel, withParent } from '../../lib/hierarchy';
 import { ListingCard } from '../property/ListingCard';
 import { CATEGORY_LABELS } from '../../types/listing';
 
 export const ResidencesShowcase: React.FC = () => {
-  const { listings, loading } = usePublishedListings();
+  const { listings: rawListings, loading } = usePublishedListings();
   const [filter, setFilter] = useState<string>('all');
+
+  const listings = useMemo(() => {
+    const byId = new Map(rawListings.map((l) => [l.id, l]));
+    return rawListings
+      .filter((l) => isTopLevel(l) || l.featured)
+      .map((l) => (l.parent ? withParent(l, byId.get(l.parent.id)) : l));
+  }, [rawListings]);
 
   const categories = useMemo(() => {
     const set = new Set<string>();

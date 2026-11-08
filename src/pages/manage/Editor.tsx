@@ -1,12 +1,14 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import {
   ArrowLeft,
+  ArrowUpRight,
   Save,
   Eye,
   Sparkles,
   Check,
   Send,
   Building,
+  Building2,
   Home,
   Layers,
   MapPin,
@@ -21,6 +23,7 @@ import {
   ListingCategory,
   PublishState,
   ConstructionState,
+  Unit,
   emptyListing,
   CATEGORY_LABELS,
   CONSTRUCTION_LABELS,
@@ -28,8 +31,9 @@ import {
   NearbyType,
   StoryChapter,
 } from '../../types/listing';
-import { saveListing, useListingById, isSlugTaken } from '../../lib/listings';
-import { slugify } from '../../lib/format';
+import { saveListing, useListingById, useAllListings, isSlugTaken, createUnitListing } from '../../lib/listings';
+import { draftFromUnit, linkedUnit, unitPageMap, withParent } from '../../lib/hierarchy';
+import { formatBdt, formatNumber, slugify } from '../../lib/format';
 import { useAuth } from '../../context/AuthContext';
 import { Link, navigate } from '../../lib/router';
 import {
@@ -49,6 +53,8 @@ import { SignificanceBoard } from '../../components/manage/SignificanceBoard';
 import { UnitsEditor } from '../../components/manage/UnitsEditor';
 import { MediaUrlList } from '../../components/manage/MediaUrlList';
 import { ScoreMeter } from '../../components/manage/ScoreMeter';
+import { AmenitiesEditor } from '../../components/manage/AmenitiesEditor';
+import { normalizeAmenities } from '../../lib/amenities';
 
 interface EditorProps {
   id?: string; // If undefined, creating new
@@ -69,31 +75,74 @@ export const ListingEditor: React.FC<EditorProps> = ({ id }) => {
   const { user } = useAuth();
   const { push: toast, view: toastView } = useToasts();
   const { listing: existing, loading } = useListingById(id || null);
+  const { listings: allListings } = useAllListings(true);
 
   const [form, setForm] = useState<Listing>(() => emptyListing(user?.uid || ''));
   const [autoSlug, setAutoSlug] = useState<boolean>(!id);
   const [saving, setSaving] = useState<boolean>(false);
+  const [creatingUnitId, setCreatingUnitId] = useState<string | null>(null);
   const [activeSection, setActiveSection] = useState<string>('basics');
   const [hasChanges, setHasChanges] = useState<boolean>(false);
 
-  // Initialize from loaded document or draft
+  const projects = useMemo(
+    () => allListings.filter((l) => l.kind === 'project' && l.id !== form.id),
+    [allListings, form.id]
+  );
+  const parentProject = useMemo(
+    () => (form.parent?.id ? allListings.find((l) => l.id === form.parent?.id) ?? null : null),
+    [allListings, form.parent?.id]
+  );
+  const ownUnit = useMemo(() => linkedUnit(form, parentProject), [form, parentProject]);
+  const effectiveForm = useMemo(() => withParent(form, parentProject), [form, parentProject]);
+  const childListings = useMemo(
+    () => (form.id ? allListings.filter((l) => l.parent?.id === form.id) : []),
+    [allListings, form.id]
+  );
+  const unitPages = useMemo(() => unitPageMap(childListings), [childListings]);
+  const siblingUnitPages = useMemo(
+    () =>
+      parentProject
+        ? unitPageMap(allListings.filter((l) => l.parent?.id === parentProject.id && l.id !== form.id))
+        : {},
+    [allListings, parentProject, form.id]
+  );
+
+  // Initialize from loaded document, ?parent=&unit= query, or draft
   useEffect(() => {
     if (existing) {
       setForm(existing);
       setAutoSlug(false);
     } else if (!id) {
+      const params = new URLSearchParams(window.location.search);
+      const qParent = params.get('parent');
+      const qUnit = params.get('unit');
+      if (qParent) {
+        const proj = allListings.find((l) => l.id === qParent);
+        const u = proj?.units.find((x) => x.id === qUnit);
+        if (proj && u) {
+          setForm(draftFromUnit(proj, u, user?.uid || ''));
+          setAutoSlug(false);
+          return;
+        }
+        setForm((prev) => ({
+          ...prev,
+          kind: 'single',
+          parent: { id: qParent, ...(qUnit ? { unitId: qUnit } : {}) },
+        }));
+        return;
+      }
       // Check localStorage draft
       try {
         const cached = localStorage.getItem('aura_listing_draft_new');
         if (cached) {
           const parsed = JSON.parse(cached);
-          setForm(parsed);
+          setForm({ ...parsed, amenities: normalizeAmenities(parsed.amenities) });
         }
       } catch {
         // ignore
       }
     }
-  }, [existing, id]);
+  }, [existing, id, allListings.length]);
 
   // Autosave draft to localStorage
   useEffect(() => {
@@ -176,6 +225,7 @@ export const ListingEditor: React.FC<EditorProps> = ({ id }) => {
 
       const listingToSave: Listing = {
         ...form,
+        amenities: normalizeAmenities(form.amenities).filter((a) => a.label.trim().length > 0),
         publish: publishTarget || form.publish,
       };
 
@@ -196,6 +246,38 @@ export const ListingEditor: React.FC<EditorProps> = ({ id }) => {
       toast(errorText(err), 'error');
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleCreateUnitPage = async (unit: Unit) => {
+    if (!form.title.trim()) {
+      toast('Give the project a title first before creating unit pages', 'error');
+      scrollTo('basics');
+      return;
+    }
+    setCreatingUnitId(unit.id);
+    try {
+      let projectId = form.id;
+      const slug = form.slug.trim() || slugify(form.title);
+      if (!projectId || projectId.startsWith('seed-') || hasChanges) {
+        const listingToSave: Listing = {
+          ...form,
+          slug,
+          amenities: normalizeAmenities(form.amenities).filter((a) => a.label.trim().length > 0),
+        };
+        projectId = await saveListing(listingToSave, user?.uid || 'admin');
+        setForm((prev) => ({ ...prev, id: projectId, slug }));
+        setHasChanges(false);
+        if (!id) {
+          navigate(`/manage/edit/${projectId}`, { replace: true });
+        }
+      }
+      await createUnitListing({ ...form, id: projectId, slug }, unit, user?.uid || 'admin');
+      toast(`Created draft page for Unit ${unit.code}. Click "Draft" in its row to customize it.`, 'ok');
+    } catch (err) {
+      toast(errorText(err), 'error');
+    } finally {
+      setCreatingUnitId(null);
     }
   };
 
@@ -223,9 +305,25 @@ export const ListingEditor: React.FC<EditorProps> = ({ id }) => {
               <ArrowLeft className="w-4 h-4" />
             </Link>
             <div>
-              <span className="mono-label block !text-[9.5px]">
-                {id ? 'Editing Residence' : 'New Residence Blueprint'}
-              </span>
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="mono-label block !text-[9.5px]">
+                  {id ? 'Editing Residence' : 'New Residence Blueprint'}
+                </span>
+                {parentProject && (
+                  <Link
+                    to={`/manage/edit/${parentProject.id}`}
+                    className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full border border-[#d1ad7a]/40 bg-[#d1ad7a]/10 text-[9.5px] font-mono uppercase tracking-wider text-[#f1dfbd] hover:border-[#d1ad7a] transition-colors"
+                    title="Open parent building project"
+                  >
+                    <Building2 className="w-3 h-3 text-[#d1ad7a]" />
+                    <span>
+                      {parentProject.title}
+                      {ownUnit ? ` · Unit ${ownUnit.code}` : ''}
+                    </span>
+                    <ArrowUpRight className="w-3 h-3" />
+                  </Link>
+                )}
+              </div>
               <h1 className="font-display text-xl text-[#f4efe6] truncate max-w-sm sm:max-w-md">
                 {form.title || 'Untitled Residence'}
               </h1>
@@ -298,7 +396,7 @@ export const ListingEditor: React.FC<EditorProps> = ({ id }) => {
             </div>
 
             {/* Significance Score Meter */}
-            <ScoreMeter listing={form} onNavigateSection={scrollTo} />
+            <ScoreMeter listing={effectiveForm} onNavigateSection={scrollTo} />
           </div>
         </aside>
 
@@ -317,7 +415,12 @@ export const ListingEditor: React.FC<EditorProps> = ({ id }) => {
                 <Segmented
                   idPrefix="kind"
                   value={form.kind}
-                  onChange={(k) => update('kind', k)}
+                  onChange={(k) => {
+                    update('kind', k);
+                    if (k === 'project' && form.parent) {
+                      update('parent', undefined);
+                    }
+                  }}
                   options={[
                     { value: 'single', label: 'Single Residence', hint: 'One flat / house' },
                     { value: 'project', label: 'Multi-Unit Project', hint: 'Building of homes' },
@@ -336,6 +439,105 @@ export const ListingEditor: React.FC<EditorProps> = ({ id }) => {
                 />
               </Field>
             </div>
+
+            {form.kind === 'single' && (
+              <div className="rounded-2xl border border-[#d1ad7a]/30 bg-[#d1ad7a]/[0.04] p-5 space-y-4">
+                <div className="flex items-center justify-between gap-4 flex-wrap">
+                  <div className="flex items-center gap-2.5">
+                    <Building2 className="w-4 h-4 text-[#d1ad7a]" />
+                    <span className="mono-label !text-[#f1dfbd]">Project / Building Association</span>
+                  </div>
+                  {parentProject && (
+                    <Link
+                      to={`/manage/edit/${parentProject.id}`}
+                      className="inline-flex items-center gap-1.5 text-xs font-mono text-[#d1ad7a] hover:text-[#f1dfbd]"
+                    >
+                      <span>Edit {parentProject.title}</span>
+                      <ArrowUpRight className="w-3.5 h-3.5" />
+                    </Link>
+                  )}
+                </div>
+
+                <div className="grid sm:grid-cols-2 gap-4">
+                  <Field
+                    label="Belongs to Project (Building)"
+                    hint="Link this apartment to a multi-unit building project."
+                  >
+                    <select
+                      id="parent-project-select"
+                      className="lux-select"
+                      value={form.parent?.id || ''}
+                      onChange={(e) => {
+                        const pid = e.target.value;
+                        update('parent', pid ? { id: pid } : undefined);
+                      }}
+                    >
+                      <option value="">Standalone Residence (No parent project)</option>
+                      {projects.map((p) => (
+                        <option key={p.id} value={p.id}>
+                          {p.title} ({p.units.length} units)
+                        </option>
+                      ))}
+                    </select>
+                  </Field>
+
+                  {parentProject && (
+                    <Field
+                      label="Linked Unit in Building"
+                      hint="Syncs floor, sq ft, beds/baths, facing, price & status from this unit."
+                    >
+                      <select
+                        id="parent-unit-select"
+                        className="lux-select"
+                        value={form.parent?.unitId || ''}
+                        onChange={(e) => {
+                          const unitId = e.target.value || undefined;
+                          const picked = parentProject.units.find((u) => u.id === unitId);
+                          setHasChanges(true);
+                          setForm((prev) => {
+                            const next: Listing = {
+                              ...prev,
+                              parent: { id: parentProject.id, ...(unitId ? { unitId } : {}) },
+                            };
+                            if (picked && !prev.title.trim()) {
+                              next.title = `${parentProject.title} · Unit ${picked.code}`;
+                              next.titleBn = parentProject.titleBn
+                                ? `${parentProject.titleBn} · ইউনিট ${picked.code}`
+                                : prev.titleBn;
+                              if (autoSlug) {
+                                next.slug = `${parentProject.slug}-${slugify(picked.code)}`.slice(0, 80);
+                              }
+                            }
+                            return next;
+                          });
+                        }}
+                      >
+                        <option value="">Not linked to a specific unit</option>
+                        {parentProject.units.map((u) => {
+                          const takenBy = siblingUnitPages[u.id];
+                          return (
+                            <option key={u.id} value={u.id} disabled={!!takenBy}>
+                              Unit {u.code} · Floor {u.floor} · {formatNumber(u.sizeSqft)} sq ft · {formatBdt(u.price, { short: true })} ({u.status})
+                              {takenBy ? ` — linked to "${takenBy.title}"` : ''}
+                            </option>
+                          );
+                        })}
+                      </select>
+                    </Field>
+                  )}
+                </div>
+
+                {parentProject && (
+                  <p className="text-xs text-slate-400 leading-relaxed">
+                    <strong className="text-[#f1dfbd]">Smart inheritance enabled:</strong> Any field you leave empty below (Location, Developer, RAJUK approval, Milestones, Amenities, Contact, Hero photo) automatically inherits from{' '}
+                    <span className="text-slate-200">{parentProject.title}</span>.
+                    {ownUnit
+                      ? ` Core dimensions, price (${formatBdt(ownUnit.price)}), and availability (${ownUnit.status}) stay live-synced with Unit ${ownUnit.code}.`
+                      : ''}
+                  </p>
+                )}
+              </div>
+            )}
 
             <div className="grid sm:grid-cols-2 gap-5">
               <Field label="Title (English) *">
@@ -538,11 +740,62 @@ export const ListingEditor: React.FC<EditorProps> = ({ id }) => {
           >
             {form.kind === 'single' ? (
               <div className="space-y-6">
+                {parentProject && ownUnit && (
+                  <div className="rounded-2xl border border-[#d1ad7a]/35 bg-[#d1ad7a]/[0.05] p-5 space-y-4">
+                    <div className="flex items-center justify-between gap-4 flex-wrap">
+                      <div>
+                        <span className="mono-label !text-[#d1ad7a]">Live-Synced from Project Unit</span>
+                        <h3 className="font-display text-2xl text-[#f4efe6] mt-1">
+                          {parentProject.title} · Unit {ownUnit.code}
+                        </h3>
+                      </div>
+                      <Link
+                        to={`/manage/edit/${parentProject.id}`}
+                        className="btn-quiet !py-2 !px-3.5 !text-[10.5px]"
+                      >
+                        Edit in Project Units Table <ArrowUpRight className="w-3.5 h-3.5" />
+                      </Link>
+                    </div>
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs font-mono">
+                      <div className="rounded-xl bg-black/30 border border-white/[0.06] p-3">
+                        <span className="text-slate-500 block text-[10px] uppercase">Price</span>
+                        <span className="text-[#f1dfbd] text-sm mt-1 block">{formatBdt(ownUnit.price)}</span>
+                      </div>
+                      <div className="rounded-xl bg-black/30 border border-white/[0.06] p-3">
+                        <span className="text-slate-500 block text-[10px] uppercase">Area & Floor</span>
+                        <span className="text-slate-200 text-sm mt-1 block">
+                          {formatNumber(ownUnit.sizeSqft)} sq ft · Floor {ownUnit.floor}
+                        </span>
+                      </div>
+                      <div className="rounded-xl bg-black/30 border border-white/[0.06] p-3">
+                        <span className="text-slate-500 block text-[10px] uppercase">Layout</span>
+                        <span className="text-slate-200 text-sm mt-1 block">
+                          {ownUnit.beds} Bed · {ownUnit.baths} Bath · {ownUnit.balconies} Balc
+                        </span>
+                      </div>
+                      <div className="rounded-xl bg-black/30 border border-white/[0.06] p-3">
+                        <span className="text-slate-500 block text-[10px] uppercase">Facing & Status</span>
+                        <span className="text-slate-200 text-sm mt-1 block uppercase">
+                          {ownUnit.facing} · {ownUnit.status}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 <div className="grid sm:grid-cols-2 gap-5">
-                  <Field label="Asking Price (BDT ৳) *" hint="e.g. 28500000 = 2.85 Crore">
+                  <Field
+                    label="Asking Price (BDT ৳) *"
+                    hint={
+                      ownUnit && ownUnit.price > 0
+                        ? `Inherited from Unit ${ownUnit.code}: ${formatBdt(ownUnit.price)}`
+                        : 'e.g. 28500000 = 2.85 Crore'
+                    }
+                  >
                     <NumberInput
-                      value={form.price.amount}
+                      value={ownUnit && ownUnit.price > 0 ? ownUnit.price : form.price.amount}
                       placeholder="28500000"
+                      disabled={!!(ownUnit && ownUnit.price > 0)}
                       onChange={(p) => update('price', { ...form.price, amount: p || 0 })}
                     />
                   </Field>
@@ -556,77 +809,81 @@ export const ListingEditor: React.FC<EditorProps> = ({ id }) => {
                   </Field>
                 </div>
 
-                <div className="grid sm:grid-cols-3 gap-5">
-                  <Field label="Living Area (Sq Ft)">
-                    <NumberInput
-                      value={form.core.sizeSqft}
-                      placeholder="1850"
-                      onChange={(s) => updateCore({ sizeSqft: s })}
-                    />
-                  </Field>
-                  <Field label="Bedrooms">
-                    <NumberInput
-                      value={form.core.beds}
-                      placeholder="3"
-                      onChange={(b) => updateCore({ beds: b })}
-                    />
-                  </Field>
-                  <Field label="Bathrooms">
-                    <NumberInput
-                      value={form.core.baths}
-                      placeholder="3"
-                      onChange={(b) => updateCore({ baths: b })}
-                    />
-                  </Field>
-                </div>
+                {!ownUnit && (
+                  <>
+                    <div className="grid sm:grid-cols-3 gap-5">
+                      <Field label="Living Area (Sq Ft)">
+                        <NumberInput
+                          value={form.core.sizeSqft}
+                          placeholder="1850"
+                          onChange={(s) => updateCore({ sizeSqft: s })}
+                        />
+                      </Field>
+                      <Field label="Bedrooms">
+                        <NumberInput
+                          value={form.core.beds}
+                          placeholder="3"
+                          onChange={(b) => updateCore({ beds: b })}
+                        />
+                      </Field>
+                      <Field label="Bathrooms">
+                        <NumberInput
+                          value={form.core.baths}
+                          placeholder="3"
+                          onChange={(b) => updateCore({ baths: b })}
+                        />
+                      </Field>
+                    </div>
 
-                <div className="grid sm:grid-cols-4 gap-4">
-                  <Field label="Balconies">
-                    <NumberInput
-                      value={form.core.balconies}
-                      placeholder="3"
-                      onChange={(b) => updateCore({ balconies: b })}
-                    />
-                  </Field>
-                  <Field label="Floor Level">
-                    <NumberInput
-                      value={form.core.floor}
-                      placeholder="7"
-                      onChange={(f) => updateCore({ floor: f })}
-                    />
-                  </Field>
-                  <Field label="Total Storeys">
-                    <NumberInput
-                      value={form.core.totalFloors}
-                      placeholder="10"
-                      onChange={(tf) => updateCore({ totalFloors: tf })}
-                    />
-                  </Field>
-                  <Field label="Car Parking">
-                    <NumberInput
-                      value={form.core.parking}
-                      placeholder="1"
-                      onChange={(p) => updateCore({ parking: p })}
-                    />
-                  </Field>
-                </div>
+                    <div className="grid sm:grid-cols-4 gap-4">
+                      <Field label="Balconies">
+                        <NumberInput
+                          value={form.core.balconies}
+                          placeholder="3"
+                          onChange={(b) => updateCore({ balconies: b })}
+                        />
+                      </Field>
+                      <Field label="Floor Level">
+                        <NumberInput
+                          value={form.core.floor}
+                          placeholder="7"
+                          onChange={(f) => updateCore({ floor: f })}
+                        />
+                      </Field>
+                      <Field label="Total Storeys">
+                        <NumberInput
+                          value={form.core.totalFloors}
+                          placeholder={parentProject?.core.totalFloors ? String(parentProject.core.totalFloors) : '10'}
+                          onChange={(tf) => updateCore({ totalFloors: tf })}
+                        />
+                      </Field>
+                      <Field label="Car Parking">
+                        <NumberInput
+                          value={form.core.parking}
+                          placeholder={parentProject?.core.parking ? String(parentProject.core.parking) : '1'}
+                          onChange={(p) => updateCore({ parking: p })}
+                        />
+                      </Field>
+                    </div>
 
-                <div className="grid sm:grid-cols-2 gap-5">
-                  <Field label="Orientation / Facing">
-                    <TextInput
-                      value={form.core.facing || ''}
-                      placeholder="e.g. South-East"
-                      onChange={(f) => updateCore({ facing: f })}
-                    />
-                  </Field>
-                  <Field label="Handover Timeline (YYYY-MM)">
-                    <TextInput
-                      type="month"
-                      value={form.core.handover || ''}
-                      onChange={(h) => updateCore({ handover: h })}
-                    />
-                  </Field>
-                </div>
+                    <div className="grid sm:grid-cols-2 gap-5">
+                      <Field label="Orientation / Facing">
+                        <TextInput
+                          value={form.core.facing || ''}
+                          placeholder="e.g. South-East"
+                          onChange={(f) => updateCore({ facing: f })}
+                        />
+                      </Field>
+                      <Field label="Handover Timeline (YYYY-MM)">
+                        <TextInput
+                          type="month"
+                          value={form.core.handover || ''}
+                          onChange={(h) => updateCore({ handover: h })}
+                        />
+                      </Field>
+                    </div>
+                  </>
+                )}
               </div>
             ) : (
               /* Project Units Editor */
@@ -651,6 +908,9 @@ export const ListingEditor: React.FC<EditorProps> = ({ id }) => {
                 <div className="pt-4 border-t border-white/[0.08]">
                   <UnitsEditor
                     units={form.units}
+                    unitPages={unitPages}
+                    onCreateUnitPage={handleCreateUnitPage}
+                    creatingUnitId={creatingUnitId}
                     onChange={(units) => {
                       setHasChanges(true);
                       update('units', units);
@@ -670,7 +930,7 @@ export const ListingEditor: React.FC<EditorProps> = ({ id }) => {
             intro="No Naked Numbers. Organize specs into Signature (1-3 reasons to buy), Defining (structural context), and Reference. Explain 'why' every spec matters."
           >
             <SignificanceBoard
-              listing={form}
+              listing={effectiveForm}
               onChange={(facts) => {
                 setHasChanges(true);
                 update('facts', facts);
@@ -868,20 +1128,15 @@ export const ListingEditor: React.FC<EditorProps> = ({ id }) => {
               />
             </div>
 
-            {/* Amenities Tagging */}
+            {/* Amenities & Features with Icon Picker */}
             <div className="pt-4 border-t border-white/[0.08]">
               <Field
-                label="Amenities & Features (Comma separated)"
-                hint="e.g. লিফট, ২৪/৭ নিরাপত্তা, জেনারেটর, গ্যাস লাইন, ছাদ বাগান"
+                label="Amenities & Features (Cards & Icons)"
+                hint="Curate property amenities with bespoke architectural icons and optional subtitles."
               >
-                <TextInput
-                  value={form.amenities.join(', ')}
-                  onChange={(val) =>
-                    update(
-                      'amenities',
-                      val.split(',').map((s) => s.trim()).filter(Boolean)
-                    )
-                  }
+                <AmenitiesEditor
+                  value={form.amenities}
+                  onChange={(amenities) => update('amenities', amenities)}
                 />
               </Field>
             </div>

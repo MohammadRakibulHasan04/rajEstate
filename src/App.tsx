@@ -15,11 +15,10 @@ import { SavedPortfolioDrawer } from './components/SavedPortfolioDrawer';
 import { Preloader } from './components/home/Preloader';
 import { CinematicHero } from './components/home/CinematicHero';
 import { ManifestoSection } from './components/home/ManifestoSection';
-import { ParallaxGallery } from './components/home/ParallaxGallery';
 import { ResidencesShowcase } from './components/home/ResidencesShowcase';
-import { useFramePreloader } from './lib/frames';
+import { hasIntroPlayed, markIntroPlayed, useFramePreloader } from './lib/frames';
 import { ArrowUpRight } from 'lucide-react';
-import { usePath, matchRoute, navigate } from './lib/router';
+import { usePath, matchRoute, navigate, restorePendingScroll } from './lib/router';
 import { PropertyPage } from './pages/PropertyPage';
 import { ManagePage } from './pages/ManagePage';
 
@@ -30,7 +29,8 @@ function AppContent() {
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
   const [bookingProperty, setBookingProperty] = useState<Property | null>(null);
   const [isSavedDrawerOpen, setIsSavedDrawerOpen] = useState<boolean>(false);
-  const [introDone, setIntroDone] = useState(false);
+  const [introDone, setIntroDone] = useState<boolean>(() => hasIntroPlayed());
+  const returningRef = useRef<boolean>(hasIntroPlayed());
   const mainRef = useRef<HTMLDivElement>(null);
 
   const { images, progress, loaded } = useFramePreloader();
@@ -108,19 +108,33 @@ function AppContent() {
   useLayoutEffect(() => {
     const root = mainRef.current;
     if (!root) return;
+    const isReturning = returningRef.current;
     const ctx = gsap.context(() => {
-      gsap.set('[data-reveal]', { autoAlpha: 0, y: 40 });
-      ScrollTrigger.batch('[data-reveal]', {
-        start: 'top 88%',
-        once: true,
-        onEnter: (els) =>
-          gsap.fromTo(
-            els,
-            { autoAlpha: 0, y: 40 },
-            { autoAlpha: 1, y: 0, duration: 1.2, stagger: 0.1, ease: 'expo.out', overwrite: true }
-          ),
-      });
+      if (isReturning) {
+        gsap.set('[data-reveal]', { autoAlpha: 1, y: 0 });
+      } else {
+        gsap.set('[data-reveal]', { autoAlpha: 0, y: 40 });
+        ScrollTrigger.batch('[data-reveal]', {
+          start: 'top 88%',
+          once: true,
+          onEnter: (els) =>
+            gsap.fromTo(
+              els,
+              { autoAlpha: 0, y: 40 },
+              { autoAlpha: 1, y: 0, duration: 1.2, stagger: 0.1, ease: 'expo.out', overwrite: true }
+            ),
+        });
+      }
     }, root);
+
+    ScrollTrigger.refresh();
+    restorePendingScroll();
+    if (window.location.hash) {
+      const hashId = window.location.hash.slice(1);
+      const target = document.getElementById(hashId);
+      if (target) target.scrollIntoView({ behavior: 'instant' as ScrollBehavior });
+    }
+
     return () => ctx.revert();
   }, []);
 
@@ -140,7 +154,16 @@ function AppContent() {
       ref={mainRef}
       className="min-h-screen bg-[#070b14] text-slate-100 selection:bg-cyan-500/30 selection:text-white dark"
     >
-      {!introDone && <Preloader progress={progress} loaded={loaded} onComplete={() => setIntroDone(true)} />}
+      {!introDone && (
+        <Preloader
+          progress={progress}
+          loaded={loaded}
+          onComplete={() => {
+            markIntroPlayed();
+            setIntroDone(true);
+          }}
+        />
+      )}
 
       {/* Top Bar Header */}
       <TopBar
@@ -159,10 +182,7 @@ function AppContent() {
         {/* 2. PHILOSOPHY */}
         <ManifestoSection />
 
-        {/* 3. PROCESS — multi-speed parallax gallery */}
-        <ParallaxGallery />
-
-        {/* 4. SHOWCASE — residences portfolio collection */}
+        {/* 3. SHOWCASE — residences portfolio collection */}
         <ResidencesShowcase />
       </main>
 
@@ -176,7 +196,7 @@ function AppContent() {
               </p>
             </div>
             {[
-              { h: 'Explore', l: [['Philosophy', 'manifesto'], ['Process', 'process'], ['Residences', 'showcase']] },
+              { h: 'Explore', l: [['Philosophy', 'manifesto'], ['Residences', 'showcase']] },
               { h: 'Experience', l: [['Atelier', 'architects'], ['Advisory', 'advisory']] },
             ].map((col) => (
               <div key={col.h} className="md:col-span-2">
@@ -271,25 +291,15 @@ export default function App() {
   const propertyMatch = matchRoute('/property/:slug', path);
   const isManage = path === '/manage' || path.startsWith('/manage/');
 
-  if (isManage) {
-    return (
-      <AuthProvider>
-        <ManagePage />
-      </AuthProvider>
-    );
-  }
-
-  if (propertyMatch?.slug) {
-    return (
-      <AuthProvider>
-        <PropertyPage slug={propertyMatch.slug} />
-      </AuthProvider>
-    );
-  }
-
   return (
     <AuthProvider>
-      <AppContent />
+      {isManage ? (
+        <ManagePage />
+      ) : propertyMatch?.slug ? (
+        <PropertyPage slug={propertyMatch.slug} />
+      ) : (
+        <AppContent />
+      )}
     </AuthProvider>
   );
 }
