@@ -2,10 +2,18 @@ import { useEffect, useRef, useState } from 'react';
 
 /**
  * All hero video frames, resolved by Vite at build time and sorted
- * numerically (frame_001.png ... frame_006.png).
+ * numerically (frame_001.png ... frame_NNN.webp).
+ * Flexible: drop any number of frames into src/assets/frames/ and the
+ * preloader + scroll sequence will automatically adapt.
  */
 const frameModules = import.meta.glob(
-  ['../assets/frames/*.png', '../assets/frames/*.jpg', '../assets/frames/*.jpeg', '../assets/frames/*.webp'],
+  [
+    '../assets/frames/*.png',
+    '../assets/frames/*.jpg',
+    '../assets/frames/*.jpeg',
+    '../assets/frames/*.webp',
+    '../assets/frames/*.avif',
+  ],
   {
     eager: true,
     query: '?url',
@@ -17,7 +25,7 @@ export const FRAME_URLS: string[] = Object.keys(frameModules)
   .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }))
   .map((key) => frameModules[key]);
 
-export const FRAME_COUNT = FRAME_URLS.length || 1;
+export const FRAME_COUNT = Math.max(1, FRAME_URLS.length);
 
 /** Convenience accessor using 1-based frame numbers (as in the filenames). */
 export const frameUrl = (frameNumber: number) => {
@@ -25,6 +33,31 @@ export const frameUrl = (frameNumber: number) => {
   const idx = Math.min(FRAME_URLS.length, Math.max(1, frameNumber)) - 1;
   return FRAME_URLS[idx] || '';
 };
+
+/**
+ * GPU-pinned ImageBitmap cache keyed by HTMLImageElement.
+ * Prevents browser discardable-memory eviction from re-decoding JPEGs during fast scroll.
+ */
+const bitmapCache = new WeakMap<HTMLImageElement, ImageBitmap>();
+
+export interface DrawableFrame {
+  source: CanvasImageSource;
+  width: number;
+  height: number;
+}
+
+/**
+ * Returns the fastest available drawable source (GPU-pinned ImageBitmap if ready,
+ * otherwise the decoded HTMLImageElement) along with its intrinsic dimensions.
+ */
+export function getDrawableFrame(img: HTMLImageElement | undefined | null): DrawableFrame | null {
+  if (!img || !img.complete || !img.naturalWidth) return null;
+  const bmp = bitmapCache.get(img);
+  if (bmp) {
+    return { source: bmp, width: bmp.width, height: bmp.height };
+  }
+  return { source: img, width: img.naturalWidth, height: img.naturalHeight };
+}
 
 /**
  * Module-level cache so decoded hero frames and preloader completion
@@ -93,11 +126,26 @@ function ensureFramesDecoded() {
     notify();
   };
 
+  const pinBitmap = (img: HTMLImageElement): Promise<void> => {
+    if (!img.complete || !img.naturalWidth || typeof createImageBitmap !== 'function') {
+      return Promise.resolve();
+    }
+    if (bitmapCache.has(img)) {
+      return Promise.resolve();
+    }
+    return createImageBitmap(img)
+      .then((bmp) => {
+        bitmapCache.set(img, bmp);
+      })
+      .catch(() => {
+        // Fallback to HTMLImageElement if createImageBitmap is unsupported for format
+      });
+  };
+
   decodePromise = Promise.all(
     images.map((img) => {
       if (img.complete && img.naturalWidth) {
-        settle();
-        return Promise.resolve();
+        return pinBitmap(img).then(settle, settle);
       }
       const p = img.decode
         ? img.decode()
@@ -105,7 +153,7 @@ function ensureFramesDecoded() {
             img.onload = () => res();
             img.onerror = () => rej();
           });
-      return p.then(settle, settle);
+      return p.then(() => pinBitmap(img)).then(settle, settle);
     })
   ).then(() => undefined);
 }
