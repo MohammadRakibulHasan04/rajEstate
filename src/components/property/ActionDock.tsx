@@ -45,7 +45,7 @@ export const ActionDock: React.FC<{ listing: Listing; onInquire: () => void }> =
     >
       <div className="panel-glass rounded-full pl-6 pr-2 py-2 flex items-center gap-4 shadow-[0_24px_60px_-20px_rgba(0,0,0,0.8)]">
         <div className="min-w-0 flex-1">
-          <div className="font-display text-lg leading-tight truncate text-[#f4efe6]">{listing.titleBn || listing.title}</div>
+          <div className="font-display text-lg leading-[1.3] truncate text-[#f4efe6] py-0.5">{listing.titleBn || listing.title}</div>
           <div className="text-[10px] font-mono tracking-[0.2em] uppercase text-gradient-gold truncate">{priceLabel(listing)}</div>
         </div>
         <button

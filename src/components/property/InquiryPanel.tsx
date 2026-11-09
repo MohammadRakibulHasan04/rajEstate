@@ -59,9 +59,9 @@ export const InquiryPanel: React.FC<{ listing: Listing; prefill?: string }> = ({
       </span>
 
       <div className="relative max-w-[90rem] mx-auto px-6 md:px-12 lg:px-20 grid lg:grid-cols-12 gap-12 lg:gap-20">
-        <div className="lg:col-span-5" data-reveal>
+        <div className="lg:col-span-6 max-w-xl w-full" data-reveal>
           <div className="eyebrow mb-7">Arrange a private visit</div>
-          <h2 className="font-display font-light text-5xl sm:text-6xl leading-[0.95] tracking-[-0.02em]">
+          <h2 className="font-display font-light text-5xl sm:text-6xl leading-[1.3] sm:leading-[1.34] tracking-normal py-1">
             আপনার নতুন ঠিকানা <em className="italic text-gradient-gold">অপেক্ষায়।</em>
           </h2>
           <p className="mt-7 text-[15px] text-slate-300/90 font-light leading-relaxed max-w-md">
@@ -103,7 +103,7 @@ export const InquiryPanel: React.FC<{ listing: Listing; prefill?: string }> = ({
           {status === 'sent' ? (
             <div className="panel panel-glass p-10 md:p-14 text-center h-full flex flex-col items-center justify-center">
               <CheckCircle2 className="w-12 h-12 text-[#d1ad7a]" />
-              <h3 className="mt-6 font-display text-4xl">ধন্যবাদ, {form.fullName.split(' ')[0]}.</h3>
+              <h3 className="mt-6 font-display text-4xl leading-[1.3] tracking-normal py-1">ধন্যবাদ, {form.fullName.split(' ')[0]}.</h3>
               <p className="mt-4 text-slate-400 max-w-sm">Your request for {listing.title} has been received. We'll be in touch shortly.</p>
             </div>
           ) : (

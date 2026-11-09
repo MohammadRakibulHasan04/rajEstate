@@ -59,7 +59,7 @@ export const Lightbox: React.FC<{ images: MediaImage[]; index: number; onClose: 
 
       <div className="px-6 md:px-10 py-5 flex items-center justify-between gap-6">
         <p className="text-sm text-slate-300 truncate">
-          {img.captionBn && <span className="font-display text-lg text-[#f4efe6] mr-3">{img.captionBn}</span>}
+          {img.captionBn && <span className="font-display text-lg text-[#f4efe6] mr-3 inline-block leading-[1.3]">{img.captionBn}</span>}
           {img.caption}
         </p>
         <div className="hidden md:flex gap-2 overflow-x-auto max-w-[50%]">
@@ -106,9 +106,9 @@ export const MediaGallery: React.FC<GalleryProps> = ({ hero, images, openAt, set
       <div className="hairline max-w-7xl mx-auto mb-24" />
       <div className="max-w-[90rem] mx-auto px-6 md:px-12 lg:px-20">
         <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8 mb-12" data-reveal>
-          <div>
+          <div className="max-w-3xl w-full">
             <div className="eyebrow mb-7">The Rooms</div>
-            <h2 className="font-display font-light text-5xl sm:text-6xl lg:text-[5rem] leading-[0.95] tracking-[-0.02em]">
+            <h2 className="font-display font-light text-5xl sm:text-6xl lg:text-[5rem] leading-[1.3] sm:leading-[1.34] tracking-normal py-1">
               প্রতিটি ঘরে, <em className="italic text-gradient-gold">একটি গল্প।</em>
             </h2>
           </div>

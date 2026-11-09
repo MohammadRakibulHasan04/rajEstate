@@ -192,7 +192,7 @@ function AppContent() {
           <div className="grid md:grid-cols-12 gap-10 pb-16">
             <div className="md:col-span-5">
               <p className="font-display font-light text-3xl text-white leading-snug max-w-sm">
-                বসবাসের যোগ্য স্থাপত্য, <em className="italic text-cyan-400">নকশা থেকে বাস্তবে।</em>
+                Buy with comfort, <em className="italic text-cyan-400">Be in comfort</em>
               </p>
             </div>
             {[

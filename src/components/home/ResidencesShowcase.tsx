@@ -46,16 +46,13 @@ export const ResidencesShowcase: React.FC = () => {
       <div className="relative max-w-[90rem] mx-auto px-6 md:px-12 lg:px-20 space-y-16">
         {/* Editorial Heading Strip */}
         <div className="grid lg:grid-cols-12 gap-10 items-end" data-reveal>
-          <div className="lg:col-span-7">
+          <div className="lg:col-span-10 max-w-4xl">
             <div className="eyebrow mb-6">Curated Portfolio</div>
-            <h2 className="font-display font-light text-5xl sm:text-6xl lg:text-7xl leading-[0.95] tracking-[-0.02em]">
-              নির্বাচিত কিছু{' '}
-              <em className="italic text-gradient-gold">স্থপতি নিদর্শন।</em>
+            <h2 className="font-display font-light text-5xl sm:text-6xl lg:text-7xl leading-[1.3] sm:leading-[1.34] lg:leading-[1.38] tracking-normal py-1">
+              লিস্টেড{' '}
+              <em className="italic text-gradient-gold">রেসিডেন্স</em>
             </h2>
           </div>
-          <p className="lg:col-span-4 lg:col-start-9 text-[15px] text-slate-400 font-light leading-relaxed">
-            Every residence here is individually designed and meticulously vetted. No naked numbers — each home carries a complete narrative archive from blueprint to reality.
-          </p>
         </div>
 
         {/* Filter Pills */}
@@ -63,11 +60,10 @@ export const ResidencesShowcase: React.FC = () => {
           <div className="flex flex-wrap items-center gap-2">
             <button
               onClick={() => setFilter('all')}
-              className={`chip cursor-pointer ${
-                filter === 'all'
-                  ? '!border-[#d1ad7a] !bg-[#d1ad7a]/15 !text-[#f1dfbd]'
-                  : ''
-              }`}
+              className={`chip cursor-pointer ${filter === 'all'
+                ? '!border-[#d1ad7a] !bg-[#d1ad7a]/15 !text-[#f1dfbd]'
+                : ''
+                }`}
             >
               All Residences ({listings.length})
             </button>
@@ -75,11 +71,10 @@ export const ResidencesShowcase: React.FC = () => {
             {listings.some((l) => l.kind === 'project') && (
               <button
                 onClick={() => setFilter('projects')}
-                className={`chip cursor-pointer ${
-                  filter === 'projects'
-                    ? '!border-[#d1ad7a] !bg-[#d1ad7a]/15 !text-[#f1dfbd]'
-                    : ''
-                }`}
+                className={`chip cursor-pointer ${filter === 'projects'
+                  ? '!border-[#d1ad7a] !bg-[#d1ad7a]/15 !text-[#f1dfbd]'
+                  : ''
+                  }`}
               >
                 Multi-Unit Projects
               </button>
@@ -89,11 +84,10 @@ export const ResidencesShowcase: React.FC = () => {
               <button
                 key={cat}
                 onClick={() => setFilter(cat)}
-                className={`chip cursor-pointer ${
-                  filter === cat
-                    ? '!border-[#d1ad7a] !bg-[#d1ad7a]/15 !text-[#f1dfbd]'
-                    : ''
-                }`}
+                className={`chip cursor-pointer ${filter === cat
+                  ? '!border-[#d1ad7a] !bg-[#d1ad7a]/15 !text-[#f1dfbd]'
+                  : ''
+                  }`}
               >
                 {CATEGORY_LABELS[cat as keyof typeof CATEGORY_LABELS] || cat}
               </button>

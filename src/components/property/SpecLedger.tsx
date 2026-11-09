@@ -52,9 +52,9 @@ export const SpecLedger: React.FC<{ listing: Listing; facts: Fact[] }> = ({ list
         {amenities.length > 0 && (
           <div className="mt-24 pt-16 border-t border-white/[0.08]" data-reveal>
             <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-10">
-              <div>
+              <div className="max-w-3xl w-full">
                 <div className="eyebrow mb-4">Amenities &amp; Features · সুযোগ-সুবিধা</div>
-                <h3 className="font-display font-light text-3xl sm:text-4xl md:text-[2.75rem] leading-[1.02] text-[#f4efe6]">
+                <h3 className="font-display font-light text-3xl sm:text-4xl md:text-[2.75rem] leading-[1.3] sm:leading-[1.34] tracking-normal text-[#f4efe6] py-1">
                   প্রতিদিনের স্বাচ্ছন্দ্য ও <em className="italic text-gradient-gold">নিরাপত্তা।</em>
                 </h3>
               </div>
@@ -83,7 +83,7 @@ export const SpecLedger: React.FC<{ listing: Listing; facts: Fact[] }> = ({ list
                     </div>
 
                     <div className="mt-6">
-                      <div className="font-display font-light text-xl md:text-2xl text-[#f4efe6] group-hover:text-[#f1dfbd] leading-snug transition-colors">
+                      <div className="font-display font-light text-xl md:text-2xl text-[#f4efe6] group-hover:text-[#f1dfbd] leading-[1.35] tracking-normal transition-colors py-0.5">
                         {item.label}
                       </div>
                       <div className="mt-1.5 text-[10.5px] font-mono tracking-[0.2em] uppercase text-[#d1ad7a]/75">

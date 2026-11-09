@@ -54,9 +54,9 @@ export const ProximityRings: React.FC<{ listing: Listing }> = ({ listing }) => {
     <section id="neighbourhood" className="relative py-28 md:py-40 border-t border-white/[0.06]">
       <div className="max-w-[90rem] mx-auto px-6 md:px-12 lg:px-20">
         <div className="grid lg:grid-cols-12 gap-10 items-end mb-16" data-reveal>
-          <div className="lg:col-span-7">
+          <div className="lg:col-span-8 max-w-4xl">
             <div className="eyebrow mb-7">The Neighbourhood</div>
-            <h2 className="font-display font-light text-5xl sm:text-6xl lg:text-[5rem] leading-[0.95] tracking-[-0.02em]">
+            <h2 className="font-display font-light text-5xl sm:text-6xl lg:text-[5rem] leading-[1.3] sm:leading-[1.34] tracking-normal py-1">
               প্রয়োজনের সবকিছু, <em className="italic text-gradient-gold">মিনিটের দূরত্বে।</em>
             </h2>
           </div>

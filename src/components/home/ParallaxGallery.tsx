@@ -115,14 +115,14 @@ export const ParallaxGallery: React.FC = () => {
       <div className="hairline max-w-7xl mx-auto mb-24" />
 
       <div className="relative px-6 md:px-12 lg:px-20 max-w-7xl mx-auto grid lg:grid-cols-12 gap-10 items-end">
-        <div className="lg:col-span-7">
+        <div className="lg:col-span-8 max-w-4xl">
           <div className="eyebrow mb-7">The Process</div>
-          <h2 className="font-display font-light text-5xl sm:text-6xl lg:text-[5.5rem] leading-[0.95] tracking-[-0.02em]">
+          <h2 className="font-display font-light text-5xl sm:text-6xl lg:text-[5.5rem] leading-[1.3] sm:leading-[1.34] lg:leading-[1.38] tracking-normal py-1">
             <span className="reveal-line">
-              <span data-head-line>প্রথম রেখা থেকে</span>
+              <span data-head-line className="py-[0.08em] block">প্রথম রেখা থেকে</span>
             </span>
             <span className="reveal-line">
-              <span data-head-line>
+              <span data-head-line className="py-[0.08em] block">
                 <em className="italic text-gradient-gold">দিনের শেষ আলো।</em>
               </span>
             </span>
@@ -163,7 +163,7 @@ export const ParallaxGallery: React.FC = () => {
               {[...MARQUEE, ...MARQUEE].map((w, i) => (
                 <span key={`${dup}-${i}`} className="flex items-center">
                   <span
-                    className={`font-display font-light text-6xl md:text-8xl px-8 md:px-12 whitespace-nowrap ${
+                    className={`font-display font-light text-6xl md:text-8xl px-8 md:px-12 whitespace-nowrap leading-[1.32] tracking-normal py-2 ${
                       i % 2 === 0 ? 'italic text-[#f4efe6]' : 'text-outline'
                     }`}
                   >

@@ -76,7 +76,8 @@
 
 .font-display {
   font-family: var(--font-display-family);
-  letter-spacing: -0.01em;
+  letter-spacing: 0em;
+  line-height: 1.25;
 }
 
 .font-sans {
@@ -114,6 +115,11 @@
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
+  display: inline-block;
+  padding-right: 0.12em;
+  padding-bottom: 0.08em;
+  padding-top: 0.06em;
+  margin-right: -0.06em;
 }
 
 .text-outline {
@@ -125,10 +131,10 @@
 .reveal-line {
   display: block;
   overflow: hidden;
-  padding-top: 0.22em;
-  margin-top: -0.22em;
-  padding-bottom: 0.18em;
-  margin-bottom: -0.18em;
+  padding-top: 0.36em;
+  margin-top: -0.36em;
+  padding-bottom: 0.3em;
+  margin-bottom: -0.3em;
 }
 
 .reveal-line > span {

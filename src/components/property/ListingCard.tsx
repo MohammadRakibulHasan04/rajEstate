@@ -57,8 +57,8 @@ export const ListingCard: React.FC<ListingCardProps> = ({ listing, index = 0, si
             </div>
           )}
           <div className="flex items-end justify-between gap-4">
-            <div className="min-w-0">
-              <h3 className="font-display font-light text-3xl md:text-4xl leading-[1.02] text-[#f4efe6] truncate">
+            <div className="min-w-0 flex-1">
+              <h3 className="font-display font-light text-3xl md:text-4xl leading-[1.25] text-[#f4efe6] truncate py-0.5">
                 {listing.titleBn || listing.title}
               </h3>
               <div className="mt-2 flex items-center gap-2 text-[11px] font-mono tracking-[0.18em] uppercase text-slate-400">

@@ -29,9 +29,9 @@ export const PlanAndFacts: React.FC<Props> = ({ listing, facts, onInquireUnit, o
 
       <div className="relative max-w-[90rem] mx-auto px-6 md:px-12 lg:px-20">
         <div className="grid lg:grid-cols-12 gap-10 items-end mb-16 md:mb-20" data-reveal>
-          <div className="lg:col-span-7">
+          <div className="lg:col-span-8 max-w-4xl">
             <div className="eyebrow mb-7">The Plan</div>
-            <h2 className="font-display font-light text-5xl sm:text-6xl lg:text-[5rem] leading-[0.95] tracking-[-0.02em]">
+            <h2 className="font-display font-light text-5xl sm:text-6xl lg:text-[5rem] leading-[1.3] sm:leading-[1.34] tracking-normal py-1">
               সুচিন্তিত নকশা, <em className="italic text-gradient-gold">প্রতিটি ইঞ্চিতে।</em>
             </h2>
           </div>

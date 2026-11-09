@@ -38,9 +38,9 @@ export const TrustLedger: React.FC<{ listing: Listing }> = ({ listing }) => {
     <section id="trust" className="relative py-28 md:py-36 bg-[#05080f] border-y border-white/[0.06]">
       <div className="max-w-[90rem] mx-auto px-6 md:px-12 lg:px-20">
         <div className="grid lg:grid-cols-12 gap-10 mb-16" data-reveal>
-          <div className="lg:col-span-6">
+          <div className="lg:col-span-8 max-w-4xl">
             <div className="eyebrow mb-7">Peace of mind</div>
-            <h2 className="font-display font-light text-5xl sm:text-6xl leading-[0.95] tracking-[-0.02em]">
+            <h2 className="font-display font-light text-5xl sm:text-6xl leading-[1.3] sm:leading-[1.34] tracking-normal py-1">
               বিশ্বাসের <em className="italic text-gradient-gold">ভিত্তি।</em>
             </h2>
           </div>

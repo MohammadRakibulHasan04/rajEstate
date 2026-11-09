@@ -91,13 +91,13 @@ export const PropertyHero: React.FC<Props> = ({ listing, parent, unit, onInquire
           )}
         </div>
 
-        <h1 className="font-display font-light text-[13vw] sm:text-[9vw] lg:text-[6.4vw] leading-[0.92] tracking-[-0.02em] max-w-[16ch]">
+        <h1 className="font-display font-light text-[13vw] sm:text-[9vw] lg:text-[6.4vw] leading-[1.26] sm:leading-[1.3] tracking-normal max-w-4xl sm:max-w-5xl w-full py-1">
           <span className="reveal-line">
-            <span data-hero-line>{listing.titleBn || listing.title}</span>
+            <span data-hero-line className="py-[0.08em] block">{listing.titleBn || listing.title}</span>
           </span>
           {listing.taglineBn && (
-            <span className="reveal-line text-[0.5em] mt-2">
-              <span data-hero-line>
+            <span className="reveal-line text-[0.5em] mt-3">
+              <span data-hero-line className="py-[0.08em] block">
                 <em className="italic text-gradient-gold">{listing.taglineBn}</em>
               </span>
             </span>

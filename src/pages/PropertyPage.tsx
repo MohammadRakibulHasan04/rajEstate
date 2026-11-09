@@ -135,7 +135,7 @@ export const PropertyPage: React.FC<{ slug: string }> = ({ slug }) => {
     return (
       <main className="min-h-screen bg-[#070b14] text-[#f4efe6] flex flex-col items-center justify-center text-center px-6">
         <span className="text-outline font-display text-[30vw] leading-none select-none" aria-hidden="true">404</span>
-        <h1 className="font-display text-4xl md:text-5xl -mt-10">এই ঠিকানাটি খুঁজে পাওয়া যায়নি।</h1>
+        <h1 className="font-display text-4xl md:text-5xl leading-[1.34] tracking-normal py-2 max-w-2xl -mt-10">এই ঠিকানাটি খুঁজে পাওয়া যায়নি।</h1>
         <p className="mt-4 text-slate-400">This residence may have been sold or moved.</p>
         <Link to="/" className="btn-gold mt-10">Back to residences</Link>
       </main>
@@ -259,7 +259,7 @@ export const PropertyPage: React.FC<{ slug: string }> = ({ slug }) => {
           <section className="relative py-28 md:py-36 border-t border-white/[0.06]" aria-labelledby="related-heading">
             <div className="max-w-[90rem] mx-auto px-6 md:px-12 lg:px-20">
               <div className="eyebrow mb-7" data-reveal>More residences</div>
-              <h2 id="related-heading" className="font-display font-light text-4xl md:text-6xl leading-[0.95] mb-14" data-reveal>
+              <h2 id="related-heading" className="font-display font-light text-4xl md:text-6xl leading-[1.3] sm:leading-[1.34] tracking-normal mb-14 max-w-4xl py-1" data-reveal>
                 আরও কিছু <em className="italic text-gradient-gold">ঠিকানা।</em>
               </h2>
               <div className="grid md:grid-cols-3 gap-8">

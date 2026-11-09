@@ -730,20 +730,20 @@ export const CinematicHero: React.FC<CinematicHeroProps> = ({
         ref={introRef}
         className="absolute inset-0 z-20 flex flex-col justify-center md:justify-end px-5 sm:px-8 md:px-12 lg:px-20 pt-20 pb-12 sm:pb-16 md:pb-[15vh] lg:pb-[14vh] will-change-[opacity]"
       >
-        <div className="relative max-w-2xl w-full">
+        <div className="relative max-w-4xl sm:max-w-5xl w-full">
           <h1
             ref={introTitleRef}
-            className="font-display font-light text-[2.1rem] xs:text-[2.5rem] sm:text-5xl md:text-6xl lg:text-[4.4vw] xl:text-[4.2vw] leading-[1.22] sm:leading-[1.26] md:leading-[1.3] tracking-[-0.01em]"
+            className="font-display font-light text-[2.1rem] xs:text-[2.5rem] sm:text-5xl md:text-6xl lg:text-[4.4vw] xl:text-[4.2vw] leading-[1.34] sm:leading-[1.38] md:leading-[1.42] tracking-normal py-1"
           >
             <span data-intro-parallax className="block will-change-transform">
               <span className="reveal-line">
-                <span data-intro-line>রাজশাহীতে খুঁজছেন</span>
+                <span data-intro-line className="py-[0.08em] block">রাজশাহীতে খুঁজছেন</span>
               </span>
             </span>
             <span data-intro-parallax className="block will-change-transform">
               <span className="reveal-line">
-                <span data-intro-line>
-                  মনের মতো <em className="italic text-gradient-gold pr-[0.06em]">ঠিকানা?</em>
+                <span data-intro-line className="py-[0.08em] block">
+                  মনের মতো <em className="italic text-gradient-gold pr-[0.1em]">ঠিকানা?</em>
                 </span>
               </span>
             </span>
@@ -781,15 +781,15 @@ export const CinematicHero: React.FC<CinematicHeroProps> = ({
               ref={(el) => {
                 chapterInnerRefs.current[i] = el;
               }}
-              className="relative max-w-2xl will-change-transform w-full"
+              className="relative max-w-4xl sm:max-w-5xl will-change-transform w-full"
             >
               <div data-ch-title>
-                <h2 className="font-display font-light text-[1.85rem] xs:text-[2.15rem] sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl leading-[1.24] sm:leading-[1.28] md:leading-[1.32] tracking-[-0.01em]">
-                  <span data-ch-line1 className="block will-change-transform py-[0.06em]">
+                <h2 className="font-display font-light text-[1.85rem] xs:text-[2.15rem] sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl leading-[1.34] sm:leading-[1.38] md:leading-[1.42] tracking-normal py-1">
+                  <span data-ch-line1 className="block will-change-transform py-[0.1em]">
                     {c.title[0]}
                   </span>
                   <span data-ch-line2 className="block will-change-transform">
-                    <em className="italic text-gradient-gold inline-block py-[0.08em] pr-[0.1em]">
+                    <em className="italic text-gradient-gold inline-block py-[0.1em] pr-[0.12em]">
                       {c.title[1]}
                     </em>
                   </span>

@@ -62,10 +62,10 @@ export const ParallaxQuoteBand: React.FC<ParallaxQuoteBandProps> = ({ onBook }) 
       <div className="relative h-full max-w-7xl mx-auto px-6 md:px-12 lg:px-20 flex items-center">
         <blockquote data-quote className="max-w-3xl">
           <div className="eyebrow mb-8">On Architecture</div>
-          <p className="font-display font-light text-5xl sm:text-6xl lg:text-[5.2rem] leading-[1] tracking-[-0.02em]">
-            <span className="reveal-line"><span data-q-line>&ldquo;Architecture is</span></span>
-            <span className="reveal-line"><span data-q-line>the <em className="italic text-gradient-gold">thoughtful making</em></span></span>
-            <span className="reveal-line"><span data-q-line>of space.&rdquo;</span></span>
+          <p className="font-display font-light text-5xl sm:text-6xl lg:text-[5.2rem] leading-[1.2] tracking-[-0.01em]">
+            <span className="reveal-line"><span data-q-line className="py-[0.08em] block">&ldquo;Architecture is</span></span>
+            <span className="reveal-line"><span data-q-line className="py-[0.08em] block">the <em className="italic text-gradient-gold">thoughtful making</em></span></span>
+            <span className="reveal-line"><span data-q-line className="py-[0.08em] block">of space.&rdquo;</span></span>
           </p>
           <footer className="mt-8 text-[11px] font-mono tracking-[0.3em] uppercase text-slate-300">Louis I. Kahn</footer>
         </blockquote>

@@ -15,9 +15,9 @@ export const SignatureFacts: React.FC<{ facts: Fact[]; summary?: string }> = ({ 
 
       <div className="relative max-w-[90rem] mx-auto px-6 md:px-12 lg:px-20">
         <div className="grid lg:grid-cols-12 gap-10 items-end mb-16 md:mb-24" data-reveal>
-          <div className="lg:col-span-7">
+          <div className="lg:col-span-8 max-w-4xl">
             <div className="eyebrow mb-7">Why this home</div>
-            <h2 className="font-display font-light text-5xl sm:text-6xl lg:text-[5rem] leading-[0.95] tracking-[-0.02em]">
+            <h2 className="font-display font-light text-5xl sm:text-6xl lg:text-[5rem] leading-[1.3] sm:leading-[1.34] tracking-normal py-1">
               যা একে <em className="italic text-gradient-gold">আলাদা করে।</em>
             </h2>
           </div>
@@ -41,7 +41,7 @@ export const SignatureFacts: React.FC<{ facts: Fact[]; summary?: string }> = ({ 
               </span>
               <div className="col-span-9 md:col-span-4">
                 <div className="mono-label">{f.label}{f.labelBn ? ` · ${f.labelBn}` : ''}</div>
-                <div className="mt-3 font-display font-light text-3xl md:text-5xl leading-[1.02] text-[#f4efe6] group-hover:text-[#f1dfbd] transition-colors duration-700">
+                <div className="mt-3 font-display font-light text-3xl md:text-5xl leading-[1.28] tracking-normal text-[#f4efe6] group-hover:text-[#f1dfbd] transition-colors duration-700 py-0.5">
                   {f.value}
                 </div>
               </div>

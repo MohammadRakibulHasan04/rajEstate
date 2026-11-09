@@ -369,7 +369,7 @@ export const StoryChapters: React.FC<{ chapters: StoryChapter[] }> = ({ chapters
 
                     <h2
                       data-text-item
-                      className="font-display font-light text-3xl sm:text-5xl lg:text-[3.5rem] leading-[0.98] tracking-[-0.02em] text-[#f4efe6]"
+                      className="font-display font-light text-3xl sm:text-5xl lg:text-[3.5rem] leading-[1.3] sm:leading-[1.34] tracking-normal text-[#f4efe6] py-1 max-w-3xl"
                     >
                       {ch.titleBn}
                     </h2>
@@ -436,7 +436,7 @@ export const StoryChapters: React.FC<{ chapters: StoryChapter[] }> = ({ chapters
                           <span className="block text-[9.5px] font-mono tracking-[0.28em] uppercase text-[#d1ad7a]">
                             Chapter {no} · {ch.kicker}
                           </span>
-                          <span className="font-display text-lg sm:text-xl text-[#f4efe6]">
+                          <span className="font-display text-lg sm:text-xl text-[#f4efe6] leading-[1.3] inline-block py-0.5">
                             {ch.titleBn}
                           </span>
                         </div>
