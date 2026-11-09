@@ -125,10 +125,10 @@
 .reveal-line {
   display: block;
   overflow: hidden;
-  padding-top: 0.16em;
-  margin-top: -0.16em;
-  padding-bottom: 0.12em;
-  margin-bottom: -0.12em;
+  padding-top: 0.22em;
+  margin-top: -0.22em;
+  padding-bottom: 0.18em;
+  margin-bottom: -0.18em;
 }
 
 .reveal-line > span {
@@ -226,7 +226,13 @@
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background: linear-gradient(90deg, rgba(5, 8, 15, 0.78) 0%, rgba(5, 8, 15, 0.35) 34%, transparent 60%);
+  background: linear-gradient(180deg, rgba(5, 8, 15, 0.75) 0%, rgba(5, 8, 15, 0.52) 42%, rgba(5, 8, 15, 0.88) 100%);
+}
+
+@media (min-width: 768px) {
+  .hero-shade-left {
+    background: linear-gradient(90deg, rgba(5, 8, 15, 0.78) 0%, rgba(5, 8, 15, 0.35) 34%, transparent 60%);
+  }
 }
 
 .hero-grid {

@@ -379,10 +379,12 @@ export const CinematicHero: React.FC<CinematicHeroProps> = ({
       // Ensure timeline always spans exactly [0, 1]
       tl.set({}, {}, 1);
 
+      const isMobile = window.innerWidth < 768;
+
       // 1. Intro differential multi-line parallax exit (0.00 -> 0.16)
       introLineWraps.forEach((wrap, idx) => {
         // Upper lines travel slightly faster than lower lines for genuine depth separation
-        const yTravel = -92 + idx * 22;
+        const yTravel = isMobile ? -42 + idx * 16 : -92 + idx * 22;
         tl.fromTo(
           wrap,
           { y: 0 },
@@ -394,7 +396,7 @@ export const CinematicHero: React.FC<CinematicHeroProps> = ({
       tl.fromTo(
         introSubRef.current,
         { y: 0, autoAlpha: 1 },
-        { y: -32, autoAlpha: 0, duration: 0.12, ease: 'power2.inOut' },
+        { y: isMobile ? -18 : -32, autoAlpha: 0, duration: 0.12, ease: 'power2.inOut' },
         0.01
       ).fromTo(
         introRef.current,
@@ -464,26 +466,30 @@ export const CinematicHero: React.FC<CinematicHeroProps> = ({
 
         // Plane 1: Primary Headline Line 1 (Foreground)
         if (line1) {
+          const l1EnterY = isMobile ? 30 : 68;
+          const l1HoldY = isMobile ? -3 : -12;
+          const l1ExitY = isMobile ? -34 : -72;
+
           tl.fromTo(
             line1,
-            { y: 68 },
-            { y: 10, duration: enterDur, ease: 'power2.out' },
+            { y: l1EnterY },
+            { y: isMobile ? 4 : 10, duration: enterDur, ease: 'power2.out' },
             s
           );
           if (isLast) {
             tl.to(
               line1,
-              { y: -6, duration: holdDur, ease: 'sine.out' },
+              { y: isMobile ? -2 : -6, duration: holdDur, ease: 'sine.out' },
               holdStart
             );
           } else {
             tl.to(
               line1,
-              { y: -12, duration: holdDur, ease: 'none' },
+              { y: l1HoldY, duration: holdDur, ease: 'none' },
               holdStart
             ).to(
               line1,
-              { y: -72, duration: exitDur, ease: 'power2.in' },
+              { y: l1ExitY, duration: exitDur, ease: 'power2.in' },
               exitStart
             );
           }
@@ -491,15 +497,19 @@ export const CinematicHero: React.FC<CinematicHeroProps> = ({
 
         // Plane 2: Gold Italic Line 2 (Mid-foreground, deeper parallax offset & stagger)
         if (line2) {
+          const l2EnterY = isMobile ? 42 : 94;
+          const l2HoldY = isMobile ? -2 : -8;
+          const l2ExitY = isMobile ? -26 : -52;
+
           const staggerOffset = Math.min(0.018, span * 0.05);
           const line2HoldStart = s + staggerOffset + enterDur;
           const line2HoldDur = Math.max(0.01, exitStart - line2HoldStart);
 
           tl.fromTo(
             line2,
-            { y: 94, autoAlpha: 0 },
+            { y: l2EnterY, autoAlpha: 0 },
             {
-              y: 14,
+              y: isMobile ? 6 : 14,
               autoAlpha: 1,
               duration: enterDur,
               ease: 'power2.out',
@@ -510,17 +520,17 @@ export const CinematicHero: React.FC<CinematicHeroProps> = ({
           if (isLast) {
             tl.to(
               line2,
-              { y: -2, duration: line2HoldDur, ease: 'sine.out' },
+              { y: 0, duration: line2HoldDur, ease: 'sine.out' },
               line2HoldStart
             );
           } else {
             tl.to(
               line2,
-              { y: -8, duration: line2HoldDur, ease: 'none' },
+              { y: l2HoldY, duration: line2HoldDur, ease: 'none' },
               line2HoldStart
             ).to(
               line2,
-              { y: -52, autoAlpha: 0, duration: exitDur, ease: 'power2.in' },
+              { y: l2ExitY, autoAlpha: 0, duration: exitDur, ease: 'power2.in' },
               exitStart
             );
           }
@@ -528,6 +538,9 @@ export const CinematicHero: React.FC<CinematicHeroProps> = ({
 
         // Plane 3: Body & Final CTA (Deepest foreground plane)
         if (body) {
+          const bodyEnterY = isMobile ? 48 : 108;
+          const bodyExitY = isMobile ? -18 : -38;
+
           const bodyStagger = Math.min(0.03, span * 0.09);
           const bodyEnterDur = enterDur * 1.05;
           const bodyHoldStart = s + bodyStagger + bodyEnterDur;
@@ -535,9 +548,9 @@ export const CinematicHero: React.FC<CinematicHeroProps> = ({
 
           tl.fromTo(
             body,
-            { y: 108, autoAlpha: 0 },
+            { y: bodyEnterY, autoAlpha: 0 },
             {
-              y: 8,
+              y: isMobile ? 4 : 8,
               autoAlpha: 1,
               duration: bodyEnterDur,
               ease: 'power2.out',
@@ -554,11 +567,11 @@ export const CinematicHero: React.FC<CinematicHeroProps> = ({
           } else {
             tl.to(
               body,
-              { y: -4, duration: bodyHoldDur, ease: 'none' },
+              { y: isMobile ? -1 : -4, duration: bodyHoldDur, ease: 'none' },
               bodyHoldStart
             ).to(
               body,
-              { y: -38, autoAlpha: 0, duration: exitDur, ease: 'power2.in' },
+              { y: bodyExitY, autoAlpha: 0, duration: exitDur, ease: 'power2.in' },
               exitStart
             );
           }
@@ -699,7 +712,7 @@ export const CinematicHero: React.FC<CinematicHeroProps> = ({
       id="home"
       ref={sectionRef}
       aria-label="AURA — from blueprint to residence"
-      className="relative h-screen w-full overflow-hidden bg-[#070b14] text-[#f4efe6] select-none"
+      className="relative h-screen h-[100dvh] w-full overflow-hidden bg-[#070b14] text-[#f4efe6] select-none"
     >
       {/* Layer 0: GPU-accelerated frame sequence canvas */}
       <div ref={stageRef} className="absolute inset-0">
@@ -715,38 +728,40 @@ export const CinematicHero: React.FC<CinematicHeroProps> = ({
       {/* Layer 2: intro */}
       <div
         ref={introRef}
-        className="absolute inset-0 z-20 flex flex-col justify-end px-6 md:px-12 lg:px-20 pb-16 sm:pb-20 md:pb-[15vh] lg:pb-[14vh] will-change-[opacity]"
+        className="absolute inset-0 z-20 flex flex-col justify-center md:justify-end px-5 sm:px-8 md:px-12 lg:px-20 pt-20 pb-12 sm:pb-16 md:pb-[15vh] lg:pb-[14vh] will-change-[opacity]"
       >
-        <h1
-          ref={introTitleRef}
-          className="font-display font-light text-[8.5vw] sm:text-[6.5vw] lg:text-[5vw] xl:text-[4.4vw] leading-[1.3] tracking-[-0.01em] max-w-[20ch]"
-        >
-          <span data-intro-parallax className="block will-change-transform">
-            <span className="reveal-line">
-              <span data-intro-line>রাজশাহীতে</span>
-            </span>
-          </span>
-          <span data-intro-parallax className="block will-change-transform">
-            <span className="reveal-line">
-              <span data-intro-line>খুঁজছেন</span>
-            </span>
-          </span>
-          <span data-intro-parallax className="block will-change-transform">
-            <span className="reveal-line">
-              <span data-intro-line>
-                মনের মতো <em className="italic text-gradient-gold pr-[0.06em]">ঠিকানা?</em>
+        <div className="relative max-w-2xl w-full">
+          <h1
+            ref={introTitleRef}
+            className="font-display font-light text-[2.1rem] xs:text-[2.5rem] sm:text-5xl md:text-6xl lg:text-[4.4vw] xl:text-[4.2vw] leading-[1.22] sm:leading-[1.26] md:leading-[1.3] tracking-[-0.01em]"
+          >
+            <span data-intro-parallax className="block will-change-transform">
+              <span className="reveal-line">
+                <span data-intro-line>রাজশাহীতে খুঁজছেন</span>
               </span>
             </span>
-          </span>
-        </h1>
-        <div
-          ref={introSubRef}
-          className="mt-8 md:mt-12 flex flex-col items-start gap-6 sm:gap-7 max-w-sm sm:max-w-[400px] will-change-transform"
-        >
-          <div data-intro-fade className="flex items-center">
-            <button id="hero-explore-btn" onClick={onExplore} className="btn-gold">
-              Explore Residences <ArrowRight className="w-4 h-4" />
-            </button>
+            <span data-intro-parallax className="block will-change-transform">
+              <span className="reveal-line">
+                <span data-intro-line>
+                  মনের মতো <em className="italic text-gradient-gold pr-[0.06em]">ঠিকানা?</em>
+                </span>
+              </span>
+            </span>
+          </h1>
+
+          <div
+            ref={introSubRef}
+            className="mt-6 sm:mt-8 md:mt-10 flex flex-col items-start gap-4 sm:gap-6 will-change-transform"
+          >
+            <div data-intro-fade className="flex items-center">
+              <button
+                id="hero-explore-btn"
+                onClick={onExplore}
+                className="btn-gold text-[10px] sm:text-[11px] px-6 py-3.5 sm:px-7 sm:py-4"
+              >
+                Explore Residences <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -760,37 +775,41 @@ export const CinematicHero: React.FC<CinematicHeroProps> = ({
             ref={(el) => {
               chapterRefs.current[i] = el;
             }}
-            className="pointer-events-none absolute inset-0 z-20 flex items-center px-6 md:px-12 lg:px-20 pt-20 pb-16 will-change-[opacity]"
+            className="pointer-events-none absolute inset-0 z-20 flex items-center px-5 sm:px-8 md:px-12 lg:px-20 pt-20 pb-12 sm:pb-16 md:pb-16 will-change-[opacity]"
           >
             <div
               ref={(el) => {
                 chapterInnerRefs.current[i] = el;
               }}
-              className="relative max-w-2xl will-change-transform"
+              className="relative max-w-2xl will-change-transform w-full"
             >
               <div data-ch-title>
-                <h2 className="font-display font-light text-5xl sm:text-6xl lg:text-7xl leading-[1.35] tracking-[-0.01em]">
-                  <span data-ch-line1 className="block will-change-transform py-[0.08em]">
+                <h2 className="font-display font-light text-[1.85rem] xs:text-[2.15rem] sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl leading-[1.24] sm:leading-[1.28] md:leading-[1.32] tracking-[-0.01em]">
+                  <span data-ch-line1 className="block will-change-transform py-[0.06em]">
                     {c.title[0]}
                   </span>
                   <span data-ch-line2 className="block will-change-transform">
-                    <em className="italic text-gradient-gold inline-block py-[0.12em] pr-[0.12em]">
+                    <em className="italic text-gradient-gold inline-block py-[0.08em] pr-[0.1em]">
                       {c.title[1]}
                     </em>
                   </span>
                 </h2>
               </div>
               {(c.body || isLast) && (
-                <div data-ch-body className="mt-7 will-change-transform">
+                <div data-ch-body className="mt-6 sm:mt-8 will-change-transform">
                   {c.body && (
-                    <p className="text-[17px] sm:text-lg lg:text-xl leading-[1.75] text-slate-200 font-normal max-w-lg">
+                    <p className="text-[15px] sm:text-base lg:text-lg leading-[1.65] text-slate-200/90 font-normal max-w-lg">
                       {c.body}
                     </p>
                   )}
                   {isLast && (
-                    <div className="pointer-events-auto mt-9 flex flex-wrap gap-3">
-                      <button id="hero-final-explore-btn" onClick={onExplore} className="btn-gold">
-                        View the Collection <ArrowRight className="w-4 h-4" />
+                    <div className="pointer-events-auto mt-6 sm:mt-8 md:mt-9 flex flex-wrap gap-3">
+                      <button
+                        id="hero-final-explore-btn"
+                        onClick={onExplore}
+                        className="btn-gold text-[10px] sm:text-[11px] px-6 py-3.5 sm:px-7 sm:py-4"
+                      >
+                        View the Collection <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                       </button>
                     </div>
                   )}
