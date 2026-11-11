@@ -43,15 +43,15 @@ export const Lightbox: React.FC<{ images: MediaImage[]; index: number; onClose: 
         </button>
       </div>
 
-      <div className="relative flex-1 flex items-center justify-center px-4 md:px-20 min-h-0">
+      <div className="relative flex-1 flex items-center justify-center px-4 md:px-20 min-h-0 overflow-hidden">
         <img key={img.url} src={img.url} alt={img.caption || ''} className="toast max-h-full max-w-full object-contain rounded-lg" />
         {images.length > 1 && (
           <>
-            <button onClick={prev} aria-label="Previous photo" className="absolute left-3 md:left-8 p-3 rounded-full border border-white/15 bg-black/40 text-white hover:border-[#d1ad7a] cursor-pointer">
-              <ChevronLeft className="w-5 h-5" />
+            <button onClick={prev} aria-label="Previous photo" className="absolute left-3 md:left-8 top-1/2 -translate-y-1/2 w-11 h-11 flex items-center justify-center rounded-full border border-white/15 bg-black/55 text-white hover:border-[#d1ad7a] cursor-pointer">
+              <ChevronLeft className="w-5 h-5 shrink-0" />
             </button>
-            <button onClick={next} aria-label="Next photo" className="absolute right-3 md:right-8 p-3 rounded-full border border-white/15 bg-black/40 text-white hover:border-[#d1ad7a] cursor-pointer">
-              <ChevronRight className="w-5 h-5" />
+            <button onClick={next} aria-label="Next photo" className="absolute right-3 md:right-8 top-1/2 -translate-y-1/2 w-11 h-11 flex items-center justify-center rounded-full border border-white/15 bg-black/55 text-white hover:border-[#d1ad7a] cursor-pointer">
+              <ChevronRight className="w-5 h-5 shrink-0" />
             </button>
           </>
         )}

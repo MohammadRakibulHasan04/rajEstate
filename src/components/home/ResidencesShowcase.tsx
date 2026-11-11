@@ -31,10 +31,8 @@ export const ResidencesShowcase: React.FC = () => {
   return (
     <section
       id="showcase"
-      className="relative overflow-hidden bg-[#070b14] text-[#f4efe6] py-28 md:py-40 border-t border-white/[0.08]"
+      className="relative overflow-hidden bg-[#070b14] text-[#f4efe6] py-28 md:py-40"
     >
-      <div className="hairline max-w-7xl mx-auto mb-20" />
-
       {/* Decorative background watermark */}
       <span
         aria-hidden="true"

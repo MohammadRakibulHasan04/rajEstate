@@ -12,8 +12,7 @@ import { Unit } from '../types/listing';
 
 import { PropertyHero } from '../components/property/PropertyHero';
 import { SignatureFacts } from '../components/property/SignatureFacts';
-import { StoryChapters } from '../components/property/StoryChapters';
-import { MediaGallery, Lightbox } from '../components/property/MediaGallery';
+import { Lightbox } from '../components/property/MediaGallery';
 import { PlanAndFacts } from '../components/property/PlanAndFacts';
 import { ProximityRings } from '../components/property/ProximityRings';
 import { TrustLedger } from '../components/property/TrustLedger';
@@ -145,7 +144,33 @@ export const PropertyPage: React.FC<{ slug: string }> = ({ slug }) => {
   const isDraft = listing.publish !== 'published';
   const saved = isPropertySaved(listing.id);
   const related = published.filter((l) => isTopLevel(l) && l.slug !== listing.slug && l.id !== parentId).slice(0, 3);
-  const allImages = listing.media.hero.url ? [listing.media.hero, ...listing.media.gallery] : listing.media.gallery;
+
+  // Merge gallery + any unique chapter photos so the top gallery, Rooms grid, and Lightbox share one consistent list
+  const mergedGallery = useMemo(() => {
+    const seen = new Set<string>();
+    if (listing.media.hero?.url) seen.add(listing.media.hero.url);
+    const list = [...listing.media.gallery].filter((img) => {
+      if (!img?.url || seen.has(img.url)) return false;
+      seen.add(img.url);
+      return true;
+    });
+    listing.chapters.forEach((ch) => {
+      if (ch.imageUrl && !seen.has(ch.imageUrl)) {
+        seen.add(ch.imageUrl);
+        list.push({
+          url: ch.imageUrl,
+          room: ch.kicker.replace(/^The\s+/i, ''),
+          caption: ch.titleEn,
+          captionBn: ch.titleBn,
+        });
+      }
+    });
+    return list;
+  }, [listing.media.hero, listing.media.gallery, listing.chapters]);
+
+  const allImages = listing.media.hero.url
+    ? [{ ...listing.media.hero, room: listing.media.hero.room || 'Exterior' }, ...mergedGallery]
+    : mergedGallery;
 
   return (
     <div ref={rootRef} className="min-h-screen bg-[#070b14] text-[#f4efe6] selection:bg-cyan-500/30 selection:text-white">
@@ -162,8 +187,10 @@ export const PropertyPage: React.FC<{ slug: string }> = ({ slug }) => {
 
       {/* Floating nav */}
       <nav
-        className={`fixed inset-x-0 z-[90] transition-all duration-700 ${isDraft ? 'top-7' : 'top-0'} ${
-          navSolid ? 'bg-[#070b14]/85 backdrop-blur-xl border-b border-white/[0.06] py-3.5' : 'bg-transparent py-6'
+        className={`fixed inset-x-0 z-[90] transition-all duration-500 ${isDraft ? 'top-7' : 'top-0'} ${
+          navSolid
+            ? 'bg-[#070b14]/90 backdrop-blur-xl border-b border-white/[0.08] py-3.5'
+            : 'bg-[#070b14]/75 backdrop-blur-md border-b border-white/[0.04] py-4'
         }`}
         aria-label="Property navigation"
       >
@@ -194,8 +221,6 @@ export const PropertyPage: React.FC<{ slug: string }> = ({ slug }) => {
           <div className="hidden lg:flex items-center gap-8 text-[10.5px] font-mono tracking-[0.24em] uppercase text-slate-400">
             {[
               ['why', 'Why', tiers.signature.length > 0],
-              ['story', 'Chapters', listing.chapters.length > 0],
-              ['gallery', 'Rooms', listing.media.gallery.length > 0],
               ['plan', listing.kind === 'project' ? 'Homes' : 'Plan', true],
               ['building', 'Building', !!(parent && parentId)],
               ['neighbourhood', 'Area', listing.nearby.length > 0],
@@ -236,11 +261,10 @@ export const PropertyPage: React.FC<{ slug: string }> = ({ slug }) => {
           parent={parent && parentId ? parent : undefined}
           unit={ownUnit}
           onInquire={() => scrollTo('inquiry')}
-          onGallery={() => setGalleryAt(0)}
+          onGallery={(idx = 0) => setGalleryAt(idx)}
+          onOpenPlan={setPlanUrl}
         />
         <SignatureFacts facts={tiers.signature} summary={listing.summary} />
-        <StoryChapters chapters={listing.chapters} />
-        <MediaGallery hero={listing.media.hero} images={listing.media.gallery} openAt={galleryAt} setOpenAt={setGalleryAt} />
         <PlanAndFacts
           listing={listing}
           facts={tiers.defining}
@@ -296,8 +320,7 @@ export const PropertyPage: React.FC<{ slug: string }> = ({ slug }) => {
           onClose={() => setPlanUrl(null)}
         />
       )}
-      {/* Gallery lightbox is rendered inside MediaGallery; this handles the hero button when gallery is short */}
-      {galleryAt !== null && listing.media.gallery.length === 0 && allImages.length > 0 && (
+      {galleryAt !== null && allImages.length > 0 && (
         <Lightbox images={allImages} index={galleryAt} onIndex={setGalleryAt} onClose={() => setGalleryAt(null)} />
       )}
     </div>
