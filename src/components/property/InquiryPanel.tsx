@@ -50,7 +50,7 @@ export const InquiryPanel: React.FC<{ listing: Listing; prefill?: string }> = ({
   const waText = `Hello, I'm interested in ${listing.title} (${window.location.href}).`;
 
   return (
-    <section id="inquiry" className="relative overflow-hidden py-28 md:py-40 bg-[#EFEAE1] border-t border-[#181512]/[0.08]">
+    <section id="inquiry" className="relative overflow-hidden py-28 md:py-40 bg-[#ffffff] border-t border-[#181512]/[0.08]">
       <span
         aria-hidden="true"
         className="text-outline pointer-events-none absolute top-1/2 -translate-y-1/2 left-1/2 -translate-x-1/2 whitespace-nowrap font-display font-light text-[22vw] leading-none select-none"
@@ -120,7 +120,7 @@ export const InquiryPanel: React.FC<{ listing: Listing; prefill?: string }> = ({
                       className={`text-left p-4 rounded-xl border transition-all duration-300 cursor-pointer ${
                         form.tourType === o.value
                           ? 'border-[#9A6B3B] bg-[#9A6B3B]/10 shadow-xs'
-                          : 'border-[#181512]/12 bg-[#F6F2EA]/60 hover:border-[#181512]/25 hover:bg-[#FFFFFF]'
+                          : 'border-[#181512]/12 bg-[#F8F7F4] hover:border-[#181512]/25 hover:bg-[#ffffff]'
                       }`}
                     >
                       <span className="block text-sm text-[#181512] font-medium">{o.label}</span>

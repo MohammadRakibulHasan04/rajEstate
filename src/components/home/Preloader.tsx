@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import gsap from 'gsap';
+import logoIcon from '../../assets/logo-icon.png';
 
 interface PreloaderProps {
   progress: number; // 0..1
@@ -70,7 +71,7 @@ export const Preloader: React.FC<PreloaderProps> = ({ progress, loaded, onComple
   return (
     <div
       ref={rootRef}
-      className="fixed inset-0 z-[100] bg-[#F6F2EA] text-[#181512] flex flex-col justify-between px-6 md:px-12 py-8 md:py-10 overflow-hidden"
+      className="fixed inset-0 z-[100] bg-[#ffffff] text-[#181512] flex flex-col justify-between px-6 md:px-12 py-8 md:py-10 overflow-hidden"
       aria-busy={!loaded}
       aria-label="Loading Jonopod Properties"
     >
@@ -78,11 +79,20 @@ export const Preloader: React.FC<PreloaderProps> = ({ progress, loaded, onComple
       <div className="grain" />
 
       <div className="relative flex items-center justify-between text-[10px] font-mono tracking-[0.32em] uppercase text-[#786F63]" data-pl-fade>
-        <span>Jonopod Properties · Architectural Residences</span>
+        <div className="flex items-center gap-2.5">
+          <img src={logoIcon} alt="" className="w-4 h-4 object-contain opacity-75" />
+          <span>Jonopod Properties · Architectural Residences</span>
+        </div>
         <span className="hidden sm:inline">Est. MMXXVI</span>
       </div>
 
       <div className="relative flex flex-col items-center text-center">
+        <img
+          src={logoIcon}
+          alt="Jonopod Properties"
+          className="w-14 h-14 sm:w-16 sm:h-16 md:w-20 md:h-20 object-contain mb-4"
+          data-pl-fade
+        />
         <span className="reveal-line">
           <span data-pl-word className="font-display font-light text-[13vw] sm:text-[12vw] md:text-[8.5rem] leading-none tracking-[0.06em] uppercase text-[#181512]">
             Jonopod

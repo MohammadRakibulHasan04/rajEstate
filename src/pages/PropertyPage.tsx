@@ -21,6 +21,7 @@ import { InquiryPanel } from '../components/property/InquiryPanel';
 import { ActionDock } from '../components/property/ActionDock';
 import { ListingCard } from '../components/property/ListingCard';
 import { ProjectLink, projectHref } from '../components/property/ProjectLink';
+import logoImg from '../assets/logo.png';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -122,7 +123,7 @@ export const PropertyPage: React.FC<{ slug: string }> = ({ slug }) => {
 
   if (loading || (parentId && parentLoading) || (adminChecking && !listing)) {
     return (
-      <div className="min-h-screen bg-[#F6F2EA] p-6 md:p-20 flex flex-col justify-end gap-6" aria-busy="true">
+      <div className="min-h-screen bg-[#ffffff] p-6 md:p-20 flex flex-col justify-end gap-6" aria-busy="true">
         <div className="skeleton h-4 w-48 rounded" />
         <div className="skeleton h-24 w-3/4 max-w-3xl rounded-xl" />
         <div className="skeleton h-16 w-1/2 max-w-xl rounded-xl" />
@@ -132,7 +133,7 @@ export const PropertyPage: React.FC<{ slug: string }> = ({ slug }) => {
 
   if (!listing || !tiers) {
     return (
-      <main className="min-h-screen bg-[#F6F2EA] text-[#181512] flex flex-col items-center justify-center text-center px-6">
+      <main className="min-h-screen bg-[#ffffff] text-[#181512] flex flex-col items-center justify-center text-center px-6">
         <span className="text-outline font-display text-[30vw] leading-none select-none" aria-hidden="true">404</span>
         <h1 className="font-display text-4xl md:text-5xl leading-[1.34] tracking-normal py-2 max-w-2xl -mt-10 text-[#181512]">এই ঠিকানাটি খুঁজে পাওয়া যায়নি।</h1>
         <p className="mt-4 text-[#5C5346]">This residence may have been sold or moved.</p>
@@ -173,14 +174,14 @@ export const PropertyPage: React.FC<{ slug: string }> = ({ slug }) => {
     : mergedGallery;
 
   return (
-    <div ref={rootRef} className="min-h-screen bg-[#F6F2EA] text-[#181512] selection:bg-[#9A6B3B]/20 selection:text-[#181512]">
+    <div ref={rootRef} className="min-h-screen bg-[#ffffff] text-[#181512] selection:bg-[#9A6B3B]/20 selection:text-[#181512]">
       {/* Progress */}
       <div className="fixed top-0 inset-x-0 z-[100] h-[2px] bg-[#181512]/[0.06]">
         <div ref={progressRef} className="h-full origin-left bg-gradient-to-r from-[#855B30] via-[#C89B62] to-[#855B30]" style={{ transform: 'scaleX(0)' }} />
       </div>
 
       {isDraft && (
-        <div className="fixed top-[2px] inset-x-0 z-[95] bg-[#9A6B3B] text-[#FAF7F2] text-center text-[10.5px] font-mono tracking-[0.22em] uppercase py-1.5">
+        <div className="fixed top-[2px] inset-x-0 z-[95] bg-[#9A6B3B] text-[#ffffff] text-center text-[10.5px] font-mono tracking-[0.22em] uppercase py-1.5">
           Preview · this listing is {listing.publish} and only visible to admins
         </div>
       )}
@@ -189,19 +190,30 @@ export const PropertyPage: React.FC<{ slug: string }> = ({ slug }) => {
       <nav
         className={`fixed inset-x-0 z-[90] transition-all duration-500 ${isDraft ? 'top-7' : 'top-0'} ${
           navSolid
-            ? 'bg-[#FAF7F2]/92 backdrop-blur-xl border-b border-[#181512]/[0.09] shadow-[0_8px_30px_-16px_rgba(24,21,18,0.08)] py-3.5'
-            : 'bg-[#F6F2EA]/82 backdrop-blur-md border-b border-[#181512]/[0.06] py-4'
+            ? 'bg-[#ffffff]/92 backdrop-blur-xl border-b border-[#181512]/[0.09] shadow-[0_8px_30px_-16px_rgba(24,21,18,0.08)] py-3.5'
+            : 'bg-[#ffffff]/85 backdrop-blur-md border-b border-[#181512]/[0.06] py-4'
         }`}
         aria-label="Property navigation"
       >
         <div className="max-w-[90rem] mx-auto px-6 md:px-12 lg:px-20 flex items-center justify-between gap-6">
           <div className="flex items-center gap-4">
+            <Link
+              to="/"
+              className="shrink-0 flex items-center pr-3 border-r border-[#181512]/12 mr-1 group"
+              title="Jonopod Properties Home"
+            >
+              <img
+                src={logoImg}
+                alt="Jonopod Properties"
+                className="h-6 sm:h-7 w-auto object-contain transition-transform duration-300 group-hover:scale-[1.02]"
+              />
+            </Link>
             <button
               id="property-back"
               onClick={() => goBack(parent ? projectHref(parent, ownUnit?.code) : '/#showcase')}
-              className="group inline-flex items-center gap-3 text-[11px] font-mono tracking-[0.26em] uppercase text-[#3D362E] hover:text-[#9A6B3B] transition-colors cursor-pointer"
+              className="group inline-flex items-center gap-2 text-[11px] font-mono tracking-[0.26em] uppercase text-[#3D362E] hover:text-[#9A6B3B] transition-colors cursor-pointer"
             >
-              <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform duration-500" />
+              <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-1 transition-transform duration-500" />
               Back
             </button>
             {parent && parentId && (
@@ -240,13 +252,13 @@ export const PropertyPage: React.FC<{ slug: string }> = ({ slug }) => {
                 <Pencil className="w-3.5 h-3.5" /> <span className="hidden sm:inline">Edit</span>
               </Link>
             )}
-            <button id="property-share" onClick={share} className="p-2.5 rounded-full border border-[#181512]/15 bg-[#FCFBF8]/80 text-[#3D362E] hover:text-[#181512] hover:border-[#9A6B3B]/60 transition-colors cursor-pointer" aria-label="Share">
+            <button id="property-share" onClick={share} className="p-2.5 rounded-full border border-[#181512]/15 bg-[#ffffff] text-[#3D362E] hover:text-[#181512] hover:border-[#9A6B3B]/60 transition-colors cursor-pointer" aria-label="Share">
               {copied ? <Check className="w-4 h-4 text-[#9A6B3B]" /> : <Share2 className="w-4 h-4" />}
             </button>
             <button
               id="property-save"
               onClick={() => toggleSaveProperty(listing.id)}
-              className={`p-2.5 rounded-full border transition-colors cursor-pointer ${saved ? 'border-[#9A6B3B] text-[#9A6B3B] bg-[#9A6B3B]/12' : 'border-[#181512]/15 bg-[#FCFBF8]/80 text-[#3D362E] hover:text-[#181512] hover:border-[#9A6B3B]/60'}`}
+              className={`p-2.5 rounded-full border transition-colors cursor-pointer ${saved ? 'border-[#9A6B3B] text-[#9A6B3B] bg-[#9A6B3B]/12' : 'border-[#181512]/15 bg-[#ffffff] text-[#3D362E] hover:text-[#181512] hover:border-[#9A6B3B]/60'}`}
               aria-label={saved ? 'Remove from saved' : 'Save this home'}
             >
               <Bookmark className={`w-4 h-4 ${saved ? 'fill-current' : ''}`} />
@@ -298,14 +310,16 @@ export const PropertyPage: React.FC<{ slug: string }> = ({ slug }) => {
         )}
       </main>
 
-      <footer className="border-t border-[#181512]/10 bg-[#E9E2D6] px-6 md:px-12 lg:px-20 pt-14 pb-28">
+      <footer className="border-t border-[#181512]/10 bg-[#ffffff] px-6 md:px-12 lg:px-20 pt-14 pb-28">
         <div className="max-w-[90rem] mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
           <Link to="/#showcase" className="group inline-flex items-center gap-3 text-sm text-[#3D362E] hover:text-[#9A6B3B] transition-colors">
             <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform duration-500" /> All residences
           </Link>
-          <span aria-hidden="true" className="font-display font-light text-4xl sm:text-5xl tracking-[0.06em] uppercase text-transparent bg-clip-text bg-gradient-to-b from-[#181512]/[0.12] to-[#181512]/0 select-none">
-            Jonopod Properties
-          </span>
+          <img
+            src={logoImg}
+            alt="Jonopod Properties"
+            className="h-8 w-auto object-contain opacity-85 hover:opacity-100 transition-opacity"
+          />
           <span className="text-[10px] font-mono tracking-[0.26em] uppercase text-[#6E6559]">{priceLabel(listing)}</span>
         </div>
       </footer>

@@ -35,7 +35,7 @@ export const TrustLedger: React.FC<{ listing: Listing }> = ({ listing }) => {
   if (!trust.developer && !milestones.length) return null;
 
   return (
-    <section id="trust" className="relative py-28 md:py-36 bg-[#EFEAE1] border-y border-[#181512]/[0.08]">
+    <section id="trust" className="relative py-28 md:py-36 bg-[#ffffff] border-y border-[#181512]/[0.08]">
       <div className="max-w-[90rem] mx-auto px-6 md:px-12 lg:px-20">
         <div className="grid lg:grid-cols-12 gap-10 mb-16" data-reveal>
           <div className="lg:col-span-8 max-w-4xl">
@@ -79,7 +79,7 @@ export const TrustLedger: React.FC<{ listing: Listing }> = ({ listing }) => {
                   <li key={i} className="flex flex-col">
                     <span
                       className={`w-6 h-6 rounded-full flex items-center justify-center border ${
-                        m.done ? 'bg-[#9A6B3B] border-[#9A6B3B] text-[#FAF7F2]' : 'bg-[#FCFBF8] border-[#181512]/20'
+                        m.done ? 'bg-[#9A6B3B] border-[#9A6B3B] text-[#ffffff]' : 'bg-[#ffffff] border-[#181512]/20'
                       }`}
                     >
                       {m.done && <Check className="w-3.5 h-3.5" />}

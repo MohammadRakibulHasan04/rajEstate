@@ -304,7 +304,7 @@ export const StoryChapters: React.FC<{ chapters: StoryChapter[] }> = ({ chapters
       id="story"
       ref={sectionRef}
       aria-label="Architectural room chapters"
-      className="relative h-[100svh] min-h-[680px] w-full overflow-hidden bg-[#F6F2EA] text-[#181512] border-t border-[#181512]/[0.08]"
+      className="relative h-[100svh] min-h-[680px] w-full overflow-hidden bg-[#ffffff] text-[#181512] border-t border-[#181512]/[0.08]"
     >
       {/* Subtle atmosphere & grain */}
       <div
@@ -475,7 +475,7 @@ export const StoryChapters: React.FC<{ chapters: StoryChapter[] }> = ({ chapters
                     isCurrent
                       ? 'border-[#9A6B3B] bg-[#9A6B3B]/15 text-[#5C3D1E] font-medium'
                       : isStacked
-                      ? 'border-[#181512]/15 bg-[#FCFBF8] text-[#3D362E] hover:border-[#9A6B3B]/50'
+                      ? 'border-[#181512]/15 bg-[#ffffff] text-[#3D362E] hover:border-[#9A6B3B]/50'
                       : 'border-[#181512]/[0.08] text-[#786F63] hover:text-[#181512] hover:border-[#181512]/20'
                   }`}
                 >

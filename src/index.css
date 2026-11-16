@@ -1,8 +1,36 @@
 @import "tailwindcss";
 
 /* ------------------------------------------------------------------
-   CUSTOM BENGALI FONTS
+   CUSTOM BENGALI & DISPLAY FONTS
 ------------------------------------------------------------------- */
+@font-face {
+  font-family: 'ITC Bauhaus';
+  src: url('./assets/fonts/ITC-Bauhaus.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: block;
+}
+
+@font-face {
+  font-family: 'itc bauhaus';
+  src: url('./assets/fonts/ITC-Bauhaus.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: block;
+}
+
+@font-face {
+  font-family: 'itc bauhuas';
+  src: url('./assets/fonts/ITC-Bauhaus.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: block;
+}
+
+.font-bauhaus {
+  font-family: 'ITC Bauhaus', 'itc bauhaus', 'itc bauhuas', 'Bauhaus ITC', 'Bauhaus 93', sans-serif;
+}
+
 @font-face {
   font-family: 'ChayanaTeesta';
   src: url('./assets/fonts/Li-Chayana-Teesta-Unicode.ttf') format('truetype');
@@ -39,9 +67,9 @@
   --color-ink-900: #24201b;
   --color-ink-800: #3d362e;
   --color-ink-700: #5c5346;
-  --color-ivory: #f6f2ea;
-  --color-stone: #efeae1;
-  --color-paper: #fcfbf8;
+  --color-ivory: #ffffff;
+  --color-stone: #f8f7f4;
+  --color-paper: #ffffff;
   --color-champagne: #9a6b3b;
   --color-blueprint: #2b6cb0;
 }
@@ -56,13 +84,13 @@
   }
 
   html {
-    background: #F6F2EA;
+    background: #ffffff;
     color: #181512;
   }
 
   body {
     font-family: var(--font-sans-family);
-    background: #F6F2EA;
+    background: #ffffff;
     color: #181512;
     transition: background-color 0.3s ease, color 0.3s ease;
     overflow-x: hidden;
@@ -225,8 +253,8 @@
   letter-spacing: 0.22em;
   text-transform: uppercase;
   color: #181512;
-  border: 1px solid rgba(24, 21, 18, 0.18);
-  background: rgba(252, 251, 248, 0.82);
+  border: 1px solid rgba(24, 21, 18, 0.16);
+  background: #ffffff;
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
   cursor: pointer;
@@ -366,16 +394,16 @@
 ------------------------------------------------------------------- */
 .panel {
   position: relative;
-  border: 1px solid rgba(24, 21, 18, 0.085);
-  background: linear-gradient(180deg, #FFFFFF 0%, #FAF7F2 100%);
-  box-shadow: 0 12px 34px -16px rgba(24, 21, 18, 0.07), 0 2px 6px -1px rgba(24, 21, 18, 0.03);
+  border: 1px solid rgba(24, 21, 18, 0.09);
+  background: #ffffff;
+  box-shadow: 0 12px 34px -16px rgba(24, 21, 18, 0.06), 0 2px 6px -1px rgba(24, 21, 18, 0.03);
   border-radius: 18px;
 }
 
 .panel-glass {
-  border: 1px solid rgba(24, 21, 18, 0.11);
-  background: rgba(252, 250, 246, 0.88);
-  box-shadow: 0 18px 44px -16px rgba(24, 21, 18, 0.11);
+  border: 1px solid rgba(24, 21, 18, 0.10);
+  background: rgba(255, 255, 255, 0.90);
+  box-shadow: 0 18px 44px -16px rgba(24, 21, 18, 0.10);
   backdrop-filter: blur(18px) saturate(1.25);
   -webkit-backdrop-filter: blur(18px) saturate(1.25);
 }
@@ -394,8 +422,8 @@
 .lux-textarea {
   width: 100%;
   border-radius: 12px;
-  border: 1px solid rgba(24, 21, 18, 0.14);
-  background: #F3EFE7;
+  border: 1px solid rgba(24, 21, 18, 0.13);
+  background: #F8F7F4;
   color: #181512;
   font-size: 14px;
   padding: 12px 14px;
@@ -411,8 +439,8 @@
 .lux-input:hover,
 .lux-select:hover,
 .lux-textarea:hover {
-  border-color: rgba(24, 21, 18, 0.26);
-  background: #F7F4ED;
+  border-color: rgba(24, 21, 18, 0.25);
+  background: #FAF9F7;
 }
 
 .lux-input:focus,
@@ -436,7 +464,7 @@
 }
 
 .lux-select option {
-  background: #FCFBF8;
+  background: #ffffff;
   color: #181512;
 }
 
@@ -454,7 +482,7 @@
   padding: 8px 14px;
   border-radius: 999px;
   border: 1px solid rgba(24, 21, 18, 0.12);
-  background: rgba(252, 251, 248, 0.8);
+  background: #ffffff;
   font-family: var(--font-mono-family);
   font-size: 10.5px;
   letter-spacing: 0.18em;
@@ -468,12 +496,12 @@
 .chip:hover {
   border-color: rgba(154, 107, 59, 0.55);
   color: #181512;
-  background: #FFFFFF;
+  background: #FAF9F7;
 }
 
 .chip[data-active='true'] {
   border-color: #9A6B3B;
-  background: rgba(154, 107, 59, 0.13);
+  background: rgba(154, 107, 59, 0.12);
   color: #684724;
   font-weight: 500;
 }
@@ -485,7 +513,7 @@
   padding: 10px 16px;
   border-radius: 999px;
   border: 1px solid rgba(24, 21, 18, 0.15);
-  background: rgba(252, 251, 248, 0.72);
+  background: #ffffff;
   font-family: var(--font-mono-family);
   font-size: 10.5px;
   letter-spacing: 0.18em;
@@ -577,7 +605,7 @@
   height: 6px;
   border-radius: 9999px;
   background: #9A6B3B;
-  box-shadow: 0 0 0 2px #FCFBF8, 0 0 8px rgba(154, 107, 59, 0.55);
+  box-shadow: 0 0 0 2px #ffffff, 0 0 8px rgba(154, 107, 59, 0.55);
 }
 
 /* Masonry gallery */
@@ -669,7 +697,7 @@
 }
 
 ::-webkit-scrollbar-track {
-  background: #EFEAE1;
+  background: #ffffff;
 }
 
 ::-webkit-scrollbar-thumb {

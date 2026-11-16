@@ -72,7 +72,7 @@ export const ParallaxQuoteBand: React.FC<ParallaxQuoteBandProps> = ({ onBook }) 
 
         <div
           data-card
-          className="hidden lg:block absolute right-12 xl:right-20 bottom-[18%] w-80 rounded-2xl border border-[#181512]/12 bg-[#FAF7F2]/92 backdrop-blur-xl p-6 text-[#181512] shadow-[0_30px_80px_-20px_rgba(24,21,18,0.35)]"
+          className="hidden lg:block absolute right-12 xl:right-20 bottom-[18%] w-80 rounded-2xl border border-[#181512]/12 bg-[#ffffff]/92 backdrop-blur-xl p-6 text-[#181512] shadow-[0_30px_80px_-20px_rgba(24,21,18,0.35)]"
         >
           <div className="flex items-center justify-between text-[10px] font-mono tracking-[0.28em] uppercase text-[#9A6B3B]">
             <span>Featured</span>

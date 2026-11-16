@@ -51,7 +51,7 @@ export const ActionDock: React.FC<{ listing: Listing; onInquire: () => void }> =
         <button
           id="dock-save"
           onClick={() => toggleSaveProperty(listing.id)}
-          className={`p-3 rounded-full border transition-colors cursor-pointer ${saved ? 'border-[#9A6B3B] text-[#9A6B3B] bg-[#9A6B3B]/12' : 'border-[#181512]/15 bg-[#FCFBF8] text-[#3D362E] hover:text-[#181512] hover:border-[#9A6B3B]/60'}`}
+          className={`p-3 rounded-full border transition-colors cursor-pointer ${saved ? 'border-[#9A6B3B] text-[#9A6B3B] bg-[#9A6B3B]/12' : 'border-[#181512]/15 bg-[#ffffff] text-[#3D362E] hover:text-[#181512] hover:border-[#9A6B3B]/60'}`}
           aria-label={saved ? 'Remove from saved' : 'Save this home'}
           tabIndex={visible ? 0 : -1}
         >
@@ -61,7 +61,7 @@ export const ActionDock: React.FC<{ listing: Listing; onInquire: () => void }> =
           <a
             id="dock-call"
             href={telHref(listing.contact.phone)}
-            className="hidden sm:inline-flex p-3 rounded-full border border-[#181512]/15 bg-[#FCFBF8] text-[#3D362E] hover:text-[#181512] hover:border-[#9A6B3B]/60"
+            className="hidden sm:inline-flex p-3 rounded-full border border-[#181512]/15 bg-[#ffffff] text-[#3D362E] hover:text-[#181512] hover:border-[#9A6B3B]/60"
             aria-label="Call"
             tabIndex={visible ? 0 : -1}
           >

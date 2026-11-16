@@ -16,7 +16,7 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
   const isSaved = isPropertySaved(property.id);
 
   return (
-    <div className="group relative bg-[#FCFBF8] border border-[#181512]/10 rounded-2xl overflow-hidden hover:border-[#9A6B3B]/50 transition-all duration-300 flex flex-col shadow-xs">
+    <div className="group relative bg-[#ffffff] border border-[#181512]/10 rounded-2xl overflow-hidden hover:border-[#9A6B3B]/50 transition-all duration-300 flex flex-col shadow-xs">
       <div className="relative aspect-[16/10] overflow-hidden bg-[#EAE3D7] cursor-pointer" onClick={() => onSelect(property)}>
         <img
           src={property.heroImage}

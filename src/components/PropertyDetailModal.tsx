@@ -53,8 +53,8 @@ export const PropertyDetailModal: React.FC<PropertyDetailModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#181512]/55 backdrop-blur-md p-2 sm:p-6 overflow-y-auto">
-      <div className="relative w-full max-w-6xl max-h-[92vh] bg-[#FAF7F2] border border-[#181512]/12 rounded-2xl overflow-hidden flex flex-col shadow-2xl text-[#181512] my-auto">
-        <div className="flex items-center justify-between px-6 py-4 border-b border-[#181512]/10 bg-[#FCFBF8] z-20">
+      <div className="relative w-full max-w-6xl max-h-[92vh] bg-[#ffffff] border border-[#181512]/12 rounded-2xl overflow-hidden flex flex-col shadow-2xl text-[#181512] my-auto">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-[#181512]/10 bg-[#ffffff] z-20">
           <div className="flex items-center gap-3">
             <div>
               <div className="flex items-center gap-2 text-xs font-mono text-[#9A6B3B]">
@@ -317,7 +317,7 @@ export const PropertyDetailModal: React.FC<PropertyDetailModalProps> = ({
         </div>
 
         {lightboxIndex !== null && (
-          <div className="fixed inset-0 z-60 bg-[#F6F2EA]/97 backdrop-blur-xl flex flex-col items-center justify-between p-6">
+          <div className="fixed inset-0 z-60 bg-[#ffffff]/97 backdrop-blur-xl flex flex-col items-center justify-between p-6">
             <div className="w-full flex items-center justify-between text-xs font-mono text-[#4A433B]">
               <span>{filteredImages[lightboxIndex]?.caption}</span>
               <button

@@ -32,7 +32,7 @@ export const Lightbox: React.FC<{ images: MediaImage[]; index: number; onClose: 
   if (!img) return null;
 
   return (
-    <div className="fixed inset-0 z-[120] bg-[#F6F2EA]/97 backdrop-blur-xl flex flex-col" role="dialog" aria-modal="true" aria-label="Photo viewer">
+    <div className="fixed inset-0 z-[120] bg-[#ffffff]/97 backdrop-blur-xl flex flex-col" role="dialog" aria-modal="true" aria-label="Photo viewer">
       <div className="flex items-center justify-between px-6 md:px-10 py-5 text-[10.5px] font-mono tracking-[0.24em] uppercase border-b border-[#181512]/[0.08]">
         <span className="text-[#855B30] font-medium">
           {String(index + 1).padStart(2, '0')} / {String(images.length).padStart(2, '0')}
@@ -44,13 +44,13 @@ export const Lightbox: React.FC<{ images: MediaImage[]; index: number; onClose: 
       </div>
 
       <div className="relative flex-1 flex items-center justify-center px-4 md:px-20 min-h-0 overflow-hidden py-4">
-        <img key={img.url} src={img.url} alt={img.caption || ''} className="toast max-h-full max-w-full object-contain rounded-xl shadow-[0_24px_60px_-18px_rgba(24,21,18,0.22)] border border-[#181512]/10 bg-[#FCFBF8]" />
+        <img key={img.url} src={img.url} alt={img.caption || ''} className="toast max-h-full max-w-full object-contain rounded-xl shadow-[0_24px_60px_-18px_rgba(24,21,18,0.22)] border border-[#181512]/10 bg-[#ffffff]" />
         {images.length > 1 && (
           <>
-            <button onClick={prev} aria-label="Previous photo" className="absolute left-3 md:left-8 top-1/2 -translate-y-1/2 w-11 h-11 flex items-center justify-center rounded-full border border-[#181512]/15 bg-[#FCFBF8]/92 text-[#181512] hover:border-[#9A6B3B] shadow-md cursor-pointer">
+            <button onClick={prev} aria-label="Previous photo" className="absolute left-3 md:left-8 top-1/2 -translate-y-1/2 w-11 h-11 flex items-center justify-center rounded-full border border-[#181512]/15 bg-[#ffffff]/92 text-[#181512] hover:border-[#9A6B3B] shadow-md cursor-pointer">
               <ChevronLeft className="w-5 h-5 shrink-0" />
             </button>
-            <button onClick={next} aria-label="Next photo" className="absolute right-3 md:right-8 top-1/2 -translate-y-1/2 w-11 h-11 flex items-center justify-center rounded-full border border-[#181512]/15 bg-[#FCFBF8]/92 text-[#181512] hover:border-[#9A6B3B] shadow-md cursor-pointer">
+            <button onClick={next} aria-label="Next photo" className="absolute right-3 md:right-8 top-1/2 -translate-y-1/2 w-11 h-11 flex items-center justify-center rounded-full border border-[#181512]/15 bg-[#ffffff]/92 text-[#181512] hover:border-[#9A6B3B] shadow-md cursor-pointer">
               <ChevronRight className="w-5 h-5 shrink-0" />
             </button>
           </>

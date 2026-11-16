@@ -57,7 +57,7 @@ export const BookingInquiryModal: React.FC<BookingInquiryModalProps> = ({ proper
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#181512]/45 backdrop-blur-md p-4">
-      <div className="relative w-full max-w-lg bg-[#FAF7F2] border border-[#181512]/12 rounded-2xl overflow-hidden shadow-2xl text-[#181512] p-6">
+      <div className="relative w-full max-w-lg bg-[#ffffff] border border-[#181512]/12 rounded-2xl overflow-hidden shadow-2xl text-[#181512] p-6">
         <div className="flex items-center justify-between pb-4 border-b border-[#181512]/10">
           <div>
             <div className="flex items-center gap-2 text-xs font-mono text-[#9A6B3B]">

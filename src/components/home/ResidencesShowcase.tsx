@@ -31,7 +31,7 @@ export const ResidencesShowcase: React.FC = () => {
   return (
     <section
       id="showcase"
-      className="relative overflow-hidden bg-[#EFEAE1] text-[#181512] border-t border-[#181512]/[0.07] py-28 md:py-40"
+      className="relative overflow-hidden bg-[#ffffff] text-[#181512] border-t border-[#181512]/[0.07] py-28 md:py-40"
     >
       {/* Decorative background watermark */}
       <span

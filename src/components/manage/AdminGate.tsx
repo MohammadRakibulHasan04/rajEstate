@@ -2,6 +2,8 @@ import React from 'react';
 import { ArrowLeft, Lock, LogOut } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { Link } from '../../lib/router';
+import logoImg from '../../assets/logo.png';
+import logoIcon from '../../assets/logo-icon.png';
 
 /**
  * Guards /manage. This is UI only; Firestore rules enforce the real
@@ -21,7 +23,12 @@ export const AdminGate: React.FC<{ children: React.ReactNode }> = ({ children })
   if (!user) {
     return (
       <Shell>
-        <div className="eyebrow justify-center mb-8">Atelier access</div>
+        <img
+          src={logoImg}
+          alt="Jonopod Properties"
+          className="h-10 sm:h-12 w-auto object-contain mx-auto mb-8"
+        />
+        <div className="eyebrow justify-center mb-6">Atelier access</div>
         <h1 className="font-display font-light text-5xl md:text-7xl leading-[0.95] text-[#181512]">
           Jonopod Properties <em className="italic text-gradient-gold">Manage</em>
         </h1>
@@ -39,7 +46,12 @@ export const AdminGate: React.FC<{ children: React.ReactNode }> = ({ children })
   if (!isAdmin) {
     return (
       <Shell>
-        <span className="w-14 h-14 rounded-2xl border border-[#181512]/12 bg-[#FCFBF8] shadow-xs flex items-center justify-center mx-auto text-[#9A6B3B]">
+        <img
+          src={logoIcon}
+          alt="Jonopod Properties"
+          className="w-12 h-12 object-contain mx-auto mb-6"
+        />
+        <span className="w-14 h-14 rounded-2xl border border-[#181512]/12 bg-[#ffffff] shadow-xs flex items-center justify-center mx-auto text-[#9A6B3B]">
           <Lock className="w-6 h-6" />
         </span>
         <h1 className="mt-8 font-display font-light text-5xl leading-[0.95] text-[#181512]">Access restricted</h1>
@@ -60,7 +72,7 @@ export const AdminGate: React.FC<{ children: React.ReactNode }> = ({ children })
 };
 
 const Shell: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <main className="relative min-h-screen bg-[#F6F2EA] text-[#181512] flex items-center justify-center px-6 overflow-hidden">
+  <main className="relative min-h-screen bg-[#ffffff] text-[#181512] flex items-center justify-center px-6 overflow-hidden">
     <div className="hero-grid" aria-hidden="true" />
     <div className="grain" aria-hidden="true" />
     <span aria-hidden="true" className="text-outline absolute bottom-0 left-1/2 -translate-x-1/2 font-display text-[16vw] leading-[0.8] uppercase select-none pointer-events-none">

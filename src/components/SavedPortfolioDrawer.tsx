@@ -24,7 +24,7 @@ export const SavedPortfolioDrawer: React.FC<SavedPortfolioDrawerProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex justify-end bg-[#181512]/35 backdrop-blur-sm">
-      <div className="w-full max-w-md bg-[#FAF7F2] border-l border-[#181512]/12 h-full flex flex-col shadow-2xl animate-in slide-in-from-right duration-300">
+      <div className="w-full max-w-md bg-[#ffffff] border-l border-[#181512]/12 h-full flex flex-col shadow-2xl animate-in slide-in-from-right duration-300">
         <div className="flex items-center justify-between p-6 border-b border-[#181512]/10">
           <div>
             <div className="flex items-center gap-2 text-xs font-mono text-[#9A6B3B]">
@@ -37,13 +37,13 @@ export const SavedPortfolioDrawer: React.FC<SavedPortfolioDrawerProps> = ({
           </div>
           <button
             onClick={onClose}
-            className="p-2 text-[#4A433B] hover:text-[#181512] rounded-lg bg-[#F3EFE7] border border-[#181512]/12 transition-colors cursor-pointer"
+            className="p-2 text-[#4A433B] hover:text-[#181512] rounded-lg bg-[#F8F7F4] border border-[#181512]/12 transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        <div className="px-6 py-3 bg-[#EFEAE1] border-b border-[#181512]/[0.08] flex items-center justify-between text-xs font-mono">
+        <div className="px-6 py-3 bg-[#F8F7F4] border-b border-[#181512]/[0.08] flex items-center justify-between text-xs font-mono">
           {user ? (
             <span className="text-emerald-700 flex items-center gap-1.5">
               <span className="w-2 h-2 rounded-full bg-emerald-600 animate-pulse" />
@@ -76,7 +76,7 @@ export const SavedPortfolioDrawer: React.FC<SavedPortfolioDrawerProps> = ({
             savedProperties.map((prop) => (
               <div
                 key={prop.id}
-                className="group relative bg-[#FCFBF8] border border-[#181512]/10 rounded-xl p-3 flex gap-4 hover:border-[#9A6B3B]/50 transition-colors shadow-2xs"
+                className="group relative bg-[#ffffff] border border-[#181512]/10 rounded-xl p-3 flex gap-4 hover:border-[#9A6B3B]/50 transition-colors shadow-2xs"
               >
                 <div
                   className="w-24 h-24 rounded-lg overflow-hidden bg-[#EAE3D7] shrink-0 cursor-pointer"

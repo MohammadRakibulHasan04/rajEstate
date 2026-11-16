@@ -53,7 +53,7 @@ export const ManifestoSection: React.FC = () => {
     <section
       id="manifesto"
       ref={rootRef}
-      className="relative overflow-hidden bg-[#F6F2EA] text-[#181512] px-6 md:px-12 lg:px-20 pt-32 pb-28 md:pt-44 md:pb-36"
+      className="relative overflow-hidden bg-[#ffffff] text-[#181512] px-6 md:px-12 lg:px-20 pt-32 pb-28 md:pt-44 md:pb-36"
     >
       <span
         data-bg-word

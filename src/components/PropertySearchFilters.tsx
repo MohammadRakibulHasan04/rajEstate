@@ -50,7 +50,7 @@ export const PropertySearchFilters: React.FC<PropertySearchFiltersProps> = ({
   };
 
   return (
-    <div className="w-full bg-[#FCFBF8] backdrop-blur-md border border-[#181512]/10 rounded-2xl p-6 shadow-sm space-y-6">
+    <div className="w-full bg-[#ffffff] backdrop-blur-md border border-[#181512]/10 rounded-2xl p-6 shadow-sm space-y-6">
       <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4">
         <div className="relative flex-1 max-w-md">
           <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#786F63]" />

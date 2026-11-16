@@ -99,7 +99,7 @@ export const ProximityRings: React.FC<{ listing: Listing }> = ({ listing }) => {
                 </g>
               ))}
 
-              <circle cx={C} cy={C} r={14} fill="#FCFBF8" stroke="#9A6B3B" strokeWidth="1.5" />
+              <circle cx={C} cy={C} r={14} fill="#ffffff" stroke="#9A6B3B" strokeWidth="1.5" />
               <circle cx={C} cy={C} r={4} fill="#9A6B3B" />
             </svg>
           </div>

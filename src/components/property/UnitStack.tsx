@@ -150,7 +150,7 @@ export const UnitStack: React.FC<Props> = ({ listing, onInquireUnit, unitPages =
                   { i: <BedDouble className="w-4 h-4" />, l: 'Beds', v: selected.beds },
                   { i: <Bath className="w-4 h-4" />, l: 'Baths', v: selected.baths },
                 ].map((x) => (
-                  <div key={x.l} className="bg-[#F6F2EA] p-4">
+                  <div key={x.l} className="bg-[#ffffff] p-4">
                     <dt className="flex items-center gap-1.5 mono-label !text-[#9A6B3B]">{x.i}{x.l}</dt>
                     <dd className="mt-2 font-display text-xl text-[#181512]">{x.v}</dd>
                   </div>
@@ -177,7 +177,7 @@ export const UnitStack: React.FC<Props> = ({ listing, onInquireUnit, unitPages =
               </div>
 
               {selected.floorPlanUrl && (
-                <a href={selected.floorPlanUrl} target="_blank" rel="noreferrer" className="mt-7 block rounded-xl overflow-hidden border border-[#181512]/10 bg-[#FCFBF8] p-3">
+                <a href={selected.floorPlanUrl} target="_blank" rel="noreferrer" className="mt-7 block rounded-xl overflow-hidden border border-[#181512]/10 bg-[#ffffff] p-3">
                   <img src={selected.floorPlanUrl} alt={`Floor plan of unit ${selected.code}`} className="w-full h-auto rounded-md" loading="lazy" />
                 </a>
               )}

@@ -36,6 +36,7 @@ import { useAuth } from '../../context/AuthContext';
 import { Link, navigate } from '../../lib/router';
 import { Listing, PublishState } from '../../types/listing';
 import { useToasts, errorText } from '../../components/manage/fields';
+import logoImg from '../../assets/logo.png';
 
 export const ManageDashboard: React.FC = () => {
   const { user, logOut } = useAuth();
@@ -145,17 +146,21 @@ export const ManageDashboard: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#F6F2EA] text-[#181512] pb-32">
+    <div className="min-h-screen bg-[#ffffff] text-[#181512] pb-32">
       {toastView}
 
       {/* Top Navbar */}
-      <header className="border-b border-[#181512]/[0.08] bg-[#FAF7F2]/90 backdrop-blur-xl sticky top-0 z-40 px-6 md:px-12 py-4">
+      <header className="border-b border-[#181512]/[0.08] bg-[#ffffff]/90 backdrop-blur-xl sticky top-0 z-40 px-6 md:px-12 py-4">
         <div className="max-w-[90rem] mx-auto flex items-center justify-between gap-4">
           <div className="flex items-center gap-4">
-            <Link to="/" className="brand-mark text-[#181512] flex items-baseline gap-2.5">
-              <span className="font-display text-2xl tracking-[0.14em] uppercase">Jonopod</span>
-              <span className="text-[10px] font-mono tracking-[0.24em] text-[#9A6B3B] uppercase">
-                Properties · Studio
+            <Link to="/" className="brand-mark text-[#181512] flex items-center gap-3 group">
+              <img
+                src={logoImg}
+                alt="Jonopod Properties"
+                className="h-7 sm:h-8 w-auto object-contain transition-transform duration-300 group-hover:scale-[1.02]"
+              />
+              <span className="text-[10px] font-mono tracking-[0.24em] text-[#9A6B3B] uppercase pl-3 border-l border-[#181512]/15">
+                Studio
               </span>
             </Link>
           </div>
@@ -489,7 +494,7 @@ export const ManageDashboard: React.FC = () => {
                         <div className="flex items-center gap-2">
                           <Link
                             to={`/manage/edit/${listing.id}`}
-                            className="p-2.5 rounded-lg border border-[#181512]/12 bg-[#FCFBF8] hover:border-[#9A6B3B] text-[#4A433B] hover:text-[#181512] transition-colors"
+                            className="p-2.5 rounded-lg border border-[#181512]/12 bg-[#ffffff] hover:border-[#9A6B3B] text-[#4A433B] hover:text-[#181512] transition-colors"
                             title="Edit Listing"
                           >
                             <Pencil className="w-4 h-4" />
@@ -499,7 +504,7 @@ export const ManageDashboard: React.FC = () => {
                             href={`/property/${listing.slug}`}
                             target="_blank"
                             rel="noreferrer"
-                            className="p-2.5 rounded-lg border border-[#181512]/12 bg-[#FCFBF8] hover:border-[#9A6B3B] text-[#4A433B] hover:text-[#181512] transition-colors"
+                            className="p-2.5 rounded-lg border border-[#181512]/12 bg-[#ffffff] hover:border-[#9A6B3B] text-[#4A433B] hover:text-[#181512] transition-colors"
                             title="View Presentation"
                           >
                             <Eye className="w-4 h-4" />
@@ -508,7 +513,7 @@ export const ManageDashboard: React.FC = () => {
                           <button
                             type="button"
                             onClick={() => handleDuplicate(listing)}
-                            className="p-2.5 rounded-lg border border-[#181512]/12 bg-[#FCFBF8] hover:border-[#9A6B3B] text-[#4A433B] hover:text-[#181512] transition-colors cursor-pointer"
+                            className="p-2.5 rounded-lg border border-[#181512]/12 bg-[#ffffff] hover:border-[#9A6B3B] text-[#4A433B] hover:text-[#181512] transition-colors cursor-pointer"
                             title="Duplicate Blueprint"
                           >
                             <Copy className="w-4 h-4" />
@@ -517,7 +522,7 @@ export const ManageDashboard: React.FC = () => {
                           <button
                             type="button"
                             onClick={() => setDeleteModalListing(listing)}
-                            className="p-2.5 rounded-lg border border-[#181512]/12 bg-[#FCFBF8] hover:border-red-500/50 text-[#6E6559] hover:text-red-600 transition-colors cursor-pointer"
+                            className="p-2.5 rounded-lg border border-[#181512]/12 bg-[#ffffff] hover:border-red-500/50 text-[#6E6559] hover:text-red-600 transition-colors cursor-pointer"
                             title="Delete Residence"
                           >
                             <Trash2 className="w-4 h-4" />

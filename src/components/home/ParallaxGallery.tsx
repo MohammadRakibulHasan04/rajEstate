@@ -110,7 +110,7 @@ export const ParallaxGallery: React.FC = () => {
     <section
       id="process"
       ref={rootRef}
-      className="relative overflow-hidden bg-[#F6F2EA] text-[#181512] pt-28 md:pt-36"
+      className="relative overflow-hidden bg-[#ffffff] text-[#181512] pt-28 md:pt-36"
     >
       <div className="hairline max-w-7xl mx-auto mb-24" />
 

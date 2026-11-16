@@ -19,7 +19,7 @@ export const PlanAndFacts: React.FC<Props> = ({ listing, facts, onInquireUnit, o
   if (!plans.length && !facts.length && !listing.units.length) return null;
 
   return (
-    <section id="plan" className="relative overflow-hidden py-28 md:py-40 bg-[#EFEAE1] border-y border-[#181512]/[0.07]">
+    <section id="plan" className="relative overflow-hidden py-28 md:py-40 bg-[#ffffff] border-y border-[#181512]/[0.07]">
       <span
         aria-hidden="true"
         className="text-outline pointer-events-none absolute top-8 left-0 whitespace-nowrap font-display font-light italic text-[20vw] leading-none select-none"
@@ -46,7 +46,7 @@ export const PlanAndFacts: React.FC<Props> = ({ listing, facts, onInquireUnit, o
               <button
                 id="floorplan-open"
                 onClick={() => onOpenPlan(plan.url)}
-                className="relative block w-full rounded-2xl overflow-hidden border border-[#181512]/12 bg-[#FCFBF8] shadow-[0_18px_45px_-16px_rgba(24,21,18,0.09)] p-4 md:p-8 cursor-zoom-in group"
+                className="relative block w-full rounded-2xl overflow-hidden border border-[#181512]/12 bg-[#ffffff] shadow-[0_18px_45px_-16px_rgba(24,21,18,0.09)] p-4 md:p-8 cursor-zoom-in group"
               >
                 <img src={plan.url} alt={plan.caption || 'Floor plan'} className="w-full h-auto rounded-lg transition-transform duration-1000 group-hover:scale-[1.02]" loading="lazy" />
                 <span className="absolute bottom-6 right-6 md:bottom-10 md:right-10 px-4 py-2 rounded-full panel-glass text-[10px] font-mono tracking-[0.28em] uppercase text-[#7C5329] font-medium">

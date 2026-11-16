@@ -21,6 +21,7 @@ import { ArrowUpRight } from 'lucide-react';
 import { usePath, matchRoute, navigate, restorePendingScroll } from './lib/router';
 import { PropertyPage } from './pages/PropertyPage';
 import { ManagePage } from './pages/ManagePage';
+import logoImg from './assets/logo.png';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -152,7 +153,7 @@ function AppContent() {
   return (
     <div
       ref={mainRef}
-      className="min-h-screen bg-[#F6F2EA] text-[#181512] selection:bg-[#9A6B3B]/20 selection:text-[#181512]"
+      className="min-h-screen bg-[#ffffff] text-[#181512] selection:bg-[#9A6B3B]/20 selection:text-[#181512]"
     >
       {!introDone && (
         <Preloader
@@ -187,10 +188,15 @@ function AppContent() {
       </main>
 
       {/* FOOTER & ADVISORY */}
-      <footer id="advisory" className="relative border-t border-[#181512]/10 bg-[#E9E2D6] px-6 md:px-12 lg:px-20 pt-20 pb-10 overflow-hidden">
+      <footer id="advisory" className="relative border-t border-[#181512]/10 bg-[#ffffff] px-6 md:px-12 lg:px-20 pt-20 pb-10 overflow-hidden">
         <div className="max-w-[90rem] mx-auto">
           <div className="grid md:grid-cols-12 gap-10 pb-16">
             <div className="md:col-span-5">
+              <img
+                src={logoImg}
+                alt="Jonopod Properties"
+                className="h-10 w-auto object-contain mb-6"
+              />
               <p className="font-display font-light text-3xl text-[#181512] leading-snug max-w-sm">
                 Buy with comfort, <em className="italic text-[#9A6B3B]">Be in comfort</em>
               </p>

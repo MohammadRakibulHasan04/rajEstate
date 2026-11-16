@@ -71,10 +71,10 @@ export const SpecLedger: React.FC<{ listing: Listing; facts: Fact[] }> = ({ list
                 return (
                   <div
                     key={`${item.label}-${idx}`}
-                    className="group relative rounded-2xl border border-[#181512]/[0.09] bg-gradient-to-b from-[#FFFFFF] to-[#FAF7F2] p-5 md:p-6 shadow-[0_10px_28px_-14px_rgba(24,21,18,0.06)] hover:border-[#9A6B3B]/55 hover:from-[#FFFFFF] hover:to-[#F7EFE2] hover:shadow-[0_18px_40px_-14px_rgba(154,107,59,0.18)] hover:-translate-y-1 transition-all duration-500 flex flex-col justify-between min-h-[156px]"
+                    className="group relative rounded-2xl border border-[#181512]/[0.09] bg-[#ffffff] p-5 md:p-6 shadow-[0_10px_28px_-14px_rgba(24,21,18,0.06)] hover:border-[#9A6B3B]/55 hover:shadow-[0_18px_40px_-14px_rgba(154,107,59,0.18)] hover:-translate-y-1 transition-all duration-500 flex flex-col justify-between min-h-[156px]"
                   >
                     <div className="flex items-start justify-between gap-4">
-                      <div className="w-12 h-12 rounded-xl border border-[#9A6B3B]/30 bg-[#9A6B3B]/10 flex items-center justify-center text-[#855B30] group-hover:scale-105 group-hover:bg-[#9A6B3B] group-hover:text-[#FAF7F2] group-hover:border-[#9A6B3B] transition-all duration-500 shadow-[0_8px_22px_-8px_rgba(154,107,59,0.28)]">
+                      <div className="w-12 h-12 rounded-xl border border-[#9A6B3B]/30 bg-[#9A6B3B]/10 flex items-center justify-center text-[#855B30] group-hover:scale-105 group-hover:bg-[#9A6B3B] group-hover:text-[#ffffff] group-hover:border-[#9A6B3B] transition-all duration-500 shadow-[0_8px_22px_-8px_rgba(154,107,59,0.28)]">
                         <Icon className="w-5 h-5" />
                       </div>
                       <span className="font-mono text-[10px] tracking-[0.26em] text-[#8C8275] group-hover:text-[#9A6B3B] transition-colors">

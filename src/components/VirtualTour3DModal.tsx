@@ -327,11 +327,11 @@ export const VirtualTour3DModal: React.FC<VirtualTour3DModalProps> = ({
       }`}
     >
       <div
-        className={`relative w-full h-full max-w-7xl bg-[#FAF7F2] border border-[#181512]/12 rounded-2xl overflow-hidden flex flex-col shadow-2xl ${
+        className={`relative w-full h-full max-w-7xl bg-[#ffffff] border border-[#181512]/12 rounded-2xl overflow-hidden flex flex-col shadow-2xl ${
           isFullscreen ? 'max-w-none rounded-none border-none' : ''
         }`}
       >
-        <div className="flex items-center justify-between px-6 py-4 border-b border-[#181512]/10 bg-[#FCFBF8] z-20">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-[#181512]/10 bg-[#ffffff] z-20">
           <div className="flex items-center gap-3">
             <span className="w-2.5 h-2.5 rounded-full bg-[#9A6B3B] animate-ping" />
             <div>

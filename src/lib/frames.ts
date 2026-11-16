@@ -8,11 +8,9 @@ import { useEffect, useRef, useState } from 'react';
  */
 const frameModules = import.meta.glob(
   [
-    '../assets/frames/*.png',
-    '../assets/frames/*.jpg',
-    '../assets/frames/*.jpeg',
-    '../assets/frames/*.webp',
-    '../assets/frames/*.avif',
+    '../assets/hero-images/*.png',
+    '../assets/hero-images/*.webp',
+    '../assets/hero-images/*.jpg',
   ],
   {
     eager: true,

@@ -283,23 +283,23 @@ export const ListingEditor: React.FC<EditorProps> = ({ id }) => {
 
   if (loading && id) {
     return (
-      <div className="min-h-screen bg-[#F6F2EA] flex items-center justify-center p-6 text-[#6E6559]">
+      <div className="min-h-screen bg-[#ffffff] flex items-center justify-center p-6 text-[#6E6559]">
         <div className="skeleton w-64 h-10 rounded-lg" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#F6F2EA] text-[#181512] pb-32">
+    <div className="min-h-screen bg-[#ffffff] text-[#181512] pb-32">
       {toastView}
 
       {/* Editor Top Bar Header */}
-      <header className="sticky top-0 z-40 bg-[#FAF7F2]/92 backdrop-blur-xl border-b border-[#181512]/[0.08] px-6 md:px-12 py-4">
+      <header className="sticky top-0 z-40 bg-[#ffffff]/92 backdrop-blur-xl border-b border-[#181512]/[0.08] px-6 md:px-12 py-4">
         <div className="max-w-[90rem] mx-auto flex items-center justify-between gap-4">
           <div className="flex items-center gap-4">
             <Link
               to="/manage"
-              className="p-2 rounded-full border border-[#181512]/15 bg-[#FCFBF8] hover:border-[#9A6B3B] text-[#3D362E] hover:text-[#181512] transition-colors"
+              className="p-2 rounded-full border border-[#181512]/15 bg-[#ffffff] hover:border-[#9A6B3B] text-[#3D362E] hover:text-[#181512] transition-colors"
               title="Return to Dashboard"
             >
               <ArrowLeft className="w-4 h-4" />
@@ -757,23 +757,23 @@ export const ListingEditor: React.FC<EditorProps> = ({ id }) => {
                       </Link>
                     </div>
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs font-mono">
-                      <div className="rounded-xl bg-[#FCFBF8] border border-[#181512]/[0.08] p-3">
+                      <div className="rounded-xl bg-[#ffffff] border border-[#181512]/[0.08] p-3">
                         <span className="text-[#786F63] block text-[10px] uppercase">Price</span>
                         <span className="text-[#684724] font-semibold text-sm mt-1 block">{formatBdt(ownUnit.price)}</span>
                       </div>
-                      <div className="rounded-xl bg-[#FCFBF8] border border-[#181512]/[0.08] p-3">
+                      <div className="rounded-xl bg-[#ffffff] border border-[#181512]/[0.08] p-3">
                         <span className="text-[#786F63] block text-[10px] uppercase">Area & Floor</span>
                         <span className="text-[#181512] text-sm mt-1 block">
                           {formatNumber(ownUnit.sizeSqft)} sq ft · Floor {ownUnit.floor}
                         </span>
                       </div>
-                      <div className="rounded-xl bg-[#FCFBF8] border border-[#181512]/[0.08] p-3">
+                      <div className="rounded-xl bg-[#ffffff] border border-[#181512]/[0.08] p-3">
                         <span className="text-[#786F63] block text-[10px] uppercase">Layout</span>
                         <span className="text-[#181512] text-sm mt-1 block">
                           {ownUnit.beds} Bed · {ownUnit.baths} Bath · {ownUnit.balconies} Balc
                         </span>
                       </div>
-                      <div className="rounded-xl bg-[#FCFBF8] border border-[#181512]/[0.08] p-3">
+                      <div className="rounded-xl bg-[#ffffff] border border-[#181512]/[0.08] p-3">
                         <span className="text-[#786F63] block text-[10px] uppercase">Facing & Status</span>
                         <span className="text-[#181512] text-sm mt-1 block uppercase">
                           {ownUnit.facing} · {ownUnit.status}

@@ -410,7 +410,7 @@ export const PropertyHero: React.FC<Props> = ({
                 {quickSpecs.map((spec) => (
                   <div
                     key={spec.label}
-                    className="rounded-xl border border-[#181512]/[0.09] bg-[#FCFBF8] shadow-[0_6px_20px_-10px_rgba(24,21,18,0.06)] px-4 py-3.5 flex items-center gap-3"
+                    className="rounded-xl border border-[#181512]/[0.09] bg-[#ffffff] shadow-[0_6px_20px_-10px_rgba(24,21,18,0.06)] px-4 py-3.5 flex items-center gap-3"
                   >
                     <div className="w-9 h-9 rounded-lg bg-[#9A6B3B]/10 border border-[#9A6B3B]/25 flex items-center justify-center shrink-0">
                       {spec.icon}
@@ -432,7 +432,7 @@ export const PropertyHero: React.FC<Props> = ({
             {signature.length > 0 && (
               <dl className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-px rounded-2xl overflow-hidden border border-[#181512]/10 bg-[#181512]/10 shadow-xs">
                 {signature.map((f) => (
-                  <div key={f.key} className="bg-[#FCFBF8] px-5 py-4">
+                  <div key={f.key} className="bg-[#ffffff] px-5 py-4">
                     <dt className="mono-label">{f.label}</dt>
                     <dd className="mt-1 font-display text-2xl text-[#181512]">{f.value}</dd>
                   </div>
