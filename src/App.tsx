@@ -152,7 +152,7 @@ function AppContent() {
   return (
     <div
       ref={mainRef}
-      className="min-h-screen bg-[#070b14] text-slate-100 selection:bg-cyan-500/30 selection:text-white dark"
+      className="min-h-screen bg-[#F6F2EA] text-[#181512] selection:bg-[#9A6B3B]/20 selection:text-[#181512]"
     >
       {!introDone && (
         <Preloader
@@ -187,12 +187,12 @@ function AppContent() {
       </main>
 
       {/* FOOTER & ADVISORY */}
-      <footer id="advisory" className="relative border-t border-white/10 bg-[#05080f] px-6 md:px-12 lg:px-20 pt-20 pb-10 overflow-hidden">
+      <footer id="advisory" className="relative border-t border-[#181512]/10 bg-[#E9E2D6] px-6 md:px-12 lg:px-20 pt-20 pb-10 overflow-hidden">
         <div className="max-w-[90rem] mx-auto">
           <div className="grid md:grid-cols-12 gap-10 pb-16">
             <div className="md:col-span-5">
-              <p className="font-display font-light text-3xl text-white leading-snug max-w-sm">
-                Buy with comfort, <em className="italic text-cyan-400">Be in comfort</em>
+              <p className="font-display font-light text-3xl text-[#181512] leading-snug max-w-sm">
+                Buy with comfort, <em className="italic text-[#9A6B3B]">Be in comfort</em>
               </p>
             </div>
             {[
@@ -200,13 +200,13 @@ function AppContent() {
               { h: 'Experience', l: [['Atelier', 'architects'], ['Advisory', 'advisory']] },
             ].map((col) => (
               <div key={col.h} className="md:col-span-2">
-                <h4 className="text-[10px] font-mono tracking-[0.3em] uppercase text-slate-500">{col.h}</h4>
+                <h4 className="text-[10px] font-mono tracking-[0.3em] uppercase text-[#786F63]">{col.h}</h4>
                 <ul className="mt-5 space-y-3">
                   {col.l.map(([label, id]) => (
                     <li key={id}>
                       <button
                         onClick={() => handleNavigate(id)}
-                        className="group inline-flex items-center gap-1.5 text-sm text-slate-300 hover:text-cyan-300 transition-colors cursor-pointer"
+                        className="group inline-flex items-center gap-1.5 text-sm text-[#3D362E] hover:text-[#9A6B3B] transition-colors cursor-pointer"
                       >
                         {label}
                         <ArrowUpRight className="w-3.5 h-3.5 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-500" />
@@ -217,8 +217,8 @@ function AppContent() {
               </div>
             ))}
             <div className="md:col-span-3">
-              <h4 className="text-[10px] font-mono tracking-[0.3em] uppercase text-slate-500">Atelier</h4>
-              <address className="mt-5 not-italic text-sm text-slate-300 leading-relaxed">
+              <h4 className="text-[10px] font-mono tracking-[0.3em] uppercase text-[#786F63]">Atelier</h4>
+              <address className="mt-5 not-italic text-sm text-[#3D362E] leading-relaxed">
                 By appointment only
                 <br />
                 London · Lisbon · Dubai
@@ -228,13 +228,13 @@ function AppContent() {
 
           <div
             aria-hidden="true"
-            className="font-display font-light text-[26vw] leading-[0.8] tracking-[0.04em] text-center text-transparent bg-clip-text bg-gradient-to-b from-white/[0.12] to-white/0 select-none"
+            className="font-display font-light text-[14.5vw] leading-[0.82] tracking-[0.04em] uppercase text-center text-transparent bg-clip-text bg-gradient-to-b from-[#181512]/[0.09] to-[#181512]/0 select-none"
           >
-            AURA
+            Jonopod
           </div>
 
-          <div className="mt-6 pt-6 border-t border-white/10 flex flex-col md:flex-row items-center justify-between gap-4 text-[10px] font-mono tracking-[0.26em] uppercase text-slate-500">
-            <span>© 2026 AURA Architectural Residences</span>
+          <div className="mt-6 pt-6 border-t border-[#181512]/10 flex flex-col md:flex-row items-center justify-between gap-4 text-[10px] font-mono tracking-[0.26em] uppercase text-[#786F63]">
+            <span>© 2026 Jonopod Properties</span>
             <span>Crafted with intent</span>
           </div>
         </div>

@@ -88,7 +88,7 @@ export const MediaUrlList: React.FC<MediaUrlListProps> = ({
   return (
     <div className="space-y-6">
       {/* Sub tabs */}
-      <div className="flex flex-wrap gap-2 border-b border-white/[0.08] pb-4">
+      <div className="flex flex-wrap gap-2 border-b border-[#181512]/[0.08] pb-4">
         {[
           { id: 'hero', label: 'Hero Image', count: hero.url ? 1 : 0 },
           { id: 'gallery', label: 'Room Gallery', count: gallery.length },
@@ -101,7 +101,7 @@ export const MediaUrlList: React.FC<MediaUrlListProps> = ({
             onClick={() => setActiveTab(tab.id as typeof activeTab)}
             className={`chip cursor-pointer ${
               activeTab === tab.id
-                ? '!border-[#d1ad7a] !bg-[#d1ad7a]/10 !text-[#f1dfbd]'
+                ? '!border-[#9A6B3B] !bg-[#9A6B3B]/12 !text-[#5C3D1E] font-medium'
                 : ''
             }`}
           >
@@ -114,8 +114,8 @@ export const MediaUrlList: React.FC<MediaUrlListProps> = ({
       {/* Hero Tab */}
       {activeTab === 'hero' && (
         <div className="space-y-4">
-          <div className="p-4 rounded-xl border border-white/[0.08] bg-[#05080f]/50">
-            <label className="block mb-2 text-xs font-mono uppercase tracking-wider text-slate-400">
+          <div className="p-4 rounded-xl border border-[#181512]/10 bg-[#F6F2EA]/70">
+            <label className="block mb-2 text-xs font-mono uppercase tracking-wider text-[#5C5346]">
               Hero Cover Image URL *
             </label>
             <div className="flex gap-3">
@@ -143,7 +143,7 @@ export const MediaUrlList: React.FC<MediaUrlListProps> = ({
           </div>
 
           {hero.url ? (
-            <div className="relative aspect-[16/9] max-w-xl rounded-xl overflow-hidden border border-white/10 bg-[#0c1220]">
+            <div className="relative aspect-[16/9] max-w-xl rounded-xl overflow-hidden border border-[#181512]/12 bg-[#EAE3D7]">
               <img
                 src={hero.url}
                 alt="Hero preview"
@@ -152,12 +152,12 @@ export const MediaUrlList: React.FC<MediaUrlListProps> = ({
                   (e.currentTarget as HTMLElement).style.display = 'none';
                 }}
               />
-              <div className="absolute top-3 left-3 panel-glass px-3 py-1 rounded-full text-[10px] font-mono tracking-widest text-[#f1dfbd] uppercase">
+              <div className="absolute top-3 left-3 panel-glass px-3 py-1 rounded-full text-[10px] font-mono tracking-widest text-[#5C3D1E] font-medium uppercase">
                 Primary Elevation
               </div>
             </div>
           ) : (
-            <div className="aspect-[16/9] max-w-xl rounded-xl border border-dashed border-white/10 flex flex-col items-center justify-center text-slate-500">
+            <div className="aspect-[16/9] max-w-xl rounded-xl border border-dashed border-[#181512]/15 bg-[#F6F2EA]/50 flex flex-col items-center justify-center text-[#786F63]">
               <ImageIcon className="w-8 h-8 mb-2 opacity-50" />
               <span className="text-xs font-mono uppercase tracking-wider">No hero image set</span>
             </div>
@@ -169,7 +169,7 @@ export const MediaUrlList: React.FC<MediaUrlListProps> = ({
       {activeTab === 'gallery' && (
         <div className="space-y-6">
           {/* Quick add */}
-          <div className="p-4 rounded-xl border border-dashed border-[#d1ad7a]/30 bg-[#d1ad7a]/[0.02]">
+          <div className="p-4 rounded-xl border border-dashed border-[#9A6B3B]/40 bg-[#9A6B3B]/[0.04]">
             <span className="mono-label block mb-3">Add High-Res Photo</span>
             <div className="grid sm:grid-cols-[1fr_160px_auto] gap-3">
               <input
@@ -211,9 +211,9 @@ export const MediaUrlList: React.FC<MediaUrlListProps> = ({
             {gallery.map((item, index) => (
               <div
                 key={index}
-                className="group relative rounded-xl border border-white/[0.08] bg-[#0c1220] overflow-hidden flex flex-col"
+                className="group relative rounded-xl border border-[#181512]/10 bg-[#FCFBF8] shadow-2xs overflow-hidden flex flex-col"
               >
-                <div className="relative aspect-[4/3] bg-black/40 overflow-hidden">
+                <div className="relative aspect-[4/3] bg-[#EAE3D7] overflow-hidden">
                   <img
                     src={item.url}
                     alt={item.caption || item.room || 'Gallery photo'}
@@ -223,18 +223,18 @@ export const MediaUrlList: React.FC<MediaUrlListProps> = ({
                     }}
                   />
                   <div className="absolute top-2 left-2">
-                    <span className="px-2 py-0.5 rounded-full panel-glass text-[9px] font-mono uppercase tracking-wider text-[#d1ad7a]">
+                    <span className="px-2 py-0.5 rounded-full panel-glass text-[9px] font-mono uppercase tracking-wider text-[#5C3D1E] font-medium">
                       {item.room || 'General'}
                     </span>
                   </div>
 
                   {/* Actions overlay */}
-                  <div className="absolute top-2 right-2 flex gap-1 opacity-80 group-hover:opacity-100 transition-opacity">
+                  <div className="absolute top-2 right-2 flex gap-1 opacity-85 group-hover:opacity-100 transition-opacity">
                     <button
                       type="button"
                       disabled={index === 0}
                       onClick={() => moveGalleryItem(index, -1)}
-                      className="p-1 rounded bg-black/60 text-slate-300 hover:text-white disabled:opacity-30 cursor-pointer"
+                      className="p-1 rounded bg-[#FCFBF8]/90 text-[#3D362E] hover:text-[#181512] disabled:opacity-30 cursor-pointer shadow-xs"
                       title="Move earlier"
                     >
                       <ArrowUp className="w-3.5 h-3.5" />
@@ -243,7 +243,7 @@ export const MediaUrlList: React.FC<MediaUrlListProps> = ({
                       type="button"
                       disabled={index === gallery.length - 1}
                       onClick={() => moveGalleryItem(index, 1)}
-                      className="p-1 rounded bg-black/60 text-slate-300 hover:text-white disabled:opacity-30 cursor-pointer"
+                      className="p-1 rounded bg-[#FCFBF8]/90 text-[#3D362E] hover:text-[#181512] disabled:opacity-30 cursor-pointer shadow-xs"
                       title="Move later"
                     >
                       <ArrowDown className="w-3.5 h-3.5" />
@@ -251,7 +251,7 @@ export const MediaUrlList: React.FC<MediaUrlListProps> = ({
                     <button
                       type="button"
                       onClick={() => removeGalleryItem(index)}
-                      className="p-1 rounded bg-red-950/60 text-red-300 hover:text-red-100 cursor-pointer"
+                      className="p-1 rounded bg-red-50/95 text-red-600 hover:text-red-800 cursor-pointer shadow-xs"
                       title="Delete photo"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
@@ -291,7 +291,7 @@ export const MediaUrlList: React.FC<MediaUrlListProps> = ({
           </div>
 
           {gallery.length === 0 && (
-            <p className="text-sm text-slate-500 italic text-center py-8">
+            <p className="text-sm text-[#6E6559] italic text-center py-8">
               No gallery photos added yet. Add rooms to give buyers a complete walk-through feeling.
             </p>
           )}
@@ -301,7 +301,7 @@ export const MediaUrlList: React.FC<MediaUrlListProps> = ({
       {/* Plans Tab */}
       {activeTab === 'plans' && (
         <div className="space-y-6">
-          <div className="p-4 rounded-xl border border-dashed border-[#d1ad7a]/30 bg-[#d1ad7a]/[0.02]">
+          <div className="p-4 rounded-xl border border-dashed border-[#9A6B3B]/40 bg-[#9A6B3B]/[0.04]">
             <span className="mono-label block mb-3">Add Floor Plan / Blueprint</span>
             <div className="grid sm:grid-cols-[1fr_200px_auto] gap-3">
               <input
@@ -331,9 +331,9 @@ export const MediaUrlList: React.FC<MediaUrlListProps> = ({
             {floorPlans.map((plan, i) => (
               <div
                 key={i}
-                className="relative rounded-xl border border-white/[0.08] bg-[#0c1220] p-4 flex gap-4 items-center"
+                className="relative rounded-xl border border-[#181512]/10 bg-[#FCFBF8] p-4 flex gap-4 items-center"
               >
-                <div className="w-24 h-24 rounded-lg bg-black/60 overflow-hidden shrink-0 border border-white/5">
+                <div className="w-24 h-24 rounded-lg bg-[#F3EFE7] overflow-hidden shrink-0 border border-[#181512]/10">
                   <img src={plan.url} alt={plan.caption || ''} className="w-full h-full object-cover" />
                 </div>
                 <div className="flex-1 min-w-0">
@@ -347,14 +347,14 @@ export const MediaUrlList: React.FC<MediaUrlListProps> = ({
                       onFloorPlansChange(next);
                     }}
                   />
-                  <div className="text-[11px] font-mono text-slate-500 truncate mt-1">
+                  <div className="text-[11px] font-mono text-[#786F63] truncate mt-1">
                     {plan.url}
                   </div>
                 </div>
                 <button
                   type="button"
                   onClick={() => removeFloorPlan(i)}
-                  className="p-2 text-slate-500 hover:text-red-300 cursor-pointer"
+                  className="p-2 text-[#786F63] hover:text-red-600 cursor-pointer"
                   title="Remove plan"
                 >
                   <Trash2 className="w-4 h-4" />
@@ -364,7 +364,7 @@ export const MediaUrlList: React.FC<MediaUrlListProps> = ({
           </div>
 
           {floorPlans.length === 0 && (
-            <p className="text-sm text-slate-500 italic text-center py-8">
+            <p className="text-sm text-[#6E6559] italic text-center py-8">
               Floor plans give clarity to discerning clients. Add dimensioned floor drawings here.
             </p>
           )}
@@ -373,7 +373,7 @@ export const MediaUrlList: React.FC<MediaUrlListProps> = ({
 
       {/* Video Tab */}
       {activeTab === 'video' && onVideoUrlChange && (
-        <div className="p-6 rounded-xl border border-white/[0.08] bg-[#05080f]/50 space-y-4 max-w-xl">
+        <div className="p-6 rounded-xl border border-[#181512]/10 bg-[#F6F2EA]/70 space-y-4 max-w-xl">
           <label className="block">
             <span className="mono-label block mb-2">Video Walkthrough / Tour URL</span>
             <input
@@ -383,7 +383,7 @@ export const MediaUrlList: React.FC<MediaUrlListProps> = ({
               onChange={(e) => onVideoUrlChange(e.target.value)}
             />
           </label>
-          <p className="text-xs text-slate-500 leading-relaxed">
+          <p className="text-xs text-[#6E6559] leading-relaxed">
             Paste a link to an architectural cinematic video or walkthrough of the residence.
           </p>
         </div>

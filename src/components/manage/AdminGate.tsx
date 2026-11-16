@@ -22,16 +22,16 @@ export const AdminGate: React.FC<{ children: React.ReactNode }> = ({ children })
     return (
       <Shell>
         <div className="eyebrow justify-center mb-8">Atelier access</div>
-        <h1 className="font-display font-light text-5xl md:text-7xl leading-[0.95]">
-          AURA <em className="italic text-gradient-gold">Manage</em>
+        <h1 className="font-display font-light text-5xl md:text-7xl leading-[0.95] text-[#181512]">
+          Jonopod Properties <em className="italic text-gradient-gold">Manage</em>
         </h1>
-        <p className="mt-6 text-slate-400 max-w-sm mx-auto leading-relaxed">
+        <p className="mt-6 text-[#4A433B] max-w-sm mx-auto leading-relaxed">
           Sign in with your authorised Google account to curate residences and respond to inquiries.
         </p>
         <button id="manage-signin" onClick={() => signInWithGoogle().catch(() => undefined)} className="btn-gold mt-10">
           <GoogleMark /> Continue with Google
         </button>
-        {authError && <p className="mt-5 text-sm text-red-300 max-w-sm mx-auto">{authError}</p>}
+        {authError && <p className="mt-5 text-sm text-red-600 max-w-sm mx-auto">{authError}</p>}
       </Shell>
     );
   }
@@ -39,15 +39,15 @@ export const AdminGate: React.FC<{ children: React.ReactNode }> = ({ children })
   if (!isAdmin) {
     return (
       <Shell>
-        <span className="w-14 h-14 rounded-2xl border border-white/10 flex items-center justify-center mx-auto text-[#d1ad7a]">
+        <span className="w-14 h-14 rounded-2xl border border-[#181512]/12 bg-[#FCFBF8] shadow-xs flex items-center justify-center mx-auto text-[#9A6B3B]">
           <Lock className="w-6 h-6" />
         </span>
-        <h1 className="mt-8 font-display font-light text-5xl leading-[0.95]">Access restricted</h1>
-        <p className="mt-5 text-slate-400 max-w-sm mx-auto leading-relaxed">
-          <span className="text-slate-200">{user.email}</span> is not on the admin list. Ask the owner to add your UID to the{' '}
-          <code className="text-[#d1ad7a]">admins</code> collection.
+        <h1 className="mt-8 font-display font-light text-5xl leading-[0.95] text-[#181512]">Access restricted</h1>
+        <p className="mt-5 text-[#4A433B] max-w-sm mx-auto leading-relaxed">
+          <span className="text-[#181512] font-medium">{user.email}</span> is not on the admin list. Ask the owner to add your UID to the{' '}
+          <code className="text-[#9A6B3B]">admins</code> collection.
         </p>
-        <code className="mt-4 inline-block text-[11px] font-mono text-slate-500 select-all">{user.uid}</code>
+        <code className="mt-4 inline-block text-[11px] font-mono text-[#786F63] select-all">{user.uid}</code>
         <div className="mt-10 flex justify-center gap-3">
           <Link to="/" className="btn-ghost"><ArrowLeft className="w-4 h-4" /> Back to site</Link>
           <button onClick={() => logOut()} className="btn-quiet"><LogOut className="w-4 h-4" /> Switch account</button>
@@ -60,11 +60,11 @@ export const AdminGate: React.FC<{ children: React.ReactNode }> = ({ children })
 };
 
 const Shell: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <main className="relative min-h-screen bg-[#070b14] text-[#f4efe6] flex items-center justify-center px-6 overflow-hidden">
+  <main className="relative min-h-screen bg-[#F6F2EA] text-[#181512] flex items-center justify-center px-6 overflow-hidden">
     <div className="hero-grid" aria-hidden="true" />
     <div className="grain" aria-hidden="true" />
-    <span aria-hidden="true" className="text-outline absolute bottom-0 left-1/2 -translate-x-1/2 font-display text-[28vw] leading-[0.8] select-none pointer-events-none">
-      AURA
+    <span aria-hidden="true" className="text-outline absolute bottom-0 left-1/2 -translate-x-1/2 font-display text-[16vw] leading-[0.8] uppercase select-none pointer-events-none">
+      Jonopod
     </span>
     <div className="relative text-center">{children}</div>
   </main>

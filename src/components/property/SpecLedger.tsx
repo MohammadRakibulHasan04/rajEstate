@@ -28,16 +28,16 @@ export const SpecLedger: React.FC<{ listing: Listing; facts: Fact[] }> = ({ list
         <div className="flex items-end justify-between gap-6 mb-10" data-reveal>
           <div>
             <div className="eyebrow mb-5">Full specification</div>
-            <h2 className="font-display font-light text-4xl md:text-5xl leading-[1]">For the details-minded.</h2>
+            <h2 className="font-display font-light text-4xl md:text-5xl leading-[1] text-[#181512]">For the details-minded.</h2>
           </div>
           <span className="mono-label hidden sm:block">{rows.length} entries</span>
         </div>
 
         <dl className="grid md:grid-cols-2 gap-x-12" data-reveal>
           {shown.map(([k, v], i) => (
-            <div key={k + i} className="flex items-baseline justify-between gap-6 py-4 border-b border-white/[0.07]">
-              <dt className="text-[10.5px] font-mono tracking-[0.2em] uppercase text-slate-500 shrink-0">{k}</dt>
-              <dd className="text-sm text-slate-200 text-right">{v || '—'}</dd>
+            <div key={k + i} className="flex items-baseline justify-between gap-6 py-4 border-b border-[#181512]/[0.08]">
+              <dt className="text-[10.5px] font-mono tracking-[0.2em] uppercase text-[#6E6559] shrink-0">{k}</dt>
+              <dd className="text-sm text-[#181512] font-medium text-right">{v || '—'}</dd>
             </div>
           ))}
         </dl>
@@ -50,15 +50,15 @@ export const SpecLedger: React.FC<{ listing: Listing; facts: Fact[] }> = ({ list
         )}
 
         {amenities.length > 0 && (
-          <div className="mt-24 pt-16 border-t border-white/[0.08]" data-reveal>
+          <div className="mt-24 pt-16 border-t border-[#181512]/10" data-reveal>
             <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-10">
               <div className="max-w-3xl w-full">
                 <div className="eyebrow mb-4">Amenities &amp; Features · সুযোগ-সুবিধা</div>
-                <h3 className="font-display font-light text-3xl sm:text-4xl md:text-[2.75rem] leading-[1.3] sm:leading-[1.34] tracking-normal text-[#f4efe6] py-1">
+                <h3 className="font-display font-light text-3xl sm:text-4xl md:text-[2.75rem] leading-[1.3] sm:leading-[1.34] tracking-normal text-[#181512] py-1">
                   প্রতিদিনের স্বাচ্ছন্দ্য ও <em className="italic text-gradient-gold">নিরাপত্তা।</em>
                 </h3>
               </div>
-              <span className="mono-label text-[#d1ad7a]">
+              <span className="mono-label text-[#9A6B3B]">
                 {String(amenities.length).padStart(2, '0')} Curated Features
               </span>
             </div>
@@ -71,22 +71,22 @@ export const SpecLedger: React.FC<{ listing: Listing; facts: Fact[] }> = ({ list
                 return (
                   <div
                     key={`${item.label}-${idx}`}
-                    className="group relative rounded-2xl border border-white/10 bg-gradient-to-b from-white/[0.045] to-white/[0.015] p-5 md:p-6 hover:border-[#d1ad7a]/55 hover:from-[#d1ad7a]/[0.09] hover:to-white/[0.02] hover:-translate-y-1 transition-all duration-500 flex flex-col justify-between min-h-[156px]"
+                    className="group relative rounded-2xl border border-[#181512]/[0.09] bg-gradient-to-b from-[#FFFFFF] to-[#FAF7F2] p-5 md:p-6 shadow-[0_10px_28px_-14px_rgba(24,21,18,0.06)] hover:border-[#9A6B3B]/55 hover:from-[#FFFFFF] hover:to-[#F7EFE2] hover:shadow-[0_18px_40px_-14px_rgba(154,107,59,0.18)] hover:-translate-y-1 transition-all duration-500 flex flex-col justify-between min-h-[156px]"
                   >
                     <div className="flex items-start justify-between gap-4">
-                      <div className="w-12 h-12 rounded-xl border border-[#d1ad7a]/35 bg-[#d1ad7a]/10 flex items-center justify-center text-[#d1ad7a] group-hover:scale-105 group-hover:bg-[#d1ad7a]/20 group-hover:border-[#d1ad7a]/70 transition-all duration-500 shadow-[0_10px_28px_-10px_rgba(209,173,122,0.4)]">
+                      <div className="w-12 h-12 rounded-xl border border-[#9A6B3B]/30 bg-[#9A6B3B]/10 flex items-center justify-center text-[#855B30] group-hover:scale-105 group-hover:bg-[#9A6B3B] group-hover:text-[#FAF7F2] group-hover:border-[#9A6B3B] transition-all duration-500 shadow-[0_8px_22px_-8px_rgba(154,107,59,0.28)]">
                         <Icon className="w-5 h-5" />
                       </div>
-                      <span className="font-mono text-[10px] tracking-[0.26em] text-slate-500 group-hover:text-[#d1ad7a]/80 transition-colors">
+                      <span className="font-mono text-[10px] tracking-[0.26em] text-[#8C8275] group-hover:text-[#9A6B3B] transition-colors">
                         {no}
                       </span>
                     </div>
 
                     <div className="mt-6">
-                      <div className="font-display font-light text-xl md:text-2xl text-[#f4efe6] group-hover:text-[#f1dfbd] leading-[1.35] tracking-normal transition-colors py-0.5">
+                      <div className="font-display font-light text-xl md:text-2xl text-[#181512] group-hover:text-[#684724] leading-[1.35] tracking-normal transition-colors py-0.5">
                         {item.label}
                       </div>
-                      <div className="mt-1.5 text-[10.5px] font-mono tracking-[0.2em] uppercase text-[#d1ad7a]/75">
+                      <div className="mt-1.5 text-[10.5px] font-mono tracking-[0.2em] uppercase text-[#855B30]">
                         {item.detail || meta.category}
                       </div>
                     </div>

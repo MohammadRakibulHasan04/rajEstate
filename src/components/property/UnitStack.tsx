@@ -54,7 +54,7 @@ export const UnitStack: React.FC<Props> = ({ listing, onInquireUnit, unitPages =
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
         <div>
           <div className="eyebrow mb-5">Choose your home</div>
-          <h3 className="font-display font-light text-4xl md:text-5xl leading-[1]">
+          <h3 className="font-display font-light text-4xl md:text-5xl leading-[1] text-[#181512]">
             {stats.available} of {stats.total} <em className="italic text-gradient-gold">still yours to choose.</em>
           </h3>
         </div>
@@ -74,7 +74,7 @@ export const UnitStack: React.FC<Props> = ({ listing, onInquireUnit, unitPages =
       <div className="grid lg:grid-cols-12 gap-8">
         {/* Building */}
         <div className="lg:col-span-7 panel p-5 md:p-8">
-          <div className="flex flex-wrap items-center gap-5 mb-6 text-[10px] font-mono tracking-[0.2em] uppercase text-slate-400">
+          <div className="flex flex-wrap items-center gap-5 mb-6 text-[10px] font-mono tracking-[0.2em] uppercase text-[#6E6559]">
             {(['available', 'booked', 'sold'] as const).map((s) => (
               <span key={s} className="flex items-center gap-2">
                 <span className="unit-cell !min-w-0 !w-4 !h-4 !rounded" data-status={s} />
@@ -91,7 +91,7 @@ export const UnitStack: React.FC<Props> = ({ listing, onInquireUnit, unitPages =
           <div className="max-h-[560px] overflow-y-auto pr-2 space-y-2" role="grid" aria-label="Units by floor">
             {floors.map(({ floor, list }) => (
               <div key={floor} className="flex items-center gap-3" role="row">
-                <span className="w-12 shrink-0 text-right text-[10px] font-mono tracking-[0.18em] text-slate-500">L{String(floor).padStart(2, '0')}</span>
+                <span className="w-12 shrink-0 text-right text-[10px] font-mono tracking-[0.18em] text-[#786F63]">L{String(floor).padStart(2, '0')}</span>
                 <div className="flex-1 grid gap-2" style={{ gridTemplateColumns: `repeat(${list.length}, minmax(0, 1fr))` }}>
                   {list.map((u) => (
                     <button
@@ -113,8 +113,8 @@ export const UnitStack: React.FC<Props> = ({ listing, onInquireUnit, unitPages =
               </div>
             ))}
           </div>
-          <div className="mt-4 ml-[60px] h-px bg-gradient-to-r from-[#d1ad7a]/60 to-transparent" />
-          <div className="mt-2 ml-[60px] text-[10px] font-mono tracking-[0.24em] uppercase text-slate-500">Ground · Parking & lobby</div>
+          <div className="mt-4 ml-[60px] h-px bg-gradient-to-r from-[#9A6B3B]/50 to-transparent" />
+          <div className="mt-2 ml-[60px] text-[10px] font-mono tracking-[0.24em] uppercase text-[#786F63]">Ground · Parking & lobby</div>
         </div>
 
         {/* Selected unit */}
@@ -124,13 +124,13 @@ export const UnitStack: React.FC<Props> = ({ listing, onInquireUnit, unitPages =
               <div className="flex items-start justify-between gap-4">
                 <div>
                   <div className="mono-label">Unit</div>
-                  <div className="font-display font-light text-6xl leading-none mt-2 text-[#f4efe6]">{selected.code}</div>
+                  <div className="font-display font-light text-6xl leading-none mt-2 text-[#181512]">{selected.code}</div>
                 </div>
                 <span
                   className={`px-3 py-1.5 rounded-full text-[10px] font-mono tracking-[0.2em] uppercase border ${
                     selected.status === 'available'
-                      ? 'border-[#d1ad7a]/60 text-[#f1dfbd] bg-[#d1ad7a]/10'
-                      : 'border-white/10 text-slate-400'
+                      ? 'border-[#9A6B3B]/50 text-[#5C3D1E] bg-[#9A6B3B]/12 font-medium'
+                      : 'border-[#181512]/12 text-[#786F63]'
                   }`}
                 >
                   {STATUS_LABEL[selected.status]}
@@ -139,45 +139,45 @@ export const UnitStack: React.FC<Props> = ({ listing, onInquireUnit, unitPages =
 
               <div className="mt-7 font-display text-3xl text-gradient-gold">{formatBdt(selected.price)}</div>
               {selected.price > 0 && selected.sizeSqft > 0 && (
-                <div className="text-[11px] font-mono tracking-[0.18em] uppercase text-slate-500 mt-1">
+                <div className="text-[11px] font-mono tracking-[0.18em] uppercase text-[#786F63] mt-1">
                   ৳ {formatNumber(Math.round(selected.price / selected.sizeSqft))} / sq ft
                 </div>
               )}
 
-              <dl className="mt-7 grid grid-cols-3 gap-px rounded-xl overflow-hidden bg-white/10 border border-white/10">
+              <dl className="mt-7 grid grid-cols-3 gap-px rounded-xl overflow-hidden bg-[#181512]/10 border border-[#181512]/10">
                 {[
                   { i: <Ruler className="w-4 h-4" />, l: 'Area', v: `${formatNumber(selected.sizeSqft)} ft²` },
                   { i: <BedDouble className="w-4 h-4" />, l: 'Beds', v: selected.beds },
                   { i: <Bath className="w-4 h-4" />, l: 'Baths', v: selected.baths },
                 ].map((x) => (
-                  <div key={x.l} className="bg-[#0a0f1b] p-4">
-                    <dt className="flex items-center gap-1.5 mono-label !text-[#d1ad7a]">{x.i}{x.l}</dt>
-                    <dd className="mt-2 font-display text-xl">{x.v}</dd>
+                  <div key={x.l} className="bg-[#F6F2EA] p-4">
+                    <dt className="flex items-center gap-1.5 mono-label !text-[#9A6B3B]">{x.i}{x.l}</dt>
+                    <dd className="mt-2 font-display text-xl text-[#181512]">{x.v}</dd>
                   </div>
                 ))}
               </dl>
 
               <div className="mt-7 space-y-5">
                 <div className="flex gap-4">
-                  <Layers className="w-5 h-5 text-[#d1ad7a] shrink-0 mt-0.5" />
+                  <Layers className="w-5 h-5 text-[#9A6B3B] shrink-0 mt-0.5" />
                   <div>
-                    <div className="text-sm text-[#f4efe6]">{ordinal(selected.floor)} of {totalFloors} floors</div>
-                    <p className="text-[13px] text-slate-400 leading-relaxed mt-1">{floorWhy(selected.floor, totalFloors)}</p>
+                    <div className="text-sm text-[#181512] font-medium">{ordinal(selected.floor)} of {totalFloors} floors</div>
+                    <p className="text-[13px] text-[#4A433B] leading-relaxed mt-1">{floorWhy(selected.floor, totalFloors)}</p>
                   </div>
                 </div>
                 {selected.facing && (
                   <div className="flex gap-4">
-                    <Compass className="w-5 h-5 text-[#d1ad7a] shrink-0 mt-0.5" />
+                    <Compass className="w-5 h-5 text-[#9A6B3B] shrink-0 mt-0.5" />
                     <div>
-                      <div className="text-sm text-[#f4efe6]">{selected.facing} facing</div>
-                      <p className="text-[13px] text-slate-400 leading-relaxed mt-1">{facingWhy(selected.facing)}</p>
+                      <div className="text-sm text-[#181512] font-medium">{selected.facing} facing</div>
+                      <p className="text-[13px] text-[#4A433B] leading-relaxed mt-1">{facingWhy(selected.facing)}</p>
                     </div>
                   </div>
                 )}
               </div>
 
               {selected.floorPlanUrl && (
-                <a href={selected.floorPlanUrl} target="_blank" rel="noreferrer" className="mt-7 block rounded-xl overflow-hidden border border-white/10 bg-[#0c1220] p-3">
+                <a href={selected.floorPlanUrl} target="_blank" rel="noreferrer" className="mt-7 block rounded-xl overflow-hidden border border-[#181512]/10 bg-[#FCFBF8] p-3">
                   <img src={selected.floorPlanUrl} alt={`Floor plan of unit ${selected.code}`} className="w-full h-auto rounded-md" loading="lazy" />
                 </a>
               )}

@@ -47,7 +47,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState<boolean>(true);
   const [savedPropertyIds, setSavedPropertyIds] = useState<string[]>(() => {
     try {
-      const local = localStorage.getItem('aura_saved_properties');
+      const local = localStorage.getItem('jonopod_saved_properties');
       return local ? JSON.parse(local) : [];
     } catch {
       return [];
@@ -115,7 +115,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       (snapshot) => {
         const ids = snapshot.docs.map((d) => d.id);
         setSavedPropertyIds(ids);
-        localStorage.setItem('aura_saved_properties', JSON.stringify(ids));
+        localStorage.setItem('jonopod_saved_properties', JSON.stringify(ids));
       },
       (error) => {
         console.warn('Real-time saved properties sync error:', error);
@@ -155,7 +155,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       : [...savedPropertyIds, propertyId];
 
     setSavedPropertyIds(newSaved);
-    localStorage.setItem('aura_saved_properties', JSON.stringify(newSaved));
+    localStorage.setItem('jonopod_saved_properties', JSON.stringify(newSaved));
 
     if (user) {
       const docPath = `users/${user.uid}/saved/${propertyId}`;

@@ -468,10 +468,10 @@ export const ArchitecturalGenesisNarrative: React.FC = () => {
 
       <div className="absolute top-6 left-8 right-8 z-10 flex flex-col md:flex-row md:items-center justify-between pointer-events-none gap-4">
         <div>
-          <div className="flex items-center gap-3 text-xs font-mono text-cyan-400 tracking-wider">
-            <span className="inline-block w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
+          <div className="flex items-center gap-3 text-xs font-mono text-[#E4C799] tracking-wider">
+            <span className="inline-block w-2 h-2 rounded-full bg-[#E4C799] animate-pulse" />
             <span>ARCHITECTURAL METAMORPHOSIS ENGINE</span>
-            <span className="text-slate-500">·</span>
+            <span className="text-slate-400">·</span>
             <span>GSAP SCROLL PARALLAX</span>
           </div>
           <h2 className="text-2xl md:text-3xl font-display font-medium text-white tracking-tight mt-1">
@@ -479,16 +479,16 @@ export const ArchitecturalGenesisNarrative: React.FC = () => {
           </h2>
         </div>
 
-        <div className="pointer-events-auto flex items-center gap-4 bg-slate-900/80 backdrop-blur-md border border-slate-800/80 rounded-lg px-4 py-2.5 shadow-xl">
+        <div className="pointer-events-auto flex items-center gap-4 bg-[#FAF7F2]/92 backdrop-blur-md border border-[#181512]/12 rounded-lg px-4 py-2.5 shadow-xl text-[#181512]">
           <div className="flex flex-col">
-            <span className="text-[10px] font-mono text-slate-400 uppercase tracking-wider">Metamorphosis Progress</span>
-            <span className="text-base font-mono font-semibold text-cyan-400 tabular-nums">
+            <span className="text-[10px] font-mono text-[#6E6559] uppercase tracking-wider">Metamorphosis Progress</span>
+            <span className="text-base font-mono font-semibold text-[#9A6B3B] tabular-nums">
               {(scrollProgress * 100).toFixed(0)}% REALIZED
             </span>
           </div>
-          <div className="w-28 h-2 bg-slate-800 rounded-full overflow-hidden">
+          <div className="w-28 h-2 bg-[#E5DEC9] rounded-full overflow-hidden">
             <div
-              className="h-full bg-gradient-to-r from-cyan-500 via-sky-400 to-amber-400 transition-all duration-150"
+              className="h-full bg-gradient-to-r from-[#855B30] via-[#9A6B3B] to-[#C89B62] transition-all duration-150"
               style={{ width: `${Math.max(5, scrollProgress * 100)}%` }}
             />
           </div>
@@ -496,15 +496,15 @@ export const ArchitecturalGenesisNarrative: React.FC = () => {
       </div>
 
       <div className="absolute bottom-8 left-8 z-20 max-w-xl w-full">
-        <div className="flex items-center gap-1.5 p-1 bg-slate-900/90 backdrop-blur-md border border-slate-800/80 rounded-xl mb-3 shadow-2xl">
+        <div className="flex items-center gap-1.5 p-1 bg-[#FAF7F2]/92 backdrop-blur-md border border-[#181512]/12 rounded-xl mb-3 shadow-2xl">
           {PHASES.map((phase, idx) => (
             <button
               key={phase.id}
               onClick={() => handleJumpToPhase(idx)}
               className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 text-xs font-medium rounded-lg transition-all whitespace-nowrap cursor-pointer ${
                 activePhaseIndex === idx
-                  ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 shadow-sm'
-                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
+                  ? 'bg-[#9A6B3B]/15 text-[#5C3D1E] border border-[#9A6B3B]/40 shadow-2xs'
+                  : 'text-[#5C5346] hover:text-[#181512] hover:bg-[#181512]/5'
               }`}
             >
               <span className="font-mono text-[10px] opacity-70">0{phase.id}</span>
@@ -513,23 +513,23 @@ export const ArchitecturalGenesisNarrative: React.FC = () => {
           ))}
         </div>
 
-        <div className="bg-slate-900/90 backdrop-blur-md border border-slate-800 rounded-xl p-5 shadow-2xl">
-          <div className="flex items-center justify-between text-xs text-slate-400 mb-1">
-            <span className="font-mono text-cyan-400">{activePhase.code}</span>
+        <div className="bg-[#FAF7F2]/95 backdrop-blur-md border border-[#181512]/12 rounded-xl p-5 shadow-2xl text-[#181512]">
+          <div className="flex items-center justify-between text-xs text-[#6E6559] mb-1">
+            <span className="font-mono text-[#9A6B3B] font-medium">{activePhase.code}</span>
             <span>{activePhase.milestone}</span>
           </div>
-          <h3 className="text-lg font-display font-medium text-white mb-1.5">
+          <h3 className="text-lg font-display font-medium text-[#181512] mb-1.5">
             {activePhase.label}
           </h3>
-          <p className="text-xs text-slate-300 leading-relaxed mb-4">
+          <p className="text-xs text-[#4A433B] leading-relaxed mb-4">
             {activePhase.description}
           </p>
 
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-3 border-t border-slate-800">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-3 border-t border-[#181512]/10">
             {activePhase.specs.map((spec, sIdx) => (
               <div key={sIdx} className="flex flex-col">
-                <span className="text-[10px] font-mono text-slate-400">{spec.label}</span>
-                <span className="text-xs font-mono font-medium text-slate-200 mt-0.5">{spec.value}</span>
+                <span className="text-[10px] font-mono text-[#786F63]">{spec.label}</span>
+                <span className="text-xs font-mono font-medium text-[#181512] mt-0.5">{spec.value}</span>
               </div>
             ))}
           </div>
@@ -537,20 +537,20 @@ export const ArchitecturalGenesisNarrative: React.FC = () => {
       </div>
 
       <div className="absolute bottom-8 right-8 z-20 hidden lg:flex flex-col gap-3 w-80">
-        <div className="bg-slate-900/80 backdrop-blur-md border border-slate-800 rounded-xl p-4 shadow-xl">
-          <div className="flex items-center gap-2 text-xs font-mono text-amber-400 mb-2">
+        <div className="bg-[#FAF7F2]/92 backdrop-blur-md border border-[#181512]/12 rounded-xl p-4 shadow-xl text-[#181512]">
+          <div className="flex items-center gap-2 text-xs font-mono text-[#9A6B3B] font-medium mb-2">
             <Sparkles className="w-3.5 h-3.5" />
             <span>DYNAMIC DISCIPLINE CALLOUT</span>
           </div>
-          <p className="text-xs text-slate-300 leading-relaxed">
+          <p className="text-xs text-[#4A433B] leading-relaxed">
             {activePhaseIndex === 0 && 'Cadastral vectors establish 38m structural cantilever clearance above limestone bluff.'}
             {activePhaseIndex === 1 && 'Post-tensioned core withstands 140mph coastal wind shear and seismic lateral loads.'}
             {activePhaseIndex === 2 && 'Custom triple-glazed low-iron panels eliminate condensation while blocking 99.8% UV.'}
             {activePhaseIndex === 3 && 'Lutron DALI-2 automated circadian fixtures simulate natural sun angles across travertine walls.'}
           </p>
-          <div className="mt-3 flex items-center justify-between text-[11px] font-mono text-slate-400 pt-2 border-t border-slate-800">
+          <div className="mt-3 flex items-center justify-between text-[11px] font-mono text-[#6E6559] pt-2 border-t border-[#181512]/10">
             <span>SCROLL DOWN TO PROGRESS</span>
-            <span className="text-cyan-400">STAGE {activePhaseIndex + 1} OF 4</span>
+            <span className="text-[#9A6B3B] font-medium">STAGE {activePhaseIndex + 1} OF 4</span>
           </div>
         </div>
       </div>

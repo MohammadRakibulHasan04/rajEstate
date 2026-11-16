@@ -322,25 +322,25 @@ export const VirtualTour3DModal: React.FC<VirtualTour3DModalProps> = ({
 
   return (
     <div
-      className={`fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-xl p-2 sm:p-6 transition-all ${
+      className={`fixed inset-0 z-50 flex items-center justify-center bg-[#181512]/55 backdrop-blur-xl p-2 sm:p-6 transition-all ${
         isFullscreen ? 'p-0' : ''
       }`}
     >
       <div
-        className={`relative w-full h-full max-w-7xl bg-slate-950 border border-slate-800 rounded-2xl overflow-hidden flex flex-col shadow-2xl ${
+        className={`relative w-full h-full max-w-7xl bg-[#FAF7F2] border border-[#181512]/12 rounded-2xl overflow-hidden flex flex-col shadow-2xl ${
           isFullscreen ? 'max-w-none rounded-none border-none' : ''
         }`}
       >
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800/80 bg-slate-900/90 z-20">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-[#181512]/10 bg-[#FCFBF8] z-20">
           <div className="flex items-center gap-3">
-            <span className="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-ping" />
+            <span className="w-2.5 h-2.5 rounded-full bg-[#9A6B3B] animate-ping" />
             <div>
-              <div className="flex items-center gap-2 text-xs font-mono text-cyan-400">
+              <div className="flex items-center gap-2 text-xs font-mono text-[#9A6B3B]">
                 <span>INTERACTIVE 3D VIRTUAL TOUR</span>
-                <span className="text-slate-500">·</span>
+                <span className="text-[#786F63]">·</span>
                 <span>WEBGL SPATIAL ENGINE</span>
               </div>
-              <h2 className="text-base sm:text-lg font-display font-medium text-white truncate max-w-md">
+              <h2 className="text-base sm:text-lg font-display font-medium text-[#181512] truncate max-w-md">
                 {property.title} — {currentRoom?.name}
               </h2>
             </div>
@@ -351,8 +351,8 @@ export const VirtualTour3DModal: React.FC<VirtualTour3DModalProps> = ({
               onClick={() => setWireframeMode(!wireframeMode)}
               className={`p-2 rounded-lg text-xs font-mono flex items-center gap-1.5 transition-colors cursor-pointer ${
                 wireframeMode
-                  ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/50'
-                  : 'bg-slate-800/60 text-slate-400 hover:text-slate-200'
+                  ? 'bg-[#9A6B3B]/15 text-[#5C3D1E] border border-[#9A6B3B]'
+                  : 'bg-[#F3EFE7] text-[#4A433B] hover:text-[#181512]'
               }`}
               title="Toggle Architectural Wireframe Mesh"
             >
@@ -360,11 +360,11 @@ export const VirtualTour3DModal: React.FC<VirtualTour3DModalProps> = ({
               <span className="hidden md:inline">Wireframe</span>
             </button>
 
-            <div className="flex items-center bg-slate-800/60 rounded-lg p-0.5 border border-slate-700/60">
+            <div className="flex items-center bg-[#F3EFE7] rounded-lg p-0.5 border border-[#181512]/10">
               <button
                 onClick={() => setLightPreset('dusk')}
                 className={`p-1.5 rounded-md transition-colors cursor-pointer ${
-                  lightPreset === 'dusk' ? 'bg-amber-500/20 text-amber-300' : 'text-slate-400 hover:text-slate-200'
+                  lightPreset === 'dusk' ? 'bg-[#9A6B3B]/20 text-[#684724]' : 'text-[#6E6559] hover:text-[#181512]'
                 }`}
                 title="Dusk Twilight Illumination"
               >
@@ -373,7 +373,7 @@ export const VirtualTour3DModal: React.FC<VirtualTour3DModalProps> = ({
               <button
                 onClick={() => setLightPreset('day')}
                 className={`p-1.5 rounded-md transition-colors cursor-pointer ${
-                  lightPreset === 'day' ? 'bg-sky-500/20 text-sky-300' : 'text-slate-400 hover:text-slate-200'
+                  lightPreset === 'day' ? 'bg-sky-500/20 text-sky-700' : 'text-[#6E6559] hover:text-[#181512]'
                 }`}
                 title="Direct Day Solar Study"
               >
@@ -382,7 +382,7 @@ export const VirtualTour3DModal: React.FC<VirtualTour3DModalProps> = ({
               <button
                 onClick={() => setLightPreset('night')}
                 className={`p-1.5 rounded-md transition-colors cursor-pointer ${
-                  lightPreset === 'night' ? 'bg-indigo-500/20 text-indigo-300' : 'text-slate-400 hover:text-slate-200'
+                  lightPreset === 'night' ? 'bg-indigo-500/20 text-indigo-700' : 'text-[#6E6559] hover:text-[#181512]'
                 }`}
                 title="Midnight Ambient Obsidian"
               >
@@ -392,7 +392,7 @@ export const VirtualTour3DModal: React.FC<VirtualTour3DModalProps> = ({
 
             <button
               onClick={toggleFullscreen}
-              className="p-2 rounded-lg bg-slate-800/60 text-slate-400 hover:text-slate-200 transition-colors cursor-pointer"
+              className="p-2 rounded-lg bg-[#F3EFE7] text-[#4A433B] hover:text-[#181512] transition-colors cursor-pointer"
               title="Toggle Fullscreen"
             >
               {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
@@ -400,7 +400,7 @@ export const VirtualTour3DModal: React.FC<VirtualTour3DModalProps> = ({
 
             <button
               onClick={onClose}
-              className="p-2 rounded-lg bg-slate-800 text-slate-400 hover:text-white hover:bg-slate-700 transition-colors ml-2 cursor-pointer"
+              className="p-2 rounded-lg bg-[#F3EFE7] text-[#4A433B] hover:text-[#181512] transition-colors ml-2 cursor-pointer"
               title="Exit 3D Virtual Tour"
             >
               <X className="w-5 h-5" />
@@ -411,36 +411,36 @@ export const VirtualTour3DModal: React.FC<VirtualTour3DModalProps> = ({
         <div className="relative flex-1 w-full h-full overflow-hidden cursor-grab active:cursor-grabbing">
           <div ref={mountRef} className="w-full h-full" />
 
-          <div className="absolute top-4 left-6 pointer-events-none bg-slate-900/70 backdrop-blur-md border border-slate-800 rounded-lg px-3 py-1.5 text-[11px] font-mono text-slate-400 flex items-center gap-2">
-            <Compass className="w-3.5 h-3.5 text-cyan-400" />
+          <div className="absolute top-4 left-6 pointer-events-none bg-[#FAF7F2]/90 backdrop-blur-md border border-[#181512]/12 rounded-lg px-3 py-1.5 text-[11px] font-mono text-[#4A433B] flex items-center gap-2 shadow-xs">
+            <Compass className="w-3.5 h-3.5 text-[#9A6B3B]" />
             <span>DRAG TO ROTATE 360° · SCROLL TO ZOOM · CLICK HOTSPOTS</span>
           </div>
 
           {selectedHotspot && (
-            <div className="absolute bottom-24 left-6 right-6 sm:right-auto sm:w-96 z-30 bg-slate-900/95 backdrop-blur-xl border border-cyan-500/30 rounded-xl p-5 shadow-2xl animate-fade-in">
+            <div className="absolute bottom-24 left-6 right-6 sm:right-auto sm:w-96 z-30 bg-[#FAF7F2]/95 backdrop-blur-xl border border-[#9A6B3B]/40 rounded-xl p-5 shadow-2xl animate-fade-in">
               <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center gap-2 text-xs font-mono text-cyan-400">
+                <div className="flex items-center gap-2 text-xs font-mono text-[#9A6B3B]">
                   <Sparkles className="w-3.5 h-3.5" />
                   <span>ARCHITECTURAL MATERIAL SPEC</span>
                 </div>
                 <button
                   onClick={() => setSelectedHotspot(null)}
-                  className="text-slate-400 hover:text-white text-xs p-1 cursor-pointer"
+                  className="text-[#6E6559] hover:text-[#181512] text-xs p-1 cursor-pointer"
                 >
                   <X className="w-4 h-4" />
                 </button>
               </div>
-              <h4 className="text-base font-display font-medium text-white mb-1.5">
+              <h4 className="text-base font-display font-medium text-[#181512] mb-1.5">
                 {selectedHotspot.title}
               </h4>
-              <p className="text-xs text-slate-300 leading-relaxed">
+              <p className="text-xs text-[#4A433B] leading-relaxed">
                 {selectedHotspot.description}
               </p>
             </div>
           )}
 
           <div className="absolute bottom-6 left-6 right-6 flex flex-col sm:flex-row items-center justify-between gap-4 pointer-events-none">
-            <div className="pointer-events-auto flex items-center gap-1.5 p-1 bg-slate-900/90 backdrop-blur-md border border-slate-800 rounded-xl shadow-xl overflow-x-auto max-w-full">
+            <div className="pointer-events-auto flex items-center gap-1.5 p-1 bg-[#FAF7F2]/92 backdrop-blur-md border border-[#181512]/12 rounded-xl shadow-xl overflow-x-auto max-w-full">
               {rooms.map((room, idx) => (
                 <button
                   key={room.id}
@@ -450,8 +450,8 @@ export const VirtualTour3DModal: React.FC<VirtualTour3DModalProps> = ({
                   }}
                   className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all whitespace-nowrap cursor-pointer ${
                     activeRoomIndex === idx
-                      ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 shadow-sm'
-                      : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/40'
+                      ? 'bg-[#9A6B3B]/15 text-[#5C3D1E] border border-[#9A6B3B]/40 shadow-2xs'
+                      : 'text-[#5C5346] hover:text-[#181512] hover:bg-[#181512]/5'
                   }`}
                 >
                   {room.name}
@@ -462,7 +462,7 @@ export const VirtualTour3DModal: React.FC<VirtualTour3DModalProps> = ({
             <div className="pointer-events-auto flex items-center gap-2">
               <button
                 onClick={() => onBookViewing(property)}
-                className="px-4 py-2 text-xs font-medium text-slate-950 bg-cyan-400 hover:bg-cyan-300 rounded-lg shadow-lg hover:shadow-cyan-400/20 transition-all font-mono whitespace-nowrap cursor-pointer"
+                className="btn-gold !py-2.5 !px-5"
               >
                 REQUEST PRIVATE VIEWING
               </button>

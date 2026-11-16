@@ -17,35 +17,35 @@ export const SignatureFacts: React.FC<{ facts: Fact[]; summary?: string }> = ({ 
         <div className="grid lg:grid-cols-12 gap-10 items-end mb-16 md:mb-24" data-reveal>
           <div className="lg:col-span-8 max-w-4xl">
             <div className="eyebrow mb-7">Why this home</div>
-            <h2 className="font-display font-light text-5xl sm:text-6xl lg:text-[5rem] leading-[1.3] sm:leading-[1.34] tracking-normal py-1">
+            <h2 className="font-display font-light text-5xl sm:text-6xl lg:text-[5rem] leading-[1.3] sm:leading-[1.34] tracking-normal py-1 text-[#181512]">
               যা একে <em className="italic text-gradient-gold">আলাদা করে।</em>
             </h2>
           </div>
           {summary && (
-            <p className="lg:col-span-5 text-[15px] text-slate-400 font-light leading-relaxed">{summary}</p>
+            <p className="lg:col-span-5 text-[15px] text-[#4A433B] font-light leading-relaxed">{summary}</p>
           )}
         </div>
 
-        <ol className="border-t border-white/10">
+        <ol className="border-t border-[#181512]/10">
           {facts.map((f, i) => (
             <li
               key={f.key}
               data-reveal
-              className="group grid grid-cols-12 gap-6 md:gap-10 py-10 md:py-14 border-b border-white/10 hover:border-[#d1ad7a]/40 transition-colors duration-700"
+              className="group grid grid-cols-12 gap-6 md:gap-10 py-10 md:py-14 border-b border-[#181512]/10 hover:border-[#9A6B3B]/45 transition-colors duration-700"
             >
               <span
                 aria-hidden="true"
-                className="col-span-3 md:col-span-2 text-outline font-display font-light text-6xl md:text-8xl leading-none group-hover:[-webkit-text-stroke-color:rgba(209,173,122,0.6)] transition-all duration-700"
+                className="col-span-3 md:col-span-2 text-outline font-display font-light text-6xl md:text-8xl leading-none group-hover:[-webkit-text-stroke-color:rgba(154,107,59,0.55)] transition-all duration-700"
               >
                 {String(i + 1).padStart(2, '0')}
               </span>
               <div className="col-span-9 md:col-span-4">
                 <div className="mono-label">{f.label}{f.labelBn ? ` · ${f.labelBn}` : ''}</div>
-                <div className="mt-3 font-display font-light text-3xl md:text-5xl leading-[1.28] tracking-normal text-[#f4efe6] group-hover:text-[#f1dfbd] transition-colors duration-700 py-0.5">
+                <div className="mt-3 font-display font-light text-3xl md:text-5xl leading-[1.28] tracking-normal text-[#181512] group-hover:text-[#7C5329] transition-colors duration-700 py-0.5">
                   {f.value}
                 </div>
               </div>
-              <p className="col-span-12 md:col-span-6 md:pt-6 text-base md:text-lg text-slate-300/90 font-light leading-relaxed">
+              <p className="col-span-12 md:col-span-6 md:pt-6 text-base md:text-lg text-[#4A433B] font-light leading-relaxed">
                 {f.why}
               </p>
             </li>

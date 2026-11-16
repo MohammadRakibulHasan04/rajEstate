@@ -31,12 +31,12 @@ export const ResidencesShowcase: React.FC = () => {
   return (
     <section
       id="showcase"
-      className="relative overflow-hidden bg-[#070b14] text-[#f4efe6] py-28 md:py-40"
+      className="relative overflow-hidden bg-[#EFEAE1] text-[#181512] border-t border-[#181512]/[0.07] py-28 md:py-40"
     >
       {/* Decorative background watermark */}
       <span
         aria-hidden="true"
-        className="text-outline pointer-events-none absolute top-12 left-0 whitespace-nowrap font-display font-light italic text-[18vw] leading-none select-none opacity-40"
+        className="text-outline pointer-events-none absolute top-12 left-0 whitespace-nowrap font-display font-light italic text-[18vw] leading-none select-none opacity-60"
       >
         Residences
       </span>
@@ -46,7 +46,7 @@ export const ResidencesShowcase: React.FC = () => {
         <div className="grid lg:grid-cols-12 gap-10 items-end" data-reveal>
           <div className="lg:col-span-10 max-w-4xl">
             <div className="eyebrow mb-6">Curated Portfolio</div>
-            <h2 className="font-display font-light text-5xl sm:text-6xl lg:text-7xl leading-[1.3] sm:leading-[1.34] lg:leading-[1.38] tracking-normal py-1">
+            <h2 className="font-display font-light text-5xl sm:text-6xl lg:text-7xl leading-[1.3] sm:leading-[1.34] lg:leading-[1.38] tracking-normal py-1 text-[#181512]">
               লিস্টেড{' '}
               <em className="italic text-gradient-gold">রেসিডেন্স</em>
             </h2>
@@ -54,12 +54,12 @@ export const ResidencesShowcase: React.FC = () => {
         </div>
 
         {/* Filter Pills */}
-        <div className="flex flex-wrap items-center justify-between gap-4 border-b border-white/[0.08] pb-6" data-reveal>
+        <div className="flex flex-wrap items-center justify-between gap-4 border-b border-[#181512]/10 pb-6" data-reveal>
           <div className="flex flex-wrap items-center gap-2">
             <button
               onClick={() => setFilter('all')}
               className={`chip cursor-pointer ${filter === 'all'
-                ? '!border-[#d1ad7a] !bg-[#d1ad7a]/15 !text-[#f1dfbd]'
+                ? '!border-[#9A6B3B] !bg-[#9A6B3B]/15 !text-[#5C3D1E] font-medium'
                 : ''
                 }`}
             >
@@ -70,7 +70,7 @@ export const ResidencesShowcase: React.FC = () => {
               <button
                 onClick={() => setFilter('projects')}
                 className={`chip cursor-pointer ${filter === 'projects'
-                  ? '!border-[#d1ad7a] !bg-[#d1ad7a]/15 !text-[#f1dfbd]'
+                  ? '!border-[#9A6B3B] !bg-[#9A6B3B]/15 !text-[#5C3D1E] font-medium'
                   : ''
                   }`}
               >
@@ -83,7 +83,7 @@ export const ResidencesShowcase: React.FC = () => {
                 key={cat}
                 onClick={() => setFilter(cat)}
                 className={`chip cursor-pointer ${filter === cat
-                  ? '!border-[#d1ad7a] !bg-[#d1ad7a]/15 !text-[#f1dfbd]'
+                  ? '!border-[#9A6B3B] !bg-[#9A6B3B]/15 !text-[#5C3D1E] font-medium'
                   : ''
                   }`}
               >
@@ -92,7 +92,7 @@ export const ResidencesShowcase: React.FC = () => {
             ))}
           </div>
 
-          <span className="mono-label hidden md:inline text-slate-500">
+          <span className="mono-label hidden md:inline text-[#786F63]">
             Showing {filtered.length} of {listings.length} residences
           </span>
         </div>
@@ -106,9 +106,9 @@ export const ResidencesShowcase: React.FC = () => {
           </div>
         ) : filtered.length === 0 ? (
           <div className="panel p-16 text-center space-y-4">
-            <Compass className="w-10 h-10 text-slate-600 mx-auto" />
-            <h3 className="font-display text-2xl text-slate-300">No residences found</h3>
-            <p className="text-sm text-slate-500 max-w-sm mx-auto">
+            <Compass className="w-10 h-10 text-[#9A6B3B] mx-auto" />
+            <h3 className="font-display text-2xl text-[#181512]">No residences found</h3>
+            <p className="text-sm text-[#6E6559] max-w-sm mx-auto">
               No properties matched the selected typology filter.
             </p>
           </div>

@@ -18,7 +18,7 @@ export const Field: React.FC<{
       {label}
     </label>
     {children}
-    {error ? <p className="mt-1.5 text-[12px] text-red-300">{error}</p> : hint ? <p className="mt-1.5 text-[12px] text-slate-500 leading-relaxed">{hint}</p> : null}
+    {error ? <p className="mt-1.5 text-[12px] text-red-600">{error}</p> : hint ? <p className="mt-1.5 text-[12px] text-[#6E6559] leading-relaxed">{hint}</p> : null}
   </div>
 );
 
@@ -34,10 +34,10 @@ export const EditorSection: React.FC<{ id: string; index: string; title: string;
     <header className="flex items-start gap-5 mb-8">
       <span className="text-outline font-display text-5xl leading-none select-none" aria-hidden="true">{index}</span>
       <div>
-        <h2 className="font-display text-3xl text-[#f4efe6] leading-tight">
-          {title} {titleBn && <span className="text-slate-500 text-2xl">· {titleBn}</span>}
+        <h2 className="font-display text-3xl text-[#181512] leading-tight">
+          {title} {titleBn && <span className="text-[#6E6559] text-2xl">· {titleBn}</span>}
         </h2>
-        {intro && <p className="mt-2 text-sm text-slate-400 max-w-2xl leading-relaxed">{intro}</p>}
+        {intro && <p className="mt-2 text-sm text-[#4A433B] max-w-2xl leading-relaxed">{intro}</p>}
       </div>
     </header>
     <div className="space-y-6">{children}</div>
@@ -72,7 +72,7 @@ export const TextArea: React.FC<
   <div className="relative">
     <textarea {...rest} value={value ?? ''} onChange={(e) => onChange(e.target.value)} className={`lux-textarea ${className}`} />
     {counter && (
-      <span className={`absolute bottom-3 right-4 text-[10px] font-mono ${(value?.length ?? 0) > counter ? 'text-amber-300' : 'text-slate-600'}`}>
+      <span className={`absolute bottom-3 right-4 text-[10px] font-mono ${(value?.length ?? 0) > counter ? 'text-amber-700' : 'text-[#8C8275]'}`}>
         {value?.length ?? 0}/{counter}
       </span>
     )}
@@ -123,11 +123,11 @@ export function Segmented<T extends string>({
           aria-checked={value === o.value}
           onClick={() => onChange(o.value)}
           className={`text-left p-4 rounded-xl border transition-all duration-300 cursor-pointer ${
-            value === o.value ? 'border-[#d1ad7a]/70 bg-[#d1ad7a]/10' : 'border-white/10 hover:border-white/25'
+            value === o.value ? 'border-[#9A6B3B] bg-[#9A6B3B]/10 shadow-xs' : 'border-[#181512]/12 bg-[#F6F2EA]/60 hover:border-[#181512]/25'
           }`}
         >
-          <span className="block text-sm text-[#f4efe6]">{o.label}</span>
-          {o.hint && <span className="block text-[12px] text-slate-500 mt-1 leading-snug">{o.hint}</span>}
+          <span className="block text-sm text-[#181512] font-medium">{o.label}</span>
+          {o.hint && <span className="block text-[12px] text-[#6E6559] mt-1 leading-snug">{o.hint}</span>}
         </button>
       ))}
     </div>
@@ -149,14 +149,14 @@ export const Toggle: React.FC<{ checked: boolean; onChange: (v: boolean) => void
       aria-checked={checked}
       onClick={() => onChange(!checked)}
       className={`relative shrink-0 w-11 h-6 rounded-full border transition-colors duration-300 cursor-pointer ${
-        checked ? 'bg-[#d1ad7a] border-[#d1ad7a]' : 'bg-white/5 border-white/15'
+        checked ? 'bg-[#9A6B3B] border-[#9A6B3B]' : 'bg-[#E5DEC9] border-[#181512]/15'
       }`}
     >
-      <span className={`absolute top-0.5 w-[18px] h-[18px] rounded-full transition-all duration-300 ${checked ? 'left-[22px] bg-[#120d07]' : 'left-0.5 bg-slate-300'}`} />
+      <span className={`absolute top-0.5 w-[18px] h-[18px] rounded-full transition-all duration-300 shadow-xs ${checked ? 'left-[22px] bg-[#FCFBF8]' : 'left-0.5 bg-[#FCFBF8]'}`} />
     </button>
     <span>
-      <span className="block text-sm text-[#f4efe6]">{label}</span>
-      {hint && <span className="block text-[12px] text-slate-500 mt-0.5">{hint}</span>}
+      <span className="block text-sm text-[#181512] font-medium">{label}</span>
+      {hint && <span className="block text-[12px] text-[#6E6559] mt-0.5">{hint}</span>}
     </span>
   </label>
 );
@@ -191,18 +191,18 @@ export function Repeater<T>({
 
   return (
     <div className="space-y-3">
-      {items.length === 0 && empty && <p className="text-sm text-slate-500 italic">{empty}</p>}
+      {items.length === 0 && empty && <p className="text-sm text-[#6E6559] italic">{empty}</p>}
       {items.map((item, i) => (
-        <div key={i} className="group relative rounded-xl border border-white/[0.08] bg-[#05080f]/50 p-4 pr-14">
+        <div key={i} className="group relative rounded-xl border border-[#181512]/10 bg-[#F6F2EA]/75 p-4 pr-14">
           {render(item, (p) => update(i, p), i)}
-          <div className="absolute top-3 right-3 flex flex-col gap-1 opacity-60 group-hover:opacity-100 transition-opacity">
-            <button type="button" onClick={() => move(i, -1)} disabled={i === 0} className="p-1.5 rounded-md text-slate-400 hover:text-white hover:bg-white/5 disabled:opacity-20 cursor-pointer" aria-label="Move up">
+          <div className="absolute top-3 right-3 flex flex-col gap-1 opacity-70 group-hover:opacity-100 transition-opacity">
+            <button type="button" onClick={() => move(i, -1)} disabled={i === 0} className="p-1.5 rounded-md text-[#5C5346] hover:text-[#181512] hover:bg-[#181512]/5 disabled:opacity-20 cursor-pointer" aria-label="Move up">
               <ArrowUp className="w-3.5 h-3.5" />
             </button>
-            <button type="button" onClick={() => move(i, 1)} disabled={i === items.length - 1} className="p-1.5 rounded-md text-slate-400 hover:text-white hover:bg-white/5 disabled:opacity-20 cursor-pointer" aria-label="Move down">
+            <button type="button" onClick={() => move(i, 1)} disabled={i === items.length - 1} className="p-1.5 rounded-md text-[#5C5346] hover:text-[#181512] hover:bg-[#181512]/5 disabled:opacity-20 cursor-pointer" aria-label="Move down">
               <ArrowDown className="w-3.5 h-3.5" />
             </button>
-            <button type="button" onClick={() => remove(i)} className="p-1.5 rounded-md text-slate-500 hover:text-red-300 hover:bg-red-500/10 cursor-pointer" aria-label="Remove">
+            <button type="button" onClick={() => remove(i)} className="p-1.5 rounded-md text-[#6E6559] hover:text-red-600 hover:bg-red-500/10 cursor-pointer" aria-label="Remove">
               <Trash2 className="w-3.5 h-3.5" />
             </button>
           </div>
@@ -235,8 +235,8 @@ export function useToasts() {
       {toasts.map((t) => (
         <div
           key={t.id}
-          className={`toast panel-glass rounded-xl px-5 py-3.5 text-sm border ${
-            t.tone === 'error' ? 'border-red-400/40 text-red-200' : t.tone === 'info' ? 'border-white/15 text-slate-200' : 'border-[#d1ad7a]/50 text-[#f1dfbd]'
+          className={`toast panel-glass rounded-xl px-5 py-3.5 text-sm border font-medium ${
+            t.tone === 'error' ? 'border-red-500/40 text-red-800 bg-[#FEF2F2]/95' : t.tone === 'info' ? 'border-[#181512]/15 text-[#181512]' : 'border-[#9A6B3B]/50 text-[#5C3D1E]'
           }`}
         >
           {t.text}

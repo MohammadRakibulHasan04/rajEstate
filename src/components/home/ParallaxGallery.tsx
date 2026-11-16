@@ -110,14 +110,14 @@ export const ParallaxGallery: React.FC = () => {
     <section
       id="process"
       ref={rootRef}
-      className="relative overflow-hidden bg-[#070b14] text-[#f4efe6] pt-28 md:pt-36"
+      className="relative overflow-hidden bg-[#F6F2EA] text-[#181512] pt-28 md:pt-36"
     >
       <div className="hairline max-w-7xl mx-auto mb-24" />
 
       <div className="relative px-6 md:px-12 lg:px-20 max-w-7xl mx-auto grid lg:grid-cols-12 gap-10 items-end">
         <div className="lg:col-span-8 max-w-4xl">
           <div className="eyebrow mb-7">The Process</div>
-          <h2 className="font-display font-light text-5xl sm:text-6xl lg:text-[5.5rem] leading-[1.3] sm:leading-[1.34] lg:leading-[1.38] tracking-normal py-1">
+          <h2 className="font-display font-light text-5xl sm:text-6xl lg:text-[5.5rem] leading-[1.3] sm:leading-[1.34] lg:leading-[1.38] tracking-normal py-1 text-[#181512]">
             <span className="reveal-line">
               <span data-head-line className="py-[0.08em] block">প্রথম রেখা থেকে</span>
             </span>
@@ -128,7 +128,7 @@ export const ParallaxGallery: React.FC = () => {
             </span>
           </h2>
         </div>
-        <p className="lg:col-span-4 lg:col-start-9 text-[15px] text-slate-400 font-light leading-relaxed">
+        <p className="lg:col-span-4 lg:col-start-9 text-[15px] text-[#4A433B] font-light leading-relaxed">
           আমাদের প্রতিটি বাড়ির সাথেই থাকে তার সম্পূর্ণ নকশার আর্কাইভ: ড্রয়িং, গঠনতন্ত্র এবং উপকরণের নমুনা। আপনি শুধু একটি বাড়ি কেনেন না; আপনি এর গল্পের অংশীদার হন।
         </p>
       </div>
@@ -143,11 +143,11 @@ export const ParallaxGallery: React.FC = () => {
               <figure key={f.frame} className="group">
                 <div data-fig className={`parallax-figure ${f.aspect}`}>
                   <img src={frameUrl(f.frame)} alt={f.caption} loading="lazy" decoding="async" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#070b14]/60 via-transparent to-transparent opacity-70 group-hover:opacity-40 transition-opacity duration-700" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#181512]/40 via-transparent to-transparent opacity-50 group-hover:opacity-25 transition-opacity duration-700" />
                 </div>
                 <figcaption className="mt-4 flex items-baseline justify-between text-[10px] font-mono tracking-[0.26em] uppercase">
-                  <span className="text-slate-300">{f.caption}</span>
-                  <span className="text-[#d1ad7a]">Fig. {String(f.frame).padStart(2, '0')}</span>
+                  <span className="text-[#3D362E]">{f.caption}</span>
+                  <span className="text-[#9A6B3B]">Fig. {String(f.frame).padStart(2, '0')}</span>
                 </figcaption>
               </figure>
             ))}
@@ -156,7 +156,7 @@ export const ParallaxGallery: React.FC = () => {
       </div>
 
       {/* Marquee band */}
-      <div className="relative border-y border-white/10 py-8 md:py-10 overflow-hidden" aria-hidden="true">
+      <div className="relative border-y border-[#181512]/10 py-8 md:py-10 overflow-hidden" aria-hidden="true">
         <div className="marquee-track">
           {[0, 1].map((dup) => (
             <div key={dup} className="flex shrink-0 items-center">
@@ -164,12 +164,12 @@ export const ParallaxGallery: React.FC = () => {
                 <span key={`${dup}-${i}`} className="flex items-center">
                   <span
                     className={`font-display font-light text-6xl md:text-8xl px-8 md:px-12 whitespace-nowrap leading-[1.32] tracking-normal py-2 ${
-                      i % 2 === 0 ? 'italic text-[#f4efe6]' : 'text-outline'
+                      i % 2 === 0 ? 'italic text-[#181512]' : 'text-outline'
                     }`}
                   >
                     {w}
                   </span>
-                  <span className="w-2.5 h-2.5 rotate-45 bg-[#d1ad7a]/80" />
+                  <span className="w-2.5 h-2.5 rotate-45 bg-[#9A6B3B]/80" />
                 </span>
               ))}
             </div>

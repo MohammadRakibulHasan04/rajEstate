@@ -62,12 +62,12 @@ export const AmenitiesEditor: React.FC<AmenitiesEditorProps> = ({ value, onChang
   return (
     <div className="space-y-5">
       {/* Quick-add preset chips with icons */}
-      <div className="rounded-2xl border border-white/[0.08] bg-white/[0.015] p-4 space-y-3">
+      <div className="rounded-2xl border border-[#181512]/10 bg-[#F6F2EA]/75 p-4 space-y-3">
         <div className="flex items-center justify-between gap-2">
-          <span className="mono-label !text-[9.5px] text-slate-400">
+          <span className="mono-label !text-[9.5px] text-[#6E6559]">
             Quick-Toggle Presets (Click to add or remove with icon)
           </span>
-          <span className="text-[10px] font-mono text-[#d1ad7a]">
+          <span className="text-[10px] font-mono text-[#9A6B3B] font-medium">
             {items.length} selected
           </span>
         </div>
@@ -86,9 +86,9 @@ export const AmenitiesEditor: React.FC<AmenitiesEditorProps> = ({ value, onChang
                 data-active={active}
                 className="chip !py-1.5 !px-3 !normal-case !tracking-normal !font-sans !text-xs"
               >
-                <Icon className="w-3.5 h-3.5 text-[#d1ad7a] shrink-0" />
+                <Icon className="w-3.5 h-3.5 text-[#9A6B3B] shrink-0" />
                 <span>{preset.label}</span>
-                {active && <Check className="w-3 h-3 text-[#d1ad7a] ml-0.5" />}
+                {active && <Check className="w-3 h-3 text-[#9A6B3B] ml-0.5" />}
               </button>
             );
           })}
@@ -97,7 +97,7 @@ export const AmenitiesEditor: React.FC<AmenitiesEditorProps> = ({ value, onChang
 
       {/* Individual Amenity Cards List */}
       {items.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-white/10 p-6 text-center text-xs text-slate-500">
+        <div className="rounded-2xl border border-dashed border-[#181512]/15 bg-[#F6F2EA]/50 p-6 text-center text-xs text-[#786F63]">
           No amenities added yet. Click any preset above or add a custom amenity with an icon below.
         </div>
       ) : (
@@ -110,7 +110,7 @@ export const AmenitiesEditor: React.FC<AmenitiesEditorProps> = ({ value, onChang
             return (
               <div
                 key={idx}
-                className="rounded-2xl border border-white/[0.09] bg-white/[0.02] p-3.5 sm:p-4 space-y-3 transition-colors hover:border-white/15"
+                className="rounded-2xl border border-[#181512]/10 bg-[#FCFBF8] p-3.5 sm:p-4 space-y-3 transition-colors hover:border-[#9A6B3B]/45"
               >
                 <div className="grid sm:grid-cols-[auto_1.2fr_1fr_auto] gap-3 items-center">
                   {/* Icon Picker Trigger */}
@@ -119,24 +119,24 @@ export const AmenitiesEditor: React.FC<AmenitiesEditorProps> = ({ value, onChang
                     onClick={() => setOpenPickerIndex(pickerOpen ? null : idx)}
                     className={`inline-flex items-center gap-2.5 px-3 py-2 rounded-xl border text-left transition-all cursor-pointer ${
                       pickerOpen
-                        ? 'border-[#d1ad7a] bg-[#d1ad7a]/15 text-[#f1dfbd]'
-                        : 'border-[#d1ad7a]/35 bg-[#d1ad7a]/10 text-[#f4efe6] hover:border-[#d1ad7a]/70'
+                        ? 'border-[#9A6B3B] bg-[#9A6B3B]/15 text-[#5C3D1E]'
+                        : 'border-[#9A6B3B]/35 bg-[#9A6B3B]/10 text-[#181512] hover:border-[#9A6B3B]'
                     }`}
                     title="Choose amenity icon"
                   >
-                    <span className="w-8 h-8 rounded-lg bg-[#070b14]/60 border border-[#d1ad7a]/30 flex items-center justify-center text-[#d1ad7a] shrink-0">
+                    <span className="w-8 h-8 rounded-lg bg-[#FCFBF8] border border-[#9A6B3B]/30 flex items-center justify-center text-[#9A6B3B] shrink-0">
                       <Icon className="w-4 h-4" />
                     </span>
                     <div className="min-w-[92px]">
-                      <span className="block text-[9px] font-mono uppercase tracking-[0.2em] text-[#d1ad7a]">
+                      <span className="block text-[9px] font-mono uppercase tracking-[0.2em] text-[#9A6B3B]">
                         Icon
                       </span>
-                      <span className="block text-xs text-[#f4efe6] truncate max-w-[110px]">
+                      <span className="block text-xs text-[#181512] font-medium truncate max-w-[110px]">
                         {meta.label}
                       </span>
                     </div>
                     <ChevronDown
-                      className={`w-3.5 h-3.5 text-[#d1ad7a] transition-transform ${
+                      className={`w-3.5 h-3.5 text-[#9A6B3B] transition-transform ${
                         pickerOpen ? 'rotate-180' : ''
                       }`}
                     />
@@ -175,7 +175,7 @@ export const AmenitiesEditor: React.FC<AmenitiesEditorProps> = ({ value, onChang
                     <button
                       type="button"
                       onClick={() => updateAt(idx, { icon: inferAmenityIcon(item.label) })}
-                      className="p-2 rounded-lg text-slate-400 hover:text-[#d1ad7a] hover:bg-white/[0.04] cursor-pointer"
+                      className="p-2 rounded-lg text-[#6E6559] hover:text-[#9A6B3B] hover:bg-[#181512]/[0.04] cursor-pointer"
                       title="Auto-detect icon from name"
                     >
                       <Wand2 className="w-3.5 h-3.5" />
@@ -184,7 +184,7 @@ export const AmenitiesEditor: React.FC<AmenitiesEditorProps> = ({ value, onChang
                       type="button"
                       onClick={() => move(idx, -1)}
                       disabled={idx === 0}
-                      className="p-2 rounded-lg text-slate-400 hover:text-white disabled:opacity-25 cursor-pointer"
+                      className="p-2 rounded-lg text-[#6E6559] hover:text-[#181512] disabled:opacity-25 cursor-pointer"
                       title="Move up"
                     >
                       <ChevronUp className="w-3.5 h-3.5" />
@@ -193,7 +193,7 @@ export const AmenitiesEditor: React.FC<AmenitiesEditorProps> = ({ value, onChang
                       type="button"
                       onClick={() => move(idx, 1)}
                       disabled={idx === items.length - 1}
-                      className="p-2 rounded-lg text-slate-400 hover:text-white disabled:opacity-25 cursor-pointer"
+                      className="p-2 rounded-lg text-[#6E6559] hover:text-[#181512] disabled:opacity-25 cursor-pointer"
                       title="Move down"
                     >
                       <ChevronDown className="w-3.5 h-3.5" />
@@ -201,7 +201,7 @@ export const AmenitiesEditor: React.FC<AmenitiesEditorProps> = ({ value, onChang
                     <button
                       type="button"
                       onClick={() => removeAt(idx)}
-                      className="p-2 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 cursor-pointer"
+                      className="p-2 rounded-lg text-[#6E6559] hover:text-red-600 hover:bg-red-500/10 cursor-pointer"
                       title="Remove amenity"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
@@ -211,15 +211,15 @@ export const AmenitiesEditor: React.FC<AmenitiesEditorProps> = ({ value, onChang
 
                 {/* Expandable Visual Icon Picker Grid */}
                 {pickerOpen && (
-                  <div className="pt-3 border-t border-white/[0.08] space-y-2.5">
+                  <div className="pt-3 border-t border-[#181512]/[0.08] space-y-2.5">
                     <div className="flex items-center justify-between">
-                      <span className="mono-label !text-[9.5px] text-[#d1ad7a]">
+                      <span className="mono-label !text-[9.5px] text-[#9A6B3B]">
                         Select Icon for &ldquo;{item.label || 'Amenity'}&rdquo;
                       </span>
                       <button
                         type="button"
                         onClick={() => setOpenPickerIndex(null)}
-                        className="text-[10px] font-mono uppercase tracking-wider text-slate-400 hover:text-white cursor-pointer"
+                        className="text-[10px] font-mono uppercase tracking-wider text-[#6E6559] hover:text-[#181512] cursor-pointer"
                       >
                         Done
                       </button>
@@ -238,15 +238,15 @@ export const AmenitiesEditor: React.FC<AmenitiesEditorProps> = ({ value, onChang
                             }}
                             className={`flex items-center gap-2.5 p-2.5 rounded-xl border text-left transition-all cursor-pointer ${
                               selected
-                                ? 'border-[#d1ad7a] bg-[#d1ad7a]/15 text-[#f1dfbd]'
-                                : 'border-white/[0.08] bg-[#070b14]/60 text-slate-300 hover:border-[#d1ad7a]/45 hover:text-white'
+                                ? 'border-[#9A6B3B] bg-[#9A6B3B]/15 text-[#5C3D1E] font-medium'
+                                : 'border-[#181512]/[0.09] bg-[#F6F2EA] text-[#3D362E] hover:border-[#9A6B3B]/50 hover:text-[#181512]'
                             }`}
                           >
                             <span
                               className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${
                                 selected
-                                  ? 'bg-[#d1ad7a] text-[#120d07]'
-                                  : 'bg-white/[0.04] text-[#d1ad7a]'
+                                  ? 'bg-[#9A6B3B] text-white'
+                                  : 'bg-[#FCFBF8] text-[#9A6B3B] border border-[#181512]/[0.06]'
                               }`}
                             >
                               <EntryIcon className="w-3.5 h-3.5" />
@@ -269,7 +269,7 @@ export const AmenitiesEditor: React.FC<AmenitiesEditorProps> = ({ value, onChang
         onClick={addCustom}
         className="btn-quiet !py-2.5 !px-4"
       >
-        <Plus className="w-3.5 h-3.5 text-[#d1ad7a]" />
+        <Plus className="w-3.5 h-3.5 text-[#9A6B3B]" />
         <span>Add Amenity &amp; Icon</span>
       </button>
     </div>

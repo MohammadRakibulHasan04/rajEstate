@@ -14,30 +14,22 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [mode, setModeState] = useState<ThemeMode>(() => {
-    const saved = localStorage.getItem('aura_theme_mode');
-    return saved === 'light' || saved === 'dark' ? saved : 'dark';
-  });
+  const [mode, setModeState] = useState<ThemeMode>('light');
 
   const [accentTone, setAccentToneState] = useState<AccentTone>(() => {
-    const saved = localStorage.getItem('aura_accent_tone');
+    const saved = localStorage.getItem('jonopod_accent_tone');
     return saved === 'champagne' || saved === 'monochrome' || saved === 'bronze' ? saved : 'champagne';
   });
 
   useEffect(() => {
     const root = document.documentElement;
-    if (mode === 'dark') {
-      root.classList.add('dark');
-      root.classList.remove('light');
-    } else {
-      root.classList.add('light');
-      root.classList.remove('dark');
-    }
-    localStorage.setItem('aura_theme_mode', mode);
+    root.classList.add('light');
+    root.classList.remove('dark');
+    localStorage.setItem('jonopod_theme_mode', 'light');
   }, [mode]);
 
   useEffect(() => {
-    localStorage.setItem('aura_accent_tone', accentTone);
+    localStorage.setItem('jonopod_accent_tone', accentTone);
   }, [accentTone]);
 
   const toggleTheme = () => {

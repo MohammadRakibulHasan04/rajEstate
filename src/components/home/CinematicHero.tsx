@@ -252,7 +252,7 @@ export const CinematicHero: React.FC<CinematicHeroProps> = ({
     const frameA = resolveReadyDrawable(imgs, i);
 
     if (!frameA) {
-      ctx.fillStyle = '#070b14';
+      ctx.fillStyle = '#181512';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
       return;
     }
@@ -711,8 +711,8 @@ export const CinematicHero: React.FC<CinematicHeroProps> = ({
     <section
       id="home"
       ref={sectionRef}
-      aria-label="AURA — from blueprint to residence"
-      className="relative h-screen h-[100dvh] w-full overflow-hidden bg-[#070b14] text-[#f4efe6] select-none"
+      aria-label="Jonopod Properties — from blueprint to residence"
+      className="relative h-screen h-[100dvh] w-full overflow-hidden bg-[#181512] text-[#FAF7F2] select-none"
     >
       {/* Layer 0: GPU-accelerated frame sequence canvas */}
       <div ref={stageRef} className="absolute inset-0">
@@ -733,7 +733,7 @@ export const CinematicHero: React.FC<CinematicHeroProps> = ({
         <div className="relative max-w-4xl sm:max-w-5xl w-full">
           <h1
             ref={introTitleRef}
-            className="font-display font-light text-[2.1rem] xs:text-[2.5rem] sm:text-5xl md:text-6xl lg:text-[4.4vw] xl:text-[4.2vw] leading-[1.34] sm:leading-[1.38] md:leading-[1.42] tracking-normal py-1"
+            className="font-display font-light text-[2.1rem] xs:text-[2.5rem] sm:text-5xl md:text-6xl lg:text-[4.4vw] xl:text-[4.2vw] leading-[1.34] sm:leading-[1.38] md:leading-[1.42] tracking-normal py-1 drop-shadow-[0_4px_24px_rgba(0,0,0,0.45)]"
           >
             <span data-intro-parallax className="block will-change-transform">
               <span className="reveal-line">
@@ -743,7 +743,7 @@ export const CinematicHero: React.FC<CinematicHeroProps> = ({
             <span data-intro-parallax className="block will-change-transform">
               <span className="reveal-line">
                 <span data-intro-line className="py-[0.08em] block">
-                  মনের মতো <em className="italic text-gradient-gold pr-[0.1em]">ঠিকানা?</em>
+                  মনের মতো <em className="italic text-gradient-gold-light pr-[0.1em]">ঠিকানা?</em>
                 </span>
               </span>
             </span>
@@ -784,12 +784,12 @@ export const CinematicHero: React.FC<CinematicHeroProps> = ({
               className="relative max-w-4xl sm:max-w-5xl will-change-transform w-full"
             >
               <div data-ch-title>
-                <h2 className="font-display font-light text-[1.85rem] xs:text-[2.15rem] sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl leading-[1.34] sm:leading-[1.38] md:leading-[1.42] tracking-normal py-1">
+                <h2 className="font-display font-light text-[1.85rem] xs:text-[2.15rem] sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl leading-[1.34] sm:leading-[1.38] md:leading-[1.42] tracking-normal py-1 drop-shadow-[0_4px_24px_rgba(0,0,0,0.45)]">
                   <span data-ch-line1 className="block will-change-transform py-[0.1em]">
                     {c.title[0]}
                   </span>
                   <span data-ch-line2 className="block will-change-transform">
-                    <em className="italic text-gradient-gold inline-block py-[0.1em] pr-[0.12em]">
+                    <em className="italic text-gradient-gold-light inline-block py-[0.1em] pr-[0.12em]">
                       {c.title[1]}
                     </em>
                   </span>
@@ -798,7 +798,7 @@ export const CinematicHero: React.FC<CinematicHeroProps> = ({
               {(c.body || isLast) && (
                 <div data-ch-body className="mt-6 sm:mt-8 will-change-transform">
                   {c.body && (
-                    <p className="text-[15px] sm:text-base lg:text-lg leading-[1.65] text-slate-200/90 font-normal max-w-lg">
+                    <p className="text-[15px] sm:text-base lg:text-lg leading-[1.65] text-[#FAF7F2]/90 font-normal max-w-lg">
                       {c.body}
                     </p>
                   )}

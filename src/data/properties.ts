@@ -57,7 +57,7 @@ function createArchSvg(title: string, sub: string, type: 'blueprint' | 'exterior
       <rect x="1100" y="700" width="380" height="150" fill="rgba(7, 25, 47, 0.9)" stroke="#0284c7" stroke-width="1.5"/>
       <text x="1120" y="735" font-family="serif" font-size="20" fill="#f0f9ff">${title.toUpperCase()}</text>
       <text x="1120" y="765" font-family="sans-serif" font-size="13" fill="#7dd3fc">${sub}</text>
-      <text x="1120" y="795" font-family="monospace" font-size="11" fill="#38bdf8">REF: AURA-ARCH-CAD-992 // APPROVED</text>
+      <text x="1120" y="795" font-family="monospace" font-size="11" fill="#38bdf8">REF: JONOPOD-ARCH-CAD-992 // APPROVED</text>
       <text x="1120" y="820" font-family="monospace" font-size="10" fill="#94a3b8">AUTHORIZED ARCHITECTURAL DRAWING</text>
     </svg>
   `;
@@ -197,7 +197,7 @@ function createArchSvg(title: string, sub: string, type: 'blueprint' | 'exterior
 
 export const INITIAL_PROPERTIES: Property[] = [
   {
-    id: 'aura-solstice-residence',
+    id: 'jonopod-solstice-residence',
     title: 'The Solstice Pavilion',
     tagline: 'Sculptural post-tensioned cantilever overlooking the Pacific horizon',
     description: 'A benchmark in modern minimalist brutalism, Solstice Pavilion marries razor-thin cantilevered concrete planes with panoramic low-iron acoustic glass panels. Built into the coastal limestone bluff, the residence frames unbroken twilight ocean views with zero-edge reflection channels.',
@@ -212,7 +212,7 @@ export const INITIAL_PROPERTIES: Property[] = [
     bathrooms: 8,
     sqft: 12400,
     yearBuilt: 2025,
-    architect: 'Kengo Kuma & Associates / AURA Studio',
+    architect: 'Kengo Kuma & Associates / Jonopod Properties',
     structuralEngineer: 'Arup Façade Engineering',
     status: 'available',
     featured: true,
@@ -335,7 +335,7 @@ export const INITIAL_PROPERTIES: Property[] = [
     },
   },
   {
-    id: 'aura-skyline-tribeca',
+    id: 'jonopod-skyline-tribeca',
     title: 'The Tribeca Penthouse Sky Sanctuary',
     tagline: 'Crown triplex atop a historic cast-iron landmark with private rooftop lap pool',
     description: 'Occupying the uppermost three floors of Franklin Street, this triplex blends historic industrial heritage with pristine bespoke Italian minimalism. Soaring 24-foot ceilings, bronze pivot doors, and a private glass enclosed rooftop terrace command 360-degree views of Manhattan.',
@@ -432,7 +432,7 @@ export const INITIAL_PROPERTIES: Property[] = [
     },
   },
   {
-    id: 'aura-villa-bellagio',
+    id: 'jonopod-villa-bellagio',
     title: 'Villa Monolithica',
     tagline: 'Terraced stone brutalism rising above the azure shores of Lake Como',
     description: 'Chiseled directly from Moltrasio stone, Villa Monolithica commands a dramatic vantage over Lake Como. Featuring an underground boat dock carved into the rock face, tiered olive groves, and cantilevered basalt loggias that blur the line between geology and modern habitation.',
@@ -505,7 +505,7 @@ export const INITIAL_PROPERTIES: Property[] = [
     materials: ['Moltrasio Stone', 'Basaltina Tile', 'Aged Architectural Bronze', 'Solid Chestnut Wood'],
   },
   {
-    id: 'aura-alpine-sanctuary',
+    id: 'jonopod-alpine-sanctuary',
     title: 'The Aspen Glass Pavilion',
     tagline: 'Precision alpine glass & timber engineering tucked into the White River National Forest',
     description: 'Surrounded by towering aspens and snow-capped peaks, this alpine sanctuary is an ode to thermal glass architecture. Featuring triple-pane argon thermally isolated curtain walls, exposed Douglas fir glue-laminated beams, and an indoor-outdoor heated stone courtyard.',
@@ -571,7 +571,7 @@ export const INITIAL_PROPERTIES: Property[] = [
     materials: ['Douglas Fir Glulam', 'Colorado Sandstone', 'Blackened Steel', 'Triple-Pane Structural Glazing'],
   },
   {
-    id: 'aura-kyoto-residence',
+    id: 'jonopod-kyoto-residence',
     title: 'The Kyoto Sukiya Pavilion',
     tagline: 'Modernist interpretation of traditional Japanese Sukiya-zukuri architecture',
     description: 'Set along the tranquil slopes of Higashiyama, this residence pairs centuries-old joinery traditions with modern structural glass and polished black granite. Shading screens of cedar louvers modulate soft afternoon light onto tatami meditation chambers and internal rock gardens.',

@@ -50,36 +50,36 @@ export const PropertySearchFilters: React.FC<PropertySearchFiltersProps> = ({
   };
 
   return (
-    <div className="w-full bg-slate-900/60 backdrop-blur-md border border-slate-800 rounded-2xl p-6 shadow-xl space-y-6">
+    <div className="w-full bg-[#FCFBF8] backdrop-blur-md border border-[#181512]/10 rounded-2xl p-6 shadow-sm space-y-6">
       <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4">
         <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#786F63]" />
           <input
             type="text"
             value={filters.searchQuery}
             onChange={(e) => onChange({ ...filters, searchQuery: e.target.value })}
             placeholder="Search by architectural master, city, or feature..."
-            className="w-full pl-10 pr-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs font-mono text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 transition-colors"
+            className="lux-input !pl-10 !pr-4 !py-2.5 !text-xs font-mono"
           />
           {filters.searchQuery && (
             <button
               onClick={() => onChange({ ...filters, searchQuery: '' })}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white text-xs font-mono cursor-pointer"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-[#786F63] hover:text-[#181512] text-xs font-mono cursor-pointer"
             >
               Clear
             </button>
           )}
         </div>
 
-        <div className="flex items-center gap-1 p-1 bg-slate-950 border border-slate-800 rounded-xl overflow-x-auto">
+        <div className="flex items-center gap-1 p-1 bg-[#EFEAE1] border border-[#181512]/10 rounded-xl overflow-x-auto">
           {PROPERTY_TYPES.map((t) => (
             <button
               key={t.value}
               onClick={() => handleTypeChange(t.value)}
               className={`px-3.5 py-1.5 text-xs font-mono rounded-lg transition-colors whitespace-nowrap cursor-pointer ${
                 filters.propertyType === t.value
-                  ? 'bg-slate-800 text-cyan-300 font-medium shadow-sm'
-                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900/50'
+                  ? 'bg-[#FCFBF8] text-[#5C3D1E] font-medium shadow-2xs'
+                  : 'text-[#5C5346] hover:text-[#181512]'
               }`}
             >
               {t.label}
@@ -88,16 +88,16 @@ export const PropertySearchFilters: React.FC<PropertySearchFiltersProps> = ({
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-5 border-t border-slate-800/80">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-5 border-t border-[#181512]/10">
         <div>
-          <label className="block text-[11px] font-mono text-slate-400 uppercase tracking-wider mb-2 flex items-center gap-1.5">
-            <MapPin className="w-3.5 h-3.5 text-cyan-400" />
+          <label className="block text-[11px] font-mono text-[#6E6559] uppercase tracking-wider mb-2 flex items-center gap-1.5">
+            <MapPin className="w-3.5 h-3.5 text-[#9A6B3B]" />
             <span>Geographic Territory</span>
           </label>
           <select
             value={filters.location}
             onChange={(e) => handleLocationChange(e.target.value)}
-            className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs font-mono text-slate-200 focus:outline-none focus:border-cyan-500"
+            className="lux-select !py-2 !text-xs font-mono"
           >
             <option value="all">All Global Locations ({availableLocations.length})</option>
             {availableLocations.map((loc) => (
@@ -109,12 +109,12 @@ export const PropertySearchFilters: React.FC<PropertySearchFiltersProps> = ({
         </div>
 
         <div>
-          <div className="flex items-center justify-between text-[11px] font-mono text-slate-400 uppercase tracking-wider mb-2">
+          <div className="flex items-center justify-between text-[11px] font-mono text-[#6E6559] uppercase tracking-wider mb-2">
             <span className="flex items-center gap-1.5">
-              <DollarSign className="w-3.5 h-3.5 text-amber-400" />
+              <DollarSign className="w-3.5 h-3.5 text-[#9A6B3B]" />
               <span>Valuation Cap</span>
             </span>
-            <span className="text-white font-medium">Up to ${(filters.maxPrice / 1000000).toFixed(0)}M</span>
+            <span className="text-[#181512] font-medium">Up to ${(filters.maxPrice / 1000000).toFixed(0)}M</span>
           </div>
           <input
             type="range"
@@ -123,23 +123,23 @@ export const PropertySearchFilters: React.FC<PropertySearchFiltersProps> = ({
             step="2000000"
             value={filters.maxPrice}
             onChange={(e) => handleMaxPriceChange(Number(e.target.value))}
-            className="w-full accent-cyan-400 cursor-pointer h-1.5 bg-slate-950 rounded-lg"
+            className="w-full accent-[#9A6B3B] cursor-pointer h-1.5 bg-[#E5DEC9] rounded-lg"
           />
-          <div className="flex items-center justify-between text-[10px] font-mono text-slate-500 mt-1">
+          <div className="flex items-center justify-between text-[10px] font-mono text-[#786F63] mt-1">
             <span>$10M</span>
             <span>$50M+</span>
           </div>
         </div>
 
         <div>
-          <label className="block text-[11px] font-mono text-slate-400 uppercase tracking-wider mb-2 flex items-center gap-1.5">
-            <ArrowUpDown className="w-3.5 h-3.5 text-cyan-400" />
+          <label className="block text-[11px] font-mono text-[#6E6559] uppercase tracking-wider mb-2 flex items-center gap-1.5">
+            <ArrowUpDown className="w-3.5 h-3.5 text-[#9A6B3B]" />
             <span>Curation Order</span>
           </label>
           <select
             value={filters.sortBy}
             onChange={(e) => handleSortChange(e.target.value as any)}
-            className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs font-mono text-slate-200 focus:outline-none focus:border-cyan-500"
+            className="lux-select !py-2 !text-xs font-mono"
           >
             <option value="featured">Editorial Significance (Curated)</option>
             <option value="price-desc">Valuation: High to Low</option>
@@ -149,11 +149,11 @@ export const PropertySearchFilters: React.FC<PropertySearchFiltersProps> = ({
         </div>
       </div>
 
-      <div className="flex items-center justify-between pt-4 border-t border-slate-800/60 text-xs font-mono text-slate-400">
+      <div className="flex items-center justify-between pt-4 border-t border-[#181512]/10 text-xs font-mono text-[#6E6559]">
         <div className="flex items-center gap-2">
           <span>PORTFOLIO SELECTION</span>
-          <span className="text-slate-600">·</span>
-          <span className="text-cyan-400 font-semibold">{totalResults} PROPERTIES READY FOR VIEWING</span>
+          <span className="text-[#8C8275]">·</span>
+          <span className="text-[#9A6B3B] font-semibold">{totalResults} PROPERTIES READY FOR VIEWING</span>
         </div>
         {(filters.searchQuery || filters.propertyType !== 'all' || filters.location !== 'all' || filters.maxPrice < 50000000) && (
           <button
@@ -167,7 +167,7 @@ export const PropertySearchFilters: React.FC<PropertySearchFiltersProps> = ({
                 sortBy: 'featured',
               })
             }
-            className="text-cyan-400 hover:text-cyan-300 underline cursor-pointer"
+            className="text-[#9A6B3B] hover:text-[#684724] underline cursor-pointer"
           >
             Reset Filters
           </button>

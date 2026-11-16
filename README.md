@@ -1,4 +1,4 @@
-# AURA — Architectural Residences
+# Jonopod Properties — Architectural Residences
 
 A modern real estate showcase and listing management web application built with React, TypeScript, GSAP, and Firebase.
 

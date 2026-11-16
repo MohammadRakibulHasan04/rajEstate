@@ -133,7 +133,7 @@ export const ListingEditor: React.FC<EditorProps> = ({ id }) => {
       }
       // Check localStorage draft
       try {
-        const cached = localStorage.getItem('aura_listing_draft_new');
+        const cached = localStorage.getItem('jonopod_listing_draft_new');
         if (cached) {
           const parsed = JSON.parse(cached);
           setForm({ ...parsed, amenities: normalizeAmenities(parsed.amenities) });
@@ -149,7 +149,7 @@ export const ListingEditor: React.FC<EditorProps> = ({ id }) => {
     if (!id && form.title) {
       const handler = setTimeout(() => {
         try {
-          localStorage.setItem('aura_listing_draft_new', JSON.stringify(form));
+          localStorage.setItem('jonopod_listing_draft_new', JSON.stringify(form));
         } catch {
           // ignore
         }
@@ -233,7 +233,7 @@ export const ListingEditor: React.FC<EditorProps> = ({ id }) => {
       setHasChanges(false);
       if (!id) {
         try {
-          localStorage.removeItem('aura_listing_draft_new');
+          localStorage.removeItem('jonopod_listing_draft_new');
         } catch {}
       }
       toast(`Listing saved successfully (${listingToSave.publish})`, 'ok');
@@ -283,23 +283,23 @@ export const ListingEditor: React.FC<EditorProps> = ({ id }) => {
 
   if (loading && id) {
     return (
-      <div className="min-h-screen bg-[#070b14] flex items-center justify-center p-6 text-slate-400">
+      <div className="min-h-screen bg-[#F6F2EA] flex items-center justify-center p-6 text-[#6E6559]">
         <div className="skeleton w-64 h-10 rounded-lg" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#070b14] text-[#f4efe6] pb-32">
+    <div className="min-h-screen bg-[#F6F2EA] text-[#181512] pb-32">
       {toastView}
 
       {/* Editor Top Bar Header */}
-      <header className="sticky top-0 z-40 bg-[#070b14]/90 backdrop-blur-xl border-b border-white/[0.08] px-6 md:px-12 py-4">
+      <header className="sticky top-0 z-40 bg-[#FAF7F2]/92 backdrop-blur-xl border-b border-[#181512]/[0.08] px-6 md:px-12 py-4">
         <div className="max-w-[90rem] mx-auto flex items-center justify-between gap-4">
           <div className="flex items-center gap-4">
             <Link
               to="/manage"
-              className="p-2 rounded-full border border-white/10 hover:border-[#d1ad7a] text-slate-300 hover:text-white transition-colors"
+              className="p-2 rounded-full border border-[#181512]/15 bg-[#FCFBF8] hover:border-[#9A6B3B] text-[#3D362E] hover:text-[#181512] transition-colors"
               title="Return to Dashboard"
             >
               <ArrowLeft className="w-4 h-4" />
@@ -312,10 +312,10 @@ export const ListingEditor: React.FC<EditorProps> = ({ id }) => {
                 {parentProject && (
                   <Link
                     to={`/manage/edit/${parentProject.id}`}
-                    className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full border border-[#d1ad7a]/40 bg-[#d1ad7a]/10 text-[9.5px] font-mono uppercase tracking-wider text-[#f1dfbd] hover:border-[#d1ad7a] transition-colors"
+                    className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full border border-[#9A6B3B]/40 bg-[#9A6B3B]/10 text-[9.5px] font-mono uppercase tracking-wider text-[#5C3D1E] hover:border-[#9A6B3B] transition-colors"
                     title="Open parent building project"
                   >
-                    <Building2 className="w-3 h-3 text-[#d1ad7a]" />
+                    <Building2 className="w-3 h-3 text-[#9A6B3B]" />
                     <span>
                       {parentProject.title}
                       {ownUnit ? ` · Unit ${ownUnit.code}` : ''}
@@ -324,7 +324,7 @@ export const ListingEditor: React.FC<EditorProps> = ({ id }) => {
                   </Link>
                 )}
               </div>
-              <h1 className="font-display text-xl text-[#f4efe6] truncate max-w-sm sm:max-w-md">
+              <h1 className="font-display text-xl text-[#181512] truncate max-w-sm sm:max-w-md">
                 {form.title || 'Untitled Residence'}
               </h1>
             </div>
@@ -373,7 +373,7 @@ export const ListingEditor: React.FC<EditorProps> = ({ id }) => {
         <aside className="lg:col-span-3 space-y-6">
           <div className="lg:sticky lg:top-24 space-y-6">
             <div className="panel p-4 space-y-1">
-              <span className="mono-label block px-3 py-1.5 text-slate-500">Form Navigation</span>
+              <span className="mono-label block px-3 py-1.5 text-[#786F63]">Form Navigation</span>
               {SECTION_NAV.map((sec) => {
                 const Icon = sec.icon;
                 const active = activeSection === sec.id;
@@ -384,8 +384,8 @@ export const ListingEditor: React.FC<EditorProps> = ({ id }) => {
                     onClick={() => scrollTo(sec.id)}
                     className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left text-xs font-mono tracking-wider transition-all cursor-pointer ${
                       active
-                        ? 'bg-[#d1ad7a]/10 text-[#f1dfbd] border border-[#d1ad7a]/40 font-semibold'
-                        : 'text-slate-400 hover:text-white hover:bg-white/[0.02]'
+                        ? 'bg-[#9A6B3B]/12 text-[#5C3D1E] border border-[#9A6B3B]/40 font-semibold'
+                        : 'text-[#5C5346] hover:text-[#181512] hover:bg-[#181512]/[0.04]'
                     }`}
                   >
                     <Icon className="w-3.5 h-3.5 shrink-0" />
@@ -441,16 +441,16 @@ export const ListingEditor: React.FC<EditorProps> = ({ id }) => {
             </div>
 
             {form.kind === 'single' && (
-              <div className="rounded-2xl border border-[#d1ad7a]/30 bg-[#d1ad7a]/[0.04] p-5 space-y-4">
+              <div className="rounded-2xl border border-[#9A6B3B]/35 bg-[#9A6B3B]/[0.05] p-5 space-y-4">
                 <div className="flex items-center justify-between gap-4 flex-wrap">
                   <div className="flex items-center gap-2.5">
-                    <Building2 className="w-4 h-4 text-[#d1ad7a]" />
-                    <span className="mono-label !text-[#f1dfbd]">Project / Building Association</span>
+                    <Building2 className="w-4 h-4 text-[#9A6B3B]" />
+                    <span className="mono-label !text-[#684724]">Project / Building Association</span>
                   </div>
                   {parentProject && (
                     <Link
                       to={`/manage/edit/${parentProject.id}`}
-                      className="inline-flex items-center gap-1.5 text-xs font-mono text-[#d1ad7a] hover:text-[#f1dfbd]"
+                      className="inline-flex items-center gap-1.5 text-xs font-mono text-[#9A6B3B] hover:text-[#684724]"
                     >
                       <span>Edit {parentProject.title}</span>
                       <ArrowUpRight className="w-3.5 h-3.5" />
@@ -528,9 +528,9 @@ export const ListingEditor: React.FC<EditorProps> = ({ id }) => {
                 </div>
 
                 {parentProject && (
-                  <p className="text-xs text-slate-400 leading-relaxed">
-                    <strong className="text-[#f1dfbd]">Smart inheritance enabled:</strong> Any field you leave empty below (Location, Developer, RAJUK approval, Milestones, Amenities, Contact, Hero photo) automatically inherits from{' '}
-                    <span className="text-slate-200">{parentProject.title}</span>.
+                  <p className="text-xs text-[#4A433B] leading-relaxed">
+                    <strong className="text-[#684724]">Smart inheritance enabled:</strong> Any field you leave empty below (Location, Developer, RAJUK approval, Milestones, Amenities, Contact, Hero photo) automatically inherits from{' '}
+                    <span className="text-[#181512] font-medium">{parentProject.title}</span>.
                     {ownUnit
                       ? ` Core dimensions, price (${formatBdt(ownUnit.price)}), and availability (${ownUnit.status}) stay live-synced with Unit ${ownUnit.code}.`
                       : ''}
@@ -671,9 +671,9 @@ export const ListingEditor: React.FC<EditorProps> = ({ id }) => {
             </Field>
 
             {/* Proximity Places Repeater */}
-            <div className="pt-4 border-t border-white/[0.08]">
+            <div className="pt-4 border-t border-[#181512]/[0.08]">
               <span className="mono-label block mb-3">Nearby Proximity Landmarks (Minutes Away)</span>
-              <p className="text-xs text-slate-500 mb-4">
+              <p className="text-xs text-[#6E6559] mb-4">
                 Plotted on the 5, 10, and 20-minute concentric proximity rings on the presentation page.
               </p>
 
@@ -714,7 +714,7 @@ export const ListingEditor: React.FC<EditorProps> = ({ id }) => {
                         value={place.minutes}
                         onChange={(m) => setPlace({ minutes: m || 1 })}
                       />
-                      <span className="text-[10px] font-mono text-slate-500">MIN</span>
+                      <span className="text-[10px] font-mono text-[#786F63]">MIN</span>
                     </div>
                     <select
                       className="lux-select !py-2 !text-xs"
@@ -741,11 +741,11 @@ export const ListingEditor: React.FC<EditorProps> = ({ id }) => {
             {form.kind === 'single' ? (
               <div className="space-y-6">
                 {parentProject && ownUnit && (
-                  <div className="rounded-2xl border border-[#d1ad7a]/35 bg-[#d1ad7a]/[0.05] p-5 space-y-4">
+                  <div className="rounded-2xl border border-[#9A6B3B]/35 bg-[#9A6B3B]/[0.05] p-5 space-y-4">
                     <div className="flex items-center justify-between gap-4 flex-wrap">
                       <div>
-                        <span className="mono-label !text-[#d1ad7a]">Live-Synced from Project Unit</span>
-                        <h3 className="font-display text-2xl text-[#f4efe6] mt-1">
+                        <span className="mono-label !text-[#9A6B3B]">Live-Synced from Project Unit</span>
+                        <h3 className="font-display text-2xl text-[#181512] mt-1">
                           {parentProject.title} · Unit {ownUnit.code}
                         </h3>
                       </div>
@@ -757,25 +757,25 @@ export const ListingEditor: React.FC<EditorProps> = ({ id }) => {
                       </Link>
                     </div>
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs font-mono">
-                      <div className="rounded-xl bg-black/30 border border-white/[0.06] p-3">
-                        <span className="text-slate-500 block text-[10px] uppercase">Price</span>
-                        <span className="text-[#f1dfbd] text-sm mt-1 block">{formatBdt(ownUnit.price)}</span>
+                      <div className="rounded-xl bg-[#FCFBF8] border border-[#181512]/[0.08] p-3">
+                        <span className="text-[#786F63] block text-[10px] uppercase">Price</span>
+                        <span className="text-[#684724] font-semibold text-sm mt-1 block">{formatBdt(ownUnit.price)}</span>
                       </div>
-                      <div className="rounded-xl bg-black/30 border border-white/[0.06] p-3">
-                        <span className="text-slate-500 block text-[10px] uppercase">Area & Floor</span>
-                        <span className="text-slate-200 text-sm mt-1 block">
+                      <div className="rounded-xl bg-[#FCFBF8] border border-[#181512]/[0.08] p-3">
+                        <span className="text-[#786F63] block text-[10px] uppercase">Area & Floor</span>
+                        <span className="text-[#181512] text-sm mt-1 block">
                           {formatNumber(ownUnit.sizeSqft)} sq ft · Floor {ownUnit.floor}
                         </span>
                       </div>
-                      <div className="rounded-xl bg-black/30 border border-white/[0.06] p-3">
-                        <span className="text-slate-500 block text-[10px] uppercase">Layout</span>
-                        <span className="text-slate-200 text-sm mt-1 block">
+                      <div className="rounded-xl bg-[#FCFBF8] border border-[#181512]/[0.08] p-3">
+                        <span className="text-[#786F63] block text-[10px] uppercase">Layout</span>
+                        <span className="text-[#181512] text-sm mt-1 block">
                           {ownUnit.beds} Bed · {ownUnit.baths} Bath · {ownUnit.balconies} Balc
                         </span>
                       </div>
-                      <div className="rounded-xl bg-black/30 border border-white/[0.06] p-3">
-                        <span className="text-slate-500 block text-[10px] uppercase">Facing & Status</span>
-                        <span className="text-slate-200 text-sm mt-1 block uppercase">
+                      <div className="rounded-xl bg-[#FCFBF8] border border-[#181512]/[0.08] p-3">
+                        <span className="text-[#786F63] block text-[10px] uppercase">Facing & Status</span>
+                        <span className="text-[#181512] text-sm mt-1 block uppercase">
                           {ownUnit.facing} · {ownUnit.status}
                         </span>
                       </div>
@@ -1091,7 +1091,7 @@ export const ListingEditor: React.FC<EditorProps> = ({ id }) => {
             </div>
 
             {/* Milestones */}
-            <div className="pt-4 border-t border-white/[0.08]">
+            <div className="pt-4 border-t border-[#181512]/[0.08]">
               <span className="mono-label block mb-3">Construction Milestones Progress Rail</span>
               <Repeater
                 idPrefix="milestones"
@@ -1119,9 +1119,9 @@ export const ListingEditor: React.FC<EditorProps> = ({ id }) => {
                         type="checkbox"
                         checked={m.done}
                         onChange={(e) => setM({ done: e.target.checked })}
-                        className="rounded border-white/20 bg-black/40 text-[#d1ad7a] focus:ring-0"
+                        className="rounded border-[#181512]/25 bg-[#FCFBF8] text-[#9A6B3B] focus:ring-0"
                       />
-                      <span className="text-xs text-slate-300">Completed</span>
+                      <span className="text-xs text-[#3D362E]">Completed</span>
                     </label>
                   </div>
                 )}
@@ -1129,7 +1129,7 @@ export const ListingEditor: React.FC<EditorProps> = ({ id }) => {
             </div>
 
             {/* Amenities & Features with Icon Picker */}
-            <div className="pt-4 border-t border-white/[0.08]">
+            <div className="pt-4 border-t border-[#181512]/[0.08]">
               <Field
                 label="Amenities & Features (Cards & Icons)"
                 hint="Curate property amenities with bespoke architectural icons and optional subtitles."
@@ -1142,7 +1142,7 @@ export const ListingEditor: React.FC<EditorProps> = ({ id }) => {
             </div>
 
             {/* Contact direct */}
-            <div className="pt-4 border-t border-white/[0.08] grid sm:grid-cols-3 gap-5">
+            <div className="pt-4 border-t border-[#181512]/[0.08] grid sm:grid-cols-3 gap-5">
               <Field label="Inquiry Call Phone *">
                 <TextInput
                   value={form.contact.phone}
@@ -1160,7 +1160,7 @@ export const ListingEditor: React.FC<EditorProps> = ({ id }) => {
               <Field label="Atelier Email">
                 <TextInput
                   value={form.contact.email || ''}
-                  placeholder="info@aura.com.bd"
+                  placeholder="info@jonopodproperties.com"
                   onChange={(em) => updateContact({ email: em })}
                 />
               </Field>
@@ -1200,11 +1200,11 @@ export const ListingEditor: React.FC<EditorProps> = ({ id }) => {
               </Field>
             </div>
 
-            <div className="space-y-4 pt-4 border-t border-white/[0.08]">
+            <div className="space-y-4 pt-4 border-t border-[#181512]/[0.08]">
               <Field label="Search Title Tag">
                 <TextInput
                   value={form.seo?.title || ''}
-                  placeholder={`${form.title} · ${form.location.area || 'Dhaka'} | AURA`}
+                  placeholder={`${form.title} · ${form.location.area || 'Dhaka'} | Jonopod Properties`}
                   onChange={(t) => updateSeo({ title: t })}
                 />
               </Field>
@@ -1220,7 +1220,7 @@ export const ListingEditor: React.FC<EditorProps> = ({ id }) => {
               </Field>
             </div>
 
-            <div className="flex flex-wrap items-center justify-between gap-4 pt-6 border-t border-white/[0.08]">
+            <div className="flex flex-wrap items-center justify-between gap-4 pt-6 border-t border-[#181512]/[0.08]">
               <Link to="/manage" className="btn-ghost">
                 Discard Changes
               </Link>

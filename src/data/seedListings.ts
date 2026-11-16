@@ -175,10 +175,10 @@ export const BARAKAH: Listing = {
     ],
   },
 
-  contact: { phone: '+880 1XXX-XXXXXX', whatsapp: '', email: 'info@aura.com.bd' },
+  contact: { phone: '+880 1XXX-XXXXXX', whatsapp: '', email: 'info@jonopodproperties.com' },
   seo: {
-    title: 'The Barakah Residence · 3 Bed South-East Apartment, Bashundhara | AURA',
-    description: 'A 1,850 sq ft, south-east facing 3-bed apartment on the 7th floor in Bashundhara R/A. Ready to move. Arrange a private visit with AURA.',
+    title: 'The Barakah Residence · 3 Bed South-East Apartment, Bashundhara | Jonopod Properties',
+    description: 'A 1,850 sq ft, south-east facing 3-bed apartment on the 7th floor in Bashundhara R/A. Ready to move. Arrange a private visit with Jonopod Properties.',
   },
   createdAt: NOW,
   updatedAt: NOW,

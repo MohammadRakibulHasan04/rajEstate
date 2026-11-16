@@ -31,6 +31,18 @@ function clean<T>(v: T): T {
 
 function fromDoc(id: string, data: Record<string, unknown>): Listing {
   const l = data as unknown as Listing;
+  const rawContact = l.contact || { phone: '' };
+  const contact = {
+    ...rawContact,
+    email: rawContact.email === 'info@aura.com.bd' ? 'info@jonopodproperties.com' : rawContact.email,
+  };
+  const seo = l.seo
+    ? {
+        ...l.seo,
+        title: l.seo.title ? l.seo.title.replace(/\|\s*AURA\b/gi, '| Jonopod Properties') : l.seo.title,
+        description: l.seo.description ? l.seo.description.replace(/\bwith AURA\b/gi, 'with Jonopod Properties') : l.seo.description,
+      }
+    : undefined;
   return {
     ...l,
     id,
@@ -49,7 +61,8 @@ function fromDoc(id: string, data: Record<string, unknown>): Listing {
     price: l.price || { amount: 0, negotiable: false },
     core: l.core || {},
     trust: l.trust || { developer: '', milestones: [] },
-    contact: l.contact || { phone: '' },
+    contact,
+    ...(seo ? { seo } : {}),
   };
 }
 
@@ -57,7 +70,7 @@ export const PUBLISHED_SEEDS = SEED_LISTINGS.filter((l) => l.publish === 'publis
 
 /* ── Smart In-Memory + Session Cache ───────────────────────────── */
 
-const SESSION_CACHE_KEY = 'aura_listings_cache_v1';
+const SESSION_CACHE_KEY = 'jonopod_listings_cache_v1';
 
 interface ListingsCache {
   published: { listings: Listing[]; fromSeed: boolean } | null;

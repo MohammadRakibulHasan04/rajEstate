@@ -56,21 +56,21 @@ export const BookingInquiryModal: React.FC<BookingInquiryModalProps> = ({ proper
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4">
-      <div className="relative w-full max-w-lg bg-slate-950 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl text-slate-100 p-6">
-        <div className="flex items-center justify-between pb-4 border-b border-slate-800">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#181512]/45 backdrop-blur-md p-4">
+      <div className="relative w-full max-w-lg bg-[#FAF7F2] border border-[#181512]/12 rounded-2xl overflow-hidden shadow-2xl text-[#181512] p-6">
+        <div className="flex items-center justify-between pb-4 border-b border-[#181512]/10">
           <div>
-            <div className="flex items-center gap-2 text-xs font-mono text-cyan-400">
+            <div className="flex items-center gap-2 text-xs font-mono text-[#9A6B3B]">
               <Calendar className="w-3.5 h-3.5" />
               <span>PRIVATE ARCHITECTURAL VIEWING</span>
             </div>
-            <h3 className="text-lg font-display font-medium text-white mt-1">
+            <h3 className="text-lg font-display font-medium text-[#181512] mt-1">
               {property.title}
             </h3>
           </div>
           <button
             onClick={onClose}
-            className="p-2 text-slate-400 hover:text-white rounded-lg bg-slate-900 border border-slate-800 transition-colors cursor-pointer"
+            className="p-2 text-[#4A433B] hover:text-[#181512] rounded-lg bg-[#F3EFE7] border border-[#181512]/12 transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
@@ -78,19 +78,19 @@ export const BookingInquiryModal: React.FC<BookingInquiryModalProps> = ({ proper
 
         {isSuccess ? (
           <div className="py-8 text-center space-y-4">
-            <div className="w-14 h-14 rounded-full bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 flex items-center justify-center mx-auto">
+            <div className="w-14 h-14 rounded-full bg-emerald-600/12 border border-emerald-600/35 text-emerald-700 flex items-center justify-center mx-auto">
               <CheckCircle2 className="w-8 h-8" />
             </div>
-            <h4 className="text-xl font-display font-medium text-white">
+            <h4 className="text-xl font-display font-medium text-[#181512]">
               Viewing Request Confirmed
             </h4>
-            <p className="text-xs text-slate-300 max-w-sm mx-auto leading-relaxed">
-              Your appointment request has been recorded into our real-time advisory system. An architectural representative will contact you at <strong className="text-white">{email}</strong>.
+            <p className="text-xs text-[#4A433B] max-w-sm mx-auto leading-relaxed">
+              Your appointment request has been recorded into our real-time advisory system. An architectural representative will contact you at <strong className="text-[#181512]">{email}</strong>.
             </p>
             <div className="pt-4">
               <button
                 onClick={onClose}
-                className="px-6 py-2.5 rounded-lg bg-cyan-400 text-slate-950 font-mono text-xs font-semibold hover:bg-cyan-300 transition-colors cursor-pointer"
+                className="btn-gold !py-2.5 !px-6"
               >
                 RETURN TO PROPERTY
               </button>
@@ -99,13 +99,13 @@ export const BookingInquiryModal: React.FC<BookingInquiryModalProps> = ({ proper
         ) : (
           <form onSubmit={handleSubmit} className="mt-5 space-y-4">
             {errorMsg && (
-              <div className="p-3 bg-red-950/50 border border-red-800 text-red-300 text-xs rounded-lg">
+              <div className="p-3 bg-red-50 border border-red-300 text-red-700 text-xs rounded-lg">
                 {errorMsg}
               </div>
             )}
 
             <div>
-              <label className="block text-xs font-mono text-slate-400 mb-1.5 uppercase">
+              <label className="block text-xs font-mono text-[#6E6559] mb-1.5 uppercase">
                 Viewing Format
               </label>
               <div className="grid grid-cols-3 gap-2">
@@ -119,8 +119,8 @@ export const BookingInquiryModal: React.FC<BookingInquiryModalProps> = ({ proper
                     onClick={() => setTourType(t.id as any)}
                     className={`p-2.5 rounded-lg text-xs font-mono text-center transition-colors border cursor-pointer ${
                       tourType === t.id
-                        ? 'bg-cyan-500/20 text-cyan-300 border-cyan-500/50 font-medium'
-                        : 'bg-slate-900 text-slate-400 border-slate-800 hover:text-slate-200'
+                        ? 'bg-[#9A6B3B]/15 text-[#5C3D1E] border-[#9A6B3B] font-medium'
+                        : 'bg-[#F3EFE7] text-[#5C5346] border-[#181512]/12 hover:text-[#181512]'
                     }`}
                   >
                     {t.label}
@@ -131,7 +131,7 @@ export const BookingInquiryModal: React.FC<BookingInquiryModalProps> = ({ proper
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label className="block text-xs font-mono text-slate-400 mb-1 uppercase">
+                <label className="block text-xs font-mono text-[#6E6559] mb-1 uppercase">
                   Full Name
                 </label>
                 <input
@@ -140,11 +140,11 @@ export const BookingInquiryModal: React.FC<BookingInquiryModalProps> = ({ proper
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
                   placeholder="e.g. Eleanor Vance"
-                  className="w-full px-3 py-2 bg-slate-900 border border-slate-800 rounded-lg text-sm text-white focus:outline-none focus:border-cyan-500"
+                  className="lux-input !py-2"
                 />
               </div>
               <div>
-                <label className="block text-xs font-mono text-slate-400 mb-1 uppercase">
+                <label className="block text-xs font-mono text-[#6E6559] mb-1 uppercase">
                   Email Address
                 </label>
                 <input
@@ -153,14 +153,14 @@ export const BookingInquiryModal: React.FC<BookingInquiryModalProps> = ({ proper
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="name@domain.com"
-                  className="w-full px-3 py-2 bg-slate-900 border border-slate-800 rounded-lg text-sm text-white focus:outline-none focus:border-cyan-500"
+                  className="lux-input !py-2"
                 />
               </div>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label className="block text-xs font-mono text-slate-400 mb-1 uppercase">
+                <label className="block text-xs font-mono text-[#6E6559] mb-1 uppercase">
                   Telephone (Optional)
                 </label>
                 <input
@@ -168,24 +168,24 @@ export const BookingInquiryModal: React.FC<BookingInquiryModalProps> = ({ proper
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
                   placeholder="+1 (555) 019-2834"
-                  className="w-full px-3 py-2 bg-slate-900 border border-slate-800 rounded-lg text-sm text-white focus:outline-none focus:border-cyan-500"
+                  className="lux-input !py-2"
                 />
               </div>
               <div>
-                <label className="block text-xs font-mono text-slate-400 mb-1 uppercase">
+                <label className="block text-xs font-mono text-[#6E6559] mb-1 uppercase">
                   Preferred Date
                 </label>
                 <input
                   type="date"
                   value={preferredDate}
                   onChange={(e) => setPreferredDate(e.target.value)}
-                  className="w-full px-3 py-2 bg-slate-900 border border-slate-800 rounded-lg text-sm text-white focus:outline-none focus:border-cyan-500"
+                  className="lux-input !py-2"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-mono text-slate-400 mb-1 uppercase">
+              <label className="block text-xs font-mono text-[#6E6559] mb-1 uppercase">
                 Architectural Inquiries or Requirements
               </label>
               <textarea
@@ -193,20 +193,20 @@ export const BookingInquiryModal: React.FC<BookingInquiryModalProps> = ({ proper
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
                 placeholder="Inquire regarding post-tensioned spans, site visit protocols, or confidential acquisition..."
-                className="w-full px-3 py-2 bg-slate-900 border border-slate-800 rounded-lg text-sm text-white focus:outline-none focus:border-cyan-500 resize-none"
+                className="lux-textarea !py-2 resize-none"
               />
             </div>
 
             <div className="pt-2 flex items-center justify-between">
-              <span className="text-[11px] font-mono text-slate-500 flex items-center gap-1.5">
-                <Shield className="w-3.5 h-3.5" />
+              <span className="text-[11px] font-mono text-[#786F63] flex items-center gap-1.5">
+                <Shield className="w-3.5 h-3.5 text-[#9A6B3B]" />
                 <span>CONFIDENTIAL ENCRYPTION</span>
               </span>
 
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="px-5 py-2.5 bg-cyan-400 hover:bg-cyan-300 disabled:opacity-50 text-slate-950 font-mono text-xs font-semibold rounded-lg shadow-lg hover:shadow-cyan-400/20 transition-all cursor-pointer"
+                className="btn-gold !py-2.5 !px-5"
               >
                 {isSubmitting ? 'TRANSMITTING...' : 'CONFIRM RESERVATION'}
               </button>

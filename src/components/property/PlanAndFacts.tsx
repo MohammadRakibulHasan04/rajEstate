@@ -19,7 +19,7 @@ export const PlanAndFacts: React.FC<Props> = ({ listing, facts, onInquireUnit, o
   if (!plans.length && !facts.length && !listing.units.length) return null;
 
   return (
-    <section id="plan" className="relative overflow-hidden py-28 md:py-40">
+    <section id="plan" className="relative overflow-hidden py-28 md:py-40 bg-[#EFEAE1] border-y border-[#181512]/[0.07]">
       <span
         aria-hidden="true"
         className="text-outline pointer-events-none absolute top-8 left-0 whitespace-nowrap font-display font-light italic text-[20vw] leading-none select-none"
@@ -31,11 +31,11 @@ export const PlanAndFacts: React.FC<Props> = ({ listing, facts, onInquireUnit, o
         <div className="grid lg:grid-cols-12 gap-10 items-end mb-16 md:mb-20" data-reveal>
           <div className="lg:col-span-8 max-w-4xl">
             <div className="eyebrow mb-7">The Plan</div>
-            <h2 className="font-display font-light text-5xl sm:text-6xl lg:text-[5rem] leading-[1.3] sm:leading-[1.34] tracking-normal py-1">
+            <h2 className="font-display font-light text-5xl sm:text-6xl lg:text-[5rem] leading-[1.3] sm:leading-[1.34] tracking-normal py-1 text-[#181512]">
               সুচিন্তিত নকশা, <em className="italic text-gradient-gold">প্রতিটি ইঞ্চিতে।</em>
             </h2>
           </div>
-          <p className="lg:col-span-4 lg:col-start-9 text-[15px] text-slate-400 font-light leading-relaxed">
+          <p className="lg:col-span-4 lg:col-start-9 text-[15px] text-[#4A433B] font-light leading-relaxed">
             Every number below comes with its meaning: what it changes about the way you will live here.
           </p>
         </div>
@@ -46,10 +46,10 @@ export const PlanAndFacts: React.FC<Props> = ({ listing, facts, onInquireUnit, o
               <button
                 id="floorplan-open"
                 onClick={() => onOpenPlan(plan.url)}
-                className="relative block w-full rounded-2xl overflow-hidden border border-white/10 bg-[#0c1220] p-4 md:p-8 cursor-zoom-in group"
+                className="relative block w-full rounded-2xl overflow-hidden border border-[#181512]/12 bg-[#FCFBF8] shadow-[0_18px_45px_-16px_rgba(24,21,18,0.09)] p-4 md:p-8 cursor-zoom-in group"
               >
                 <img src={plan.url} alt={plan.caption || 'Floor plan'} className="w-full h-auto rounded-lg transition-transform duration-1000 group-hover:scale-[1.02]" loading="lazy" />
-                <span className="absolute bottom-6 right-6 md:bottom-10 md:right-10 px-4 py-2 rounded-full panel-glass text-[10px] font-mono tracking-[0.28em] uppercase text-[#d1ad7a]">
+                <span className="absolute bottom-6 right-6 md:bottom-10 md:right-10 px-4 py-2 rounded-full panel-glass text-[10px] font-mono tracking-[0.28em] uppercase text-[#7C5329] font-medium">
                   {plan.caption || 'Floor plan'}
                 </span>
               </button>
@@ -68,17 +68,17 @@ export const PlanAndFacts: React.FC<Props> = ({ listing, facts, onInquireUnit, o
           {facts.length > 0 && (
             <div className={plan ? 'lg:col-span-5' : 'lg:col-span-12 grid md:grid-cols-2 gap-x-12'}>
               {facts.map((f) => (
-                <div key={f.key} data-reveal className="group py-6 border-b border-white/[0.08] hover:border-[#d1ad7a]/30 transition-colors duration-500">
+                <div key={f.key} data-reveal className="group py-6 border-b border-[#181512]/10 hover:border-[#9A6B3B]/45 transition-colors duration-500">
                   <div className="flex items-baseline justify-between gap-6">
-                    <div className="text-[10px] font-mono tracking-[0.24em] uppercase text-slate-500">
+                    <div className="text-[10px] font-mono tracking-[0.24em] uppercase text-[#6E6559]">
                       {f.label}
-                      {f.labelBn && <span className="ml-2 normal-case tracking-normal font-sans text-slate-600">{f.labelBn}</span>}
+                      {f.labelBn && <span className="ml-2 normal-case tracking-normal font-sans text-[#8C8275]">{f.labelBn}</span>}
                     </div>
-                    <div className="font-display font-light text-2xl text-[#f4efe6] text-right group-hover:text-[#d1ad7a] transition-colors duration-500">
+                    <div className="font-display font-light text-2xl text-[#181512] text-right group-hover:text-[#9A6B3B] transition-colors duration-500">
                       {f.value}
                     </div>
                   </div>
-                  {f.why && <p className="mt-2.5 text-[13.5px] text-slate-400 leading-relaxed max-w-md">{f.why}</p>}
+                  {f.why && <p className="mt-2.5 text-[13.5px] text-[#4A433B] leading-relaxed max-w-md">{f.why}</p>}
                 </div>
               ))}
             </div>

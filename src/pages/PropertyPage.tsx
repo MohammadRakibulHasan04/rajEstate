@@ -51,7 +51,7 @@ export const PropertyPage: React.FC<{ slug: string }> = ({ slug }) => {
   const tiers = useMemo(() => (listing ? factsByTier(listing) : null), [listing]);
 
   useDocumentMeta(
-    listing ? listing.seo?.title || `${listing.title} · ${listing.location.area} | AURA` : 'Residence | AURA',
+    listing ? listing.seo?.title || `${listing.title} · ${listing.location.area} | Jonopod Properties` : 'Residence | Jonopod Properties',
     listing ? listing.seo?.description || listing.summary.slice(0, 158) : undefined
   );
 
@@ -122,7 +122,7 @@ export const PropertyPage: React.FC<{ slug: string }> = ({ slug }) => {
 
   if (loading || (parentId && parentLoading) || (adminChecking && !listing)) {
     return (
-      <div className="min-h-screen bg-[#070b14] p-6 md:p-20 flex flex-col justify-end gap-6" aria-busy="true">
+      <div className="min-h-screen bg-[#F6F2EA] p-6 md:p-20 flex flex-col justify-end gap-6" aria-busy="true">
         <div className="skeleton h-4 w-48 rounded" />
         <div className="skeleton h-24 w-3/4 max-w-3xl rounded-xl" />
         <div className="skeleton h-16 w-1/2 max-w-xl rounded-xl" />
@@ -132,10 +132,10 @@ export const PropertyPage: React.FC<{ slug: string }> = ({ slug }) => {
 
   if (!listing || !tiers) {
     return (
-      <main className="min-h-screen bg-[#070b14] text-[#f4efe6] flex flex-col items-center justify-center text-center px-6">
+      <main className="min-h-screen bg-[#F6F2EA] text-[#181512] flex flex-col items-center justify-center text-center px-6">
         <span className="text-outline font-display text-[30vw] leading-none select-none" aria-hidden="true">404</span>
-        <h1 className="font-display text-4xl md:text-5xl leading-[1.34] tracking-normal py-2 max-w-2xl -mt-10">এই ঠিকানাটি খুঁজে পাওয়া যায়নি।</h1>
-        <p className="mt-4 text-slate-400">This residence may have been sold or moved.</p>
+        <h1 className="font-display text-4xl md:text-5xl leading-[1.34] tracking-normal py-2 max-w-2xl -mt-10 text-[#181512]">এই ঠিকানাটি খুঁজে পাওয়া যায়নি।</h1>
+        <p className="mt-4 text-[#5C5346]">This residence may have been sold or moved.</p>
         <Link to="/" className="btn-gold mt-10">Back to residences</Link>
       </main>
     );
@@ -173,14 +173,14 @@ export const PropertyPage: React.FC<{ slug: string }> = ({ slug }) => {
     : mergedGallery;
 
   return (
-    <div ref={rootRef} className="min-h-screen bg-[#070b14] text-[#f4efe6] selection:bg-cyan-500/30 selection:text-white">
+    <div ref={rootRef} className="min-h-screen bg-[#F6F2EA] text-[#181512] selection:bg-[#9A6B3B]/20 selection:text-[#181512]">
       {/* Progress */}
-      <div className="fixed top-0 inset-x-0 z-[100] h-[2px] bg-white/5">
-        <div ref={progressRef} className="h-full origin-left bg-gradient-to-r from-[#d1ad7a] via-[#f1dfbd] to-[#d1ad7a]" style={{ transform: 'scaleX(0)' }} />
+      <div className="fixed top-0 inset-x-0 z-[100] h-[2px] bg-[#181512]/[0.06]">
+        <div ref={progressRef} className="h-full origin-left bg-gradient-to-r from-[#855B30] via-[#C89B62] to-[#855B30]" style={{ transform: 'scaleX(0)' }} />
       </div>
 
       {isDraft && (
-        <div className="fixed top-[2px] inset-x-0 z-[95] bg-[#d1ad7a] text-[#120d07] text-center text-[10.5px] font-mono tracking-[0.22em] uppercase py-1.5">
+        <div className="fixed top-[2px] inset-x-0 z-[95] bg-[#9A6B3B] text-[#FAF7F2] text-center text-[10.5px] font-mono tracking-[0.22em] uppercase py-1.5">
           Preview · this listing is {listing.publish} and only visible to admins
         </div>
       )}
@@ -189,8 +189,8 @@ export const PropertyPage: React.FC<{ slug: string }> = ({ slug }) => {
       <nav
         className={`fixed inset-x-0 z-[90] transition-all duration-500 ${isDraft ? 'top-7' : 'top-0'} ${
           navSolid
-            ? 'bg-[#070b14]/90 backdrop-blur-xl border-b border-white/[0.08] py-3.5'
-            : 'bg-[#070b14]/75 backdrop-blur-md border-b border-white/[0.04] py-4'
+            ? 'bg-[#FAF7F2]/92 backdrop-blur-xl border-b border-[#181512]/[0.09] shadow-[0_8px_30px_-16px_rgba(24,21,18,0.08)] py-3.5'
+            : 'bg-[#F6F2EA]/82 backdrop-blur-md border-b border-[#181512]/[0.06] py-4'
         }`}
         aria-label="Property navigation"
       >
@@ -199,18 +199,18 @@ export const PropertyPage: React.FC<{ slug: string }> = ({ slug }) => {
             <button
               id="property-back"
               onClick={() => goBack(parent ? projectHref(parent, ownUnit?.code) : '/#showcase')}
-              className="group inline-flex items-center gap-3 text-[11px] font-mono tracking-[0.26em] uppercase text-slate-300 hover:text-[#d1ad7a] transition-colors cursor-pointer"
+              className="group inline-flex items-center gap-3 text-[11px] font-mono tracking-[0.26em] uppercase text-[#3D362E] hover:text-[#9A6B3B] transition-colors cursor-pointer"
             >
               <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform duration-500" />
               Back
             </button>
             {parent && parentId && (
               <>
-                <span className="text-white/15 font-mono text-xs">/</span>
+                <span className="text-[#181512]/20 font-mono text-xs">/</span>
                 <Link
                   to={projectHref(parent, ownUnit?.code)}
                   id="nav-project-link"
-                  className="text-[11px] font-mono tracking-[0.22em] uppercase text-[#d1ad7a] hover:text-[#f1dfbd] transition-colors truncate max-w-[180px] sm:max-w-xs"
+                  className="text-[11px] font-mono tracking-[0.22em] uppercase text-[#9A6B3B] hover:text-[#684724] transition-colors truncate max-w-[180px] sm:max-w-xs"
                 >
                   {parent.title}
                 </Link>
@@ -218,7 +218,7 @@ export const PropertyPage: React.FC<{ slug: string }> = ({ slug }) => {
             )}
           </div>
 
-          <div className="hidden lg:flex items-center gap-8 text-[10.5px] font-mono tracking-[0.24em] uppercase text-slate-400">
+          <div className="hidden lg:flex items-center gap-8 text-[10.5px] font-mono tracking-[0.24em] uppercase text-[#5C5346]">
             {[
               ['why', 'Why', tiers.signature.length > 0],
               ['plan', listing.kind === 'project' ? 'Homes' : 'Plan', true],
@@ -228,7 +228,7 @@ export const PropertyPage: React.FC<{ slug: string }> = ({ slug }) => {
             ]
               .filter(([, , show]) => show)
               .map(([id, label]) => (
-                <button key={id as string} onClick={() => scrollTo(id as string)} className="hover:text-[#f4efe6] transition-colors cursor-pointer">
+                <button key={id as string} onClick={() => scrollTo(id as string)} className="hover:text-[#181512] transition-colors cursor-pointer">
                   {label}
                 </button>
               ))}
@@ -240,13 +240,13 @@ export const PropertyPage: React.FC<{ slug: string }> = ({ slug }) => {
                 <Pencil className="w-3.5 h-3.5" /> <span className="hidden sm:inline">Edit</span>
               </Link>
             )}
-            <button id="property-share" onClick={share} className="p-2.5 rounded-full border border-white/15 text-slate-300 hover:text-white hover:border-[#d1ad7a]/60 transition-colors cursor-pointer" aria-label="Share">
-              {copied ? <Check className="w-4 h-4 text-[#d1ad7a]" /> : <Share2 className="w-4 h-4" />}
+            <button id="property-share" onClick={share} className="p-2.5 rounded-full border border-[#181512]/15 bg-[#FCFBF8]/80 text-[#3D362E] hover:text-[#181512] hover:border-[#9A6B3B]/60 transition-colors cursor-pointer" aria-label="Share">
+              {copied ? <Check className="w-4 h-4 text-[#9A6B3B]" /> : <Share2 className="w-4 h-4" />}
             </button>
             <button
               id="property-save"
               onClick={() => toggleSaveProperty(listing.id)}
-              className={`p-2.5 rounded-full border transition-colors cursor-pointer ${saved ? 'border-[#d1ad7a] text-[#d1ad7a] bg-[#d1ad7a]/10' : 'border-white/15 text-slate-300 hover:text-white hover:border-[#d1ad7a]/60'}`}
+              className={`p-2.5 rounded-full border transition-colors cursor-pointer ${saved ? 'border-[#9A6B3B] text-[#9A6B3B] bg-[#9A6B3B]/12' : 'border-[#181512]/15 bg-[#FCFBF8]/80 text-[#3D362E] hover:text-[#181512] hover:border-[#9A6B3B]/60'}`}
               aria-label={saved ? 'Remove from saved' : 'Save this home'}
             >
               <Bookmark className={`w-4 h-4 ${saved ? 'fill-current' : ''}`} />
@@ -280,10 +280,10 @@ export const PropertyPage: React.FC<{ slug: string }> = ({ slug }) => {
         <InquiryPanel listing={listing} prefill={prefill} />
 
         {related.length > 0 && (
-          <section className="relative py-28 md:py-36 border-t border-white/[0.06]" aria-labelledby="related-heading">
+          <section className="relative py-28 md:py-36 border-t border-[#181512]/[0.08]" aria-labelledby="related-heading">
             <div className="max-w-[90rem] mx-auto px-6 md:px-12 lg:px-20">
               <div className="eyebrow mb-7" data-reveal>More residences</div>
-              <h2 id="related-heading" className="font-display font-light text-4xl md:text-6xl leading-[1.3] sm:leading-[1.34] tracking-normal mb-14 max-w-4xl py-1" data-reveal>
+              <h2 id="related-heading" className="font-display font-light text-4xl md:text-6xl leading-[1.3] sm:leading-[1.34] tracking-normal mb-14 max-w-4xl py-1 text-[#181512]" data-reveal>
                 আরও কিছু <em className="italic text-gradient-gold">ঠিকানা।</em>
               </h2>
               <div className="grid md:grid-cols-3 gap-8">
@@ -298,15 +298,15 @@ export const PropertyPage: React.FC<{ slug: string }> = ({ slug }) => {
         )}
       </main>
 
-      <footer className="border-t border-white/10 bg-[#05080f] px-6 md:px-12 lg:px-20 pt-14 pb-28">
+      <footer className="border-t border-[#181512]/10 bg-[#E9E2D6] px-6 md:px-12 lg:px-20 pt-14 pb-28">
         <div className="max-w-[90rem] mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
-          <Link to="/#showcase" className="group inline-flex items-center gap-3 text-sm text-slate-300 hover:text-[#d1ad7a] transition-colors">
+          <Link to="/#showcase" className="group inline-flex items-center gap-3 text-sm text-[#3D362E] hover:text-[#9A6B3B] transition-colors">
             <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform duration-500" /> All residences
           </Link>
-          <span aria-hidden="true" className="font-display font-light text-6xl tracking-[0.04em] text-transparent bg-clip-text bg-gradient-to-b from-white/[0.14] to-white/0 select-none">
-            AURA
+          <span aria-hidden="true" className="font-display font-light text-4xl sm:text-5xl tracking-[0.06em] uppercase text-transparent bg-clip-text bg-gradient-to-b from-[#181512]/[0.12] to-[#181512]/0 select-none">
+            Jonopod Properties
           </span>
-          <span className="text-[10px] font-mono tracking-[0.26em] uppercase text-slate-500">{priceLabel(listing)}</span>
+          <span className="text-[10px] font-mono tracking-[0.26em] uppercase text-[#6E6559]">{priceLabel(listing)}</span>
         </div>
       </footer>
 

@@ -44,7 +44,7 @@ export const ParallaxQuoteBand: React.FC<ParallaxQuoteBandProps> = ({ onBook }) 
     <section
       ref={rootRef}
       aria-label="Featured residence"
-      className="relative h-[115vh] min-h-[720px] overflow-hidden bg-[#070b14] text-[#f4efe6]"
+      className="relative h-[115vh] min-h-[720px] overflow-hidden bg-[#181512] text-[#FAF7F2]"
     >
       <div data-bg className="absolute inset-0 will-change-transform">
         <img
@@ -55,37 +55,37 @@ export const ParallaxQuoteBand: React.FC<ParallaxQuoteBandProps> = ({ onBook }) 
           className="h-full w-full object-cover"
         />
       </div>
-      <div className="absolute inset-0 bg-gradient-to-b from-[#070b14] via-[#070b14]/20 to-[#070b14]" />
-      <div className="absolute inset-0 bg-gradient-to-r from-[#070b14]/80 via-[#070b14]/20 to-transparent" />
+      <div className="absolute inset-0 bg-gradient-to-b from-[#181512]/55 via-[#181512]/20 to-[#181512]/70" />
+      <div className="absolute inset-0 bg-gradient-to-r from-[#181512]/75 via-[#181512]/25 to-transparent" />
       <div className="grain" aria-hidden="true" />
 
       <div className="relative h-full max-w-7xl mx-auto px-6 md:px-12 lg:px-20 flex items-center">
         <blockquote data-quote className="max-w-3xl">
-          <div className="eyebrow mb-8">On Architecture</div>
+          <div className="eyebrow !text-[#E4C799] mb-8">On Architecture</div>
           <p className="font-display font-light text-5xl sm:text-6xl lg:text-[5.2rem] leading-[1.2] tracking-[-0.01em]">
             <span className="reveal-line"><span data-q-line className="py-[0.08em] block">&ldquo;Architecture is</span></span>
-            <span className="reveal-line"><span data-q-line className="py-[0.08em] block">the <em className="italic text-gradient-gold">thoughtful making</em></span></span>
+            <span className="reveal-line"><span data-q-line className="py-[0.08em] block">the <em className="italic text-gradient-gold-light">thoughtful making</em></span></span>
             <span className="reveal-line"><span data-q-line className="py-[0.08em] block">of space.&rdquo;</span></span>
           </p>
-          <footer className="mt-8 text-[11px] font-mono tracking-[0.3em] uppercase text-slate-300">Louis I. Kahn</footer>
+          <footer className="mt-8 text-[11px] font-mono tracking-[0.3em] uppercase text-[#E6DFD3]">Louis I. Kahn</footer>
         </blockquote>
 
         <div
           data-card
-          className="hidden lg:block absolute right-12 xl:right-20 bottom-[18%] w-80 rounded-2xl border border-white/15 bg-[#070b14]/45 backdrop-blur-xl p-6 shadow-[0_30px_80px_-20px_rgba(0,0,0,0.6)]"
+          className="hidden lg:block absolute right-12 xl:right-20 bottom-[18%] w-80 rounded-2xl border border-[#181512]/12 bg-[#FAF7F2]/92 backdrop-blur-xl p-6 text-[#181512] shadow-[0_30px_80px_-20px_rgba(24,21,18,0.35)]"
         >
-          <div className="flex items-center justify-between text-[10px] font-mono tracking-[0.28em] uppercase text-[#d1ad7a]">
+          <div className="flex items-center justify-between text-[10px] font-mono tracking-[0.28em] uppercase text-[#9A6B3B]">
             <span>Featured</span>
-            <span className="text-slate-400">N°07</span>
+            <span className="text-[#786F63]">N°07</span>
           </div>
-          <h3 className="mt-4 font-display text-3xl leading-tight">The Olive Grove Residence</h3>
-          <p className="mt-2 text-sm text-slate-300/80 font-light">Luberon, Provence · 5 bed · 6,450 sq ft</p>
-          <div className="mt-5 pt-5 border-t border-white/10 flex items-center justify-between">
-            <span className="font-display text-2xl">€8.9M</span>
+          <h3 className="mt-4 font-display text-3xl leading-tight text-[#181512]">The Olive Grove Residence</h3>
+          <p className="mt-2 text-sm text-[#4A433B] font-light">Luberon, Provence · 5 bed · 6,450 sq ft</p>
+          <div className="mt-5 pt-5 border-t border-[#181512]/10 flex items-center justify-between">
+            <span className="font-display text-2xl text-[#181512]">€8.9M</span>
             <button
               id="quote-band-book-btn"
               onClick={onBook}
-              className="group inline-flex items-center gap-2 text-[10px] font-mono tracking-[0.24em] uppercase text-[#f4efe6] hover:text-[#d1ad7a] transition-colors cursor-pointer"
+              className="group inline-flex items-center gap-2 text-[10px] font-mono tracking-[0.24em] uppercase text-[#181512] hover:text-[#9A6B3B] transition-colors cursor-pointer"
             >
               Private viewing
               <ArrowUpRight className="w-4 h-4 transition-transform duration-500 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />

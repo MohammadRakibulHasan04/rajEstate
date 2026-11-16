@@ -70,39 +70,42 @@ export const Preloader: React.FC<PreloaderProps> = ({ progress, loaded, onComple
   return (
     <div
       ref={rootRef}
-      className="fixed inset-0 z-[100] bg-[#070b14] text-[#f4efe6] flex flex-col justify-between px-6 md:px-12 py-8 md:py-10 overflow-hidden"
+      className="fixed inset-0 z-[100] bg-[#F6F2EA] text-[#181512] flex flex-col justify-between px-6 md:px-12 py-8 md:py-10 overflow-hidden"
       aria-busy={!loaded}
-      aria-label="Loading AURA"
+      aria-label="Loading Jonopod Properties"
     >
-      <div className="hero-grid opacity-60" />
+      <div className="hero-grid opacity-80" />
       <div className="grain" />
 
-      <div className="relative flex items-center justify-between text-[10px] font-mono tracking-[0.32em] uppercase text-slate-400" data-pl-fade>
-        <span>AURA · Architectural Residences</span>
+      <div className="relative flex items-center justify-between text-[10px] font-mono tracking-[0.32em] uppercase text-[#786F63]" data-pl-fade>
+        <span>Jonopod Properties · Architectural Residences</span>
         <span className="hidden sm:inline">Est. MMXXVI</span>
       </div>
 
       <div className="relative flex flex-col items-center text-center">
         <span className="reveal-line">
-          <span data-pl-word className="font-display font-light text-[18vw] md:text-[11rem] leading-none tracking-[0.04em]">
-            AURA
+          <span data-pl-word className="font-display font-light text-[13vw] sm:text-[12vw] md:text-[8.5rem] leading-none tracking-[0.06em] uppercase text-[#181512]">
+            Jonopod
           </span>
         </span>
-        <span className="mt-4 font-display italic text-lg md:text-xl text-slate-400" data-pl-fade>
+        <span className="mt-2 text-[10px] sm:text-xs font-mono tracking-[0.38em] uppercase text-[#9A6B3B]" data-pl-fade>
+          Properties
+        </span>
+        <span className="mt-4 font-display italic text-lg md:text-xl text-[#5C5346]" data-pl-fade>
           Drafting your residence&hellip;
         </span>
       </div>
 
       <div className="relative" data-pl-fade>
         <div className="flex items-end justify-between mb-4">
-          <span className="text-[10px] font-mono tracking-[0.32em] uppercase text-slate-500">Blueprint → Reality</span>
-          <span className="font-display font-light text-5xl md:text-7xl tabular-nums leading-none">
+          <span className="text-[10px] font-mono tracking-[0.32em] uppercase text-[#786F63]">Blueprint → Reality</span>
+          <span className="font-display font-light text-5xl md:text-7xl tabular-nums leading-none text-[#181512]">
             <span ref={counterRef}>000</span>
-            <span className="text-[#d1ad7a] text-2xl md:text-3xl align-top ml-1">%</span>
+            <span className="text-[#9A6B3B] text-2xl md:text-3xl align-top ml-1">%</span>
           </span>
         </div>
-        <div className="h-px w-full bg-white/10 overflow-hidden">
-          <div ref={barRef} className="h-full w-full origin-left bg-gradient-to-r from-[#8fc3ff] via-[#d1ad7a] to-[#f1dfbd]" style={{ transform: 'scaleX(0)' }} />
+        <div className="h-px w-full bg-[#181512]/12 overflow-hidden">
+          <div ref={barRef} className="h-full w-full origin-left bg-gradient-to-r from-[#C89B62] via-[#9A6B3B] to-[#684724]" style={{ transform: 'scaleX(0)' }} />
         </div>
       </div>
     </div>

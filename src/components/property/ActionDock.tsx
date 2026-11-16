@@ -43,15 +43,15 @@ export const ActionDock: React.FC<{ listing: Listing; onInquire: () => void }> =
       data-visible={visible}
       aria-hidden={!visible}
     >
-      <div className="panel-glass rounded-full pl-6 pr-2 py-2 flex items-center gap-4 shadow-[0_24px_60px_-20px_rgba(0,0,0,0.8)]">
+      <div className="panel-glass rounded-full pl-6 pr-2 py-2 flex items-center gap-4 shadow-[0_24px_60px_-20px_rgba(24,21,18,0.22)]">
         <div className="min-w-0 flex-1">
-          <div className="font-display text-lg leading-[1.3] truncate text-[#f4efe6] py-0.5">{listing.titleBn || listing.title}</div>
-          <div className="text-[10px] font-mono tracking-[0.2em] uppercase text-gradient-gold truncate">{priceLabel(listing)}</div>
+          <div className="font-display text-lg leading-[1.3] truncate text-[#181512] py-0.5">{listing.titleBn || listing.title}</div>
+          <div className="text-[10px] font-mono tracking-[0.2em] uppercase text-gradient-gold font-semibold truncate">{priceLabel(listing)}</div>
         </div>
         <button
           id="dock-save"
           onClick={() => toggleSaveProperty(listing.id)}
-          className={`p-3 rounded-full border transition-colors cursor-pointer ${saved ? 'border-[#d1ad7a] text-[#d1ad7a] bg-[#d1ad7a]/10' : 'border-white/15 text-slate-300 hover:text-white'}`}
+          className={`p-3 rounded-full border transition-colors cursor-pointer ${saved ? 'border-[#9A6B3B] text-[#9A6B3B] bg-[#9A6B3B]/12' : 'border-[#181512]/15 bg-[#FCFBF8] text-[#3D362E] hover:text-[#181512] hover:border-[#9A6B3B]/60'}`}
           aria-label={saved ? 'Remove from saved' : 'Save this home'}
           tabIndex={visible ? 0 : -1}
         >
@@ -61,7 +61,7 @@ export const ActionDock: React.FC<{ listing: Listing; onInquire: () => void }> =
           <a
             id="dock-call"
             href={telHref(listing.contact.phone)}
-            className="hidden sm:inline-flex p-3 rounded-full border border-white/15 text-slate-300 hover:text-white"
+            className="hidden sm:inline-flex p-3 rounded-full border border-[#181512]/15 bg-[#FCFBF8] text-[#3D362E] hover:text-[#181512] hover:border-[#9A6B3B]/60"
             aria-label="Call"
             tabIndex={visible ? 0 : -1}
           >

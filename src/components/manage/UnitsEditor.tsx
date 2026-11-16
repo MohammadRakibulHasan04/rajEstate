@@ -56,9 +56,9 @@ export const UnitsEditor: React.FC<Props> = ({ units, onChange, unitPages = {}, 
 
   return (
     <div className="space-y-5">
-      <div className="rounded-2xl border border-[#d1ad7a]/25 bg-[#d1ad7a]/[0.03] p-5">
-        <button type="button" onClick={() => setOpen((v) => !v)} className="flex items-center gap-2 text-sm text-[#f1dfbd] cursor-pointer">
-          <Wand2 className="w-4 h-4" /> Generate units for a range of floors
+      <div className="rounded-2xl border border-[#9A6B3B]/30 bg-[#9A6B3B]/[0.05] p-5">
+        <button type="button" onClick={() => setOpen((v) => !v)} className="flex items-center gap-2 text-sm text-[#684724] font-medium cursor-pointer">
+          <Wand2 className="w-4 h-4 text-[#9A6B3B]" /> Generate units for a range of floors
         </button>
         {open && (
           <div className="mt-5 grid grid-cols-2 md:grid-cols-5 gap-3">
@@ -87,7 +87,7 @@ export const UnitsEditor: React.FC<Props> = ({ units, onChange, unitPages = {}, 
               </select>
             </label>
             <div className="col-span-2 md:col-span-5 flex items-center justify-between gap-4 pt-2">
-              <span className="text-[12px] text-slate-500">
+              <span className="text-[12px] text-[#6E6559]">
                 Creates {Math.max(0, gen.toFloor - gen.fromFloor + 1) * gen.letters.split(',').filter((s) => s.trim()).length} units. Existing codes are skipped. Run again with a different size or facing for "B" units.
               </span>
               <button type="button" id="units-generate" onClick={generate} className="btn-gold !py-3">Generate</button>
@@ -97,10 +97,10 @@ export const UnitsEditor: React.FC<Props> = ({ units, onChange, unitPages = {}, 
       </div>
 
       {units.length > 0 && (
-        <div className="overflow-x-auto rounded-xl border border-white/[0.08]">
+        <div className="overflow-x-auto rounded-xl border border-[#181512]/10 bg-[#FCFBF8]">
           <table className="w-full text-sm min-w-[980px]">
             <thead>
-              <tr className="text-left border-b border-white/[0.08] bg-white/[0.02]">
+              <tr className="text-left border-b border-[#181512]/10 bg-[#F3EFE7]">
                 {['Code', 'Floor', 'Sq ft', 'Bed', 'Bath', 'Facing', 'Price ৳', 'Status', 'Plan URL', 'Detail Page', ''].map((h) => (
                   <th key={h} className="px-3 py-3 mono-label font-normal">{h}</th>
                 ))}
@@ -110,7 +110,7 @@ export const UnitsEditor: React.FC<Props> = ({ units, onChange, unitPages = {}, 
               {units.map((u) => {
                 const page = unitPages[u.id];
                 return (
-                <tr key={u.id} className="border-b border-white/[0.05] hover:bg-white/[0.015]">
+                <tr key={u.id} className="border-b border-[#181512]/[0.06] hover:bg-[#FAF6EE]">
                   <td className="px-2 py-1.5 w-20"><input className="lux-input !py-1.5 !px-2 !text-[13px]" value={u.code} onChange={(e) => update(u.id, { code: e.target.value })} /></td>
                   <td className="px-2 py-1.5 w-20"><input type="number" className="lux-input !py-1.5 !px-2 !text-[13px]" value={u.floor} onChange={(e) => update(u.id, { floor: num(e.target.value) })} /></td>
                   <td className="px-2 py-1.5 w-24"><input type="number" className="lux-input !py-1.5 !px-2 !text-[13px]" value={u.sizeSqft} onChange={(e) => update(u.id, { sizeSqft: num(e.target.value) })} /></td>
@@ -123,11 +123,11 @@ export const UnitsEditor: React.FC<Props> = ({ units, onChange, unitPages = {}, 
                   </td>
                   <td className="px-2 py-1.5 w-36">
                     <input type="number" className="lux-input !py-1.5 !px-2 !text-[13px]" value={u.price} onChange={(e) => update(u.id, { price: num(e.target.value) })} />
-                    <span className="block text-[10px] font-mono text-slate-500 mt-0.5 px-1">{formatBdt(u.price, { short: true })}</span>
+                    <span className="block text-[10px] font-mono text-[#786F63] mt-0.5 px-1">{formatBdt(u.price, { short: true })}</span>
                   </td>
                   <td className="px-2 py-1.5 w-32">
                     <select
-                      className={`lux-select !py-1.5 !px-2 !text-[13px] ${u.status === 'available' ? '!text-[#f1dfbd]' : u.status === 'sold' ? '!text-slate-500' : ''}`}
+                      className={`lux-select !py-1.5 !px-2 !text-[13px] ${u.status === 'available' ? '!text-[#5C3D1E] font-medium' : u.status === 'sold' ? '!text-[#8C8275]' : ''}`}
                       value={u.status}
                       onChange={(e) => update(u.id, { status: e.target.value as UnitStatus })}
                     >
@@ -144,8 +144,8 @@ export const UnitsEditor: React.FC<Props> = ({ units, onChange, unitPages = {}, 
                           to={`/manage/edit/${page.id}`}
                           className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-[11px] font-mono uppercase tracking-wider transition-colors ${
                             page.publish === 'published'
-                              ? 'border-emerald-500/40 bg-emerald-500/10 text-emerald-300 hover:border-emerald-400'
-                              : 'border-[#d1ad7a]/40 bg-[#d1ad7a]/10 text-[#f1dfbd] hover:border-[#d1ad7a]'
+                              ? 'border-emerald-700/40 bg-emerald-600/10 text-emerald-800 hover:border-emerald-600'
+                              : 'border-[#9A6B3B]/40 bg-[#9A6B3B]/10 text-[#5C3D1E] hover:border-[#9A6B3B]'
                           }`}
                           title={`Edit ${page.title} (${page.publish})`}
                         >
@@ -156,7 +156,7 @@ export const UnitsEditor: React.FC<Props> = ({ units, onChange, unitPages = {}, 
                           href={`/property/${page.slug}`}
                           target="_blank"
                           rel="noreferrer"
-                          className="p-1.5 rounded-lg border border-white/10 text-slate-400 hover:text-white hover:border-white/30 transition-colors"
+                          className="p-1.5 rounded-lg border border-[#181512]/12 bg-[#F6F2EA] text-[#4A433B] hover:text-[#181512] hover:border-[#9A6B3B] transition-colors"
                           title="Preview unit detail page"
                         >
                           <Eye className="w-3.5 h-3.5" />
@@ -167,16 +167,16 @@ export const UnitsEditor: React.FC<Props> = ({ units, onChange, unitPages = {}, 
                         type="button"
                         disabled={creatingUnitId === u.id}
                         onClick={() => onCreateUnitPage(u)}
-                        className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-white/15 bg-white/[0.03] hover:border-[#d1ad7a]/60 hover:text-[#f1dfbd] text-[11px] font-mono uppercase tracking-wider text-slate-300 transition-colors cursor-pointer disabled:opacity-50"
+                        className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-[#181512]/15 bg-[#F6F2EA] hover:border-[#9A6B3B] hover:text-[#5C3D1E] text-[11px] font-mono uppercase tracking-wider text-[#3D362E] transition-colors cursor-pointer disabled:opacity-50"
                         title={`Create dedicated detail page for Unit ${u.code}`}
                       >
-                        <FilePlus2 className="w-3.5 h-3.5 text-[#d1ad7a]" />
+                        <FilePlus2 className="w-3.5 h-3.5 text-[#9A6B3B]" />
                         <span>{creatingUnitId === u.id ? 'Creating…' : '+ Page'}</span>
                       </button>
                     ) : null}
                   </td>
                   <td className="px-2 py-1.5 w-10">
-                    <button type="button" onClick={() => onChange(units.filter((x) => x.id !== u.id))} className="p-1.5 text-slate-500 hover:text-red-300 cursor-pointer" aria-label={`Remove unit ${u.code}`}>
+                    <button type="button" onClick={() => onChange(units.filter((x) => x.id !== u.id))} className="p-1.5 text-[#786F63] hover:text-red-600 cursor-pointer" aria-label={`Remove unit ${u.code}`}>
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>
                   </td>
@@ -201,7 +201,7 @@ export const UnitsEditor: React.FC<Props> = ({ units, onChange, unitPages = {}, 
           <Plus className="w-3.5 h-3.5" /> Add unit
         </button>
         {units.length > 0 && (
-          <span className="text-[11px] font-mono tracking-[0.18em] uppercase text-slate-500">
+          <span className="text-[11px] font-mono tracking-[0.18em] uppercase text-[#786F63]">
             {units.length} units · {units.filter((u) => u.status === 'available').length} available
           </span>
         )}

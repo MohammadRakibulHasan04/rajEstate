@@ -53,7 +53,7 @@ export const ManifestoSection: React.FC = () => {
     <section
       id="manifesto"
       ref={rootRef}
-      className="relative overflow-hidden bg-[#070b14] text-[#f4efe6] px-6 md:px-12 lg:px-20 pt-32 pb-28 md:pt-44 md:pb-36"
+      className="relative overflow-hidden bg-[#F6F2EA] text-[#181512] px-6 md:px-12 lg:px-20 pt-32 pb-28 md:pt-44 md:pb-36"
     >
       <span
         data-bg-word
@@ -66,18 +66,18 @@ export const ManifestoSection: React.FC = () => {
       <div className="relative max-w-7xl mx-auto grid lg:grid-cols-12 gap-12">
         <div className="lg:col-span-3">
           <div className="eyebrow">Our Philosophy</div>
-          <p className="mt-6 text-sm text-slate-400 font-light leading-relaxed max-w-xs">
+          <p className="mt-6 text-sm text-[#5C5346] font-light leading-relaxed max-w-xs">
             Transparency and documented Process
           </p>
         </div>
 
         <p
           data-statement
-          className="lg:col-span-9 font-display font-light text-[2.15rem] sm:text-5xl lg:text-[4.1rem] leading-[1.32] sm:leading-[1.38] lg:leading-[1.42] tracking-normal py-1.5 w-full max-w-5xl"
+          className="lg:col-span-9 font-display font-light text-[2.15rem] sm:text-5xl lg:text-[4.1rem] leading-[1.32] sm:leading-[1.38] lg:leading-[1.42] tracking-normal py-1.5 w-full max-w-5xl text-[#181512]"
         >
           {STATEMENT.split(' ').map((w, i) => (
             <React.Fragment key={i}>
-              <span data-word className={HIGHLIGHT.has(w) ? 'italic text-[#d1ad7a]' : ''}>
+              <span data-word className={HIGHLIGHT.has(w) ? 'italic text-[#9A6B3B]' : ''}>
                 {w}
               </span>{' '}
             </React.Fragment>

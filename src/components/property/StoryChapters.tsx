@@ -304,12 +304,12 @@ export const StoryChapters: React.FC<{ chapters: StoryChapter[] }> = ({ chapters
       id="story"
       ref={sectionRef}
       aria-label="Architectural room chapters"
-      className="relative h-[100svh] min-h-[680px] w-full overflow-hidden bg-[#070b14] text-[#f4efe6] border-t border-white/[0.06]"
+      className="relative h-[100svh] min-h-[680px] w-full overflow-hidden bg-[#F6F2EA] text-[#181512] border-t border-[#181512]/[0.08]"
     >
       {/* Subtle atmosphere & grain */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute right-[10%] top-1/2 -translate-y-1/2 w-[48vw] h-[48vw] max-w-[680px] max-h-[680px] rounded-full bg-[#d1ad7a]/[0.05] blur-[130px]"
+        className="pointer-events-none absolute right-[10%] top-1/2 -translate-y-1/2 w-[48vw] h-[48vw] max-w-[680px] max-h-[680px] rounded-full bg-[#9A6B3B]/[0.08] blur-[130px]"
       />
       <div className="grain" aria-hidden="true" />
 
@@ -334,12 +334,12 @@ export const StoryChapters: React.FC<{ chapters: StoryChapter[] }> = ({ chapters
       {/* Main Pinned Stage */}
       <div className="relative z-10 h-full max-w-[90rem] mx-auto px-6 md:px-12 lg:px-20 pt-20 pb-8 md:py-24 flex flex-col justify-between">
         {/* Top editorial bar */}
-        <div className="flex items-center justify-between gap-4 border-b border-white/[0.08] pb-4">
+        <div className="flex items-center justify-between gap-4 border-b border-[#181512]/[0.08] pb-4">
           <div className="eyebrow">Spatial Chapters · ঘরের গল্প</div>
-          <div className="flex items-center gap-2.5 text-[10.5px] font-mono tracking-[0.24em] uppercase text-slate-400">
-            <Layers className="w-3.5 h-3.5 text-[#d1ad7a]" />
+          <div className="flex items-center gap-2.5 text-[10.5px] font-mono tracking-[0.24em] uppercase text-[#6E6559]">
+            <Layers className="w-3.5 h-3.5 text-[#9A6B3B]" />
             <span>
-              Stack <strong className="text-[#f4efe6] font-normal">{String(activeIndex + 1).padStart(2, '0')}</strong> / {totalLabel}
+              Stack <strong className="text-[#181512] font-medium">{String(activeIndex + 1).padStart(2, '0')}</strong> / {totalLabel}
             </span>
           </div>
         </div>
@@ -360,16 +360,16 @@ export const StoryChapters: React.FC<{ chapters: StoryChapter[] }> = ({ chapters
                   >
                     <div
                       data-text-item
-                      className="inline-flex items-center gap-3 text-[10.5px] font-mono tracking-[0.28em] uppercase text-[#d1ad7a] mb-3 md:mb-5"
+                      className="inline-flex items-center gap-3 text-[10.5px] font-mono tracking-[0.28em] uppercase text-[#9A6B3B] font-medium mb-3 md:mb-5"
                     >
                       <span>Chapter {no}</span>
-                      <span className="w-6 h-px bg-[#d1ad7a]/60" />
+                      <span className="w-6 h-px bg-[#9A6B3B]/60" />
                       <span>{ch.kicker}</span>
                     </div>
 
                     <h2
                       data-text-item
-                      className="font-display font-light text-3xl sm:text-5xl lg:text-[3.5rem] leading-[1.3] sm:leading-[1.34] tracking-normal text-[#f4efe6] py-1 max-w-3xl"
+                      className="font-display font-light text-3xl sm:text-5xl lg:text-[3.5rem] leading-[1.3] sm:leading-[1.34] tracking-normal text-[#181512] py-1 max-w-3xl"
                     >
                       {ch.titleBn}
                     </h2>
@@ -377,7 +377,7 @@ export const StoryChapters: React.FC<{ chapters: StoryChapter[] }> = ({ chapters
                     {ch.titleEn && (
                       <p
                         data-text-item
-                        className="mt-2 md:mt-3 text-[11px] font-mono tracking-[0.22em] uppercase text-[#d1ad7a]/80"
+                        className="mt-2 md:mt-3 text-[11px] font-mono tracking-[0.22em] uppercase text-[#855B30]"
                       >
                         {ch.titleEn}
                       </p>
@@ -385,12 +385,12 @@ export const StoryChapters: React.FC<{ chapters: StoryChapter[] }> = ({ chapters
 
                     <div
                       data-text-line
-                      className="mt-4 md:mt-6 h-px w-28 bg-gradient-to-r from-[#d1ad7a] via-[#d1ad7a]/50 to-transparent origin-left"
+                      className="mt-4 md:mt-6 h-px w-28 bg-gradient-to-r from-[#9A6B3B] via-[#9A6B3B]/50 to-transparent origin-left"
                     />
 
                     <p
                       data-text-item
-                      className="mt-4 md:mt-6 text-sm sm:text-[15px] lg:text-base text-slate-300/90 font-light leading-relaxed max-w-lg"
+                      className="mt-4 md:mt-6 text-sm sm:text-[15px] lg:text-base text-[#4A433B] font-light leading-relaxed max-w-lg"
                     >
                       {ch.body}
                     </p>
@@ -411,7 +411,7 @@ export const StoryChapters: React.FC<{ chapters: StoryChapter[] }> = ({ chapters
                     <figure
                       key={i}
                       data-stack-card
-                      className="absolute inset-0 rounded-2xl overflow-hidden border border-white/15 bg-[#0c1220] shadow-[0_32px_90px_-20px_rgba(0,0,0,0.9)] will-change-transform"
+                      className="absolute inset-0 rounded-2xl overflow-hidden border border-[#181512]/15 bg-[#EAE3D7] shadow-[0_28px_70px_-20px_rgba(24,21,18,0.24)] will-change-transform"
                     >
                       <img
                         data-stack-img
@@ -423,24 +423,24 @@ export const StoryChapters: React.FC<{ chapters: StoryChapter[] }> = ({ chapters
                       />
 
                       {/* Subtle top plate rim so stacked edges behind are crisp and legible */}
-                      <div className="absolute top-0 inset-x-0 h-9 bg-gradient-to-b from-[#070b14]/80 to-transparent px-4 flex items-center justify-between text-[9.5px] font-mono tracking-[0.24em] uppercase text-[#f4efe6]/80">
+                      <div className="absolute top-0 inset-x-0 h-9 bg-gradient-to-b from-[#181512]/75 to-transparent px-4 flex items-center justify-between text-[9.5px] font-mono tracking-[0.24em] uppercase text-[#FAF7F2]/90">
                         <span>Plate {no}</span>
-                        <span className="text-[#d1ad7a]">{ch.kicker}</span>
+                        <span className="text-[#E4C799]">{ch.kicker}</span>
                       </div>
 
                       {/* Bottom editorial vignette + caption */}
-                      <div className="absolute inset-0 bg-gradient-to-t from-[#070b14]/85 via-[#070b14]/15 to-transparent pointer-events-none" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-[#181512]/85 via-[#181512]/15 to-transparent pointer-events-none" />
 
                       <figcaption className="absolute bottom-0 inset-x-0 px-5 sm:px-7 py-4 sm:py-5 flex items-end justify-between gap-4 pointer-events-none">
                         <div>
-                          <span className="block text-[9.5px] font-mono tracking-[0.28em] uppercase text-[#d1ad7a]">
+                          <span className="block text-[9.5px] font-mono tracking-[0.28em] uppercase text-[#E4C799]">
                             Chapter {no} · {ch.kicker}
                           </span>
-                          <span className="font-display text-lg sm:text-xl text-[#f4efe6] leading-[1.3] inline-block py-0.5">
+                          <span className="font-display text-lg sm:text-xl text-[#FAF7F2] leading-[1.3] inline-block py-0.5">
                             {ch.titleBn}
                           </span>
                         </div>
-                        <span className="hidden sm:inline-block text-[10px] font-mono tracking-[0.22em] uppercase text-slate-300/80">
+                        <span className="hidden sm:inline-block text-[10px] font-mono tracking-[0.22em] uppercase text-[#E6DFD3]">
                           {ch.titleEn}
                         </span>
                       </figcaption>
@@ -449,7 +449,7 @@ export const StoryChapters: React.FC<{ chapters: StoryChapter[] }> = ({ chapters
                       <div
                         data-stack-scrim
                         aria-hidden="true"
-                        className="absolute inset-0 bg-[#05080f] pointer-events-none"
+                        className="absolute inset-0 bg-[#181512] pointer-events-none"
                       />
                     </figure>
                   );
@@ -460,7 +460,7 @@ export const StoryChapters: React.FC<{ chapters: StoryChapter[] }> = ({ chapters
         </div>
 
         {/* Bottom Stack Progress & Chapter Selector */}
-        <div className="pt-3 border-t border-white/[0.08] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="pt-3 border-t border-[#181512]/[0.08] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar">
             {chapters.map((ch, i) => {
               const no = String(i + 1).padStart(2, '0');
@@ -473,13 +473,13 @@ export const StoryChapters: React.FC<{ chapters: StoryChapter[] }> = ({ chapters
                   onClick={() => jumpToChapter(i)}
                   className={`group inline-flex items-center gap-2 px-3 py-1.5 rounded-full border text-[10px] font-mono tracking-[0.2em] uppercase transition-all cursor-pointer shrink-0 ${
                     isCurrent
-                      ? 'border-[#d1ad7a] bg-[#d1ad7a]/15 text-[#f1dfbd]'
+                      ? 'border-[#9A6B3B] bg-[#9A6B3B]/15 text-[#5C3D1E] font-medium'
                       : isStacked
-                      ? 'border-white/15 bg-white/[0.03] text-slate-300 hover:border-[#d1ad7a]/50'
-                      : 'border-white/[0.06] text-slate-500 hover:text-slate-300 hover:border-white/15'
+                      ? 'border-[#181512]/15 bg-[#FCFBF8] text-[#3D362E] hover:border-[#9A6B3B]/50'
+                      : 'border-[#181512]/[0.08] text-[#786F63] hover:text-[#181512] hover:border-[#181512]/20'
                   }`}
                 >
-                  <span className={isCurrent ? 'text-[#d1ad7a]' : 'opacity-60'}>{no}</span>
+                  <span className={isCurrent ? 'text-[#9A6B3B]' : 'opacity-60'}>{no}</span>
                   <span className="hidden md:inline">{ch.kicker.replace(/^The\s+/i, '')}</span>
                 </button>
               );
@@ -487,13 +487,13 @@ export const StoryChapters: React.FC<{ chapters: StoryChapter[] }> = ({ chapters
           </div>
 
           <div className="flex items-center gap-4">
-            <span className="text-[10px] font-mono tracking-[0.26em] uppercase text-slate-500 hidden sm:inline">
+            <span className="text-[10px] font-mono tracking-[0.26em] uppercase text-[#786F63] hidden sm:inline">
               Scroll to stack rooms
             </span>
-            <div className="w-full sm:w-36 h-[2px] bg-white/10 rounded-full overflow-hidden">
+            <div className="w-full sm:w-36 h-[2px] bg-[#181512]/10 rounded-full overflow-hidden">
               <div
                 ref={progressFillRef}
-                className="h-full w-full origin-left bg-gradient-to-r from-[#d1ad7a] to-[#f1dfbd]"
+                className="h-full w-full origin-left bg-gradient-to-r from-[#855B30] to-[#C89B62]"
                 style={{ transform: 'scaleX(0)' }}
               />
             </div>

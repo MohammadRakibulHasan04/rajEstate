@@ -69,7 +69,7 @@ let cachedLoaded = false;
 let decodePromise: Promise<void> | null = null;
 const progressListeners = new Set<(p: number, done: boolean) => void>();
 
-const INTRO_SESSION_KEY = 'aura_intro_played_v1';
+const INTRO_SESSION_KEY = 'jonopod_intro_played_v1';
 let introPlayedMemory = (() => {
   try {
     return typeof sessionStorage !== 'undefined' && sessionStorage.getItem(INTRO_SESSION_KEY) === '1';

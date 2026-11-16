@@ -63,22 +63,22 @@ export const SignificanceBoard: React.FC<Props> = ({ listing, onChange }) => {
               }}
               className={`rounded-2xl border p-4 min-h-[220px] transition-colors duration-300 ${
                 overTier === tier && !(full && facts.find((f) => f.key === dragKey)?.tier !== tier)
-                  ? 'border-[#d1ad7a]/60 bg-[#d1ad7a]/[0.04]'
+                  ? 'border-[#9A6B3B] bg-[#9A6B3B]/[0.08]'
                   : tier === 'signature'
-                    ? 'border-[#d1ad7a]/25 bg-[#d1ad7a]/[0.02]'
-                    : 'border-white/[0.08] bg-[#05080f]/40'
+                    ? 'border-[#9A6B3B]/35 bg-[#9A6B3B]/[0.04]'
+                    : 'border-[#181512]/10 bg-[#F3EFE7]/70'
               }`}
             >
               <div className="flex items-baseline justify-between mb-1">
-                <h3 className="font-display text-xl text-[#f4efe6] flex items-center gap-2">
-                  {tier === 'signature' && <Sparkles className="w-4 h-4 text-[#d1ad7a]" />}
+                <h3 className="font-display text-xl text-[#181512] flex items-center gap-2">
+                  {tier === 'signature' && <Sparkles className="w-4 h-4 text-[#9A6B3B]" />}
                   {title}
                 </h3>
-                <span className={`text-[10px] font-mono tracking-[0.2em] ${full ? 'text-[#d1ad7a]' : 'text-slate-500'}`}>
+                <span className={`text-[10px] font-mono tracking-[0.2em] ${full ? 'text-[#9A6B3B]' : 'text-[#786F63]'}`}>
                   {list.length}{max ? ` / ${max}` : ''}
                 </span>
               </div>
-              <p className="text-[12px] text-slate-500 mb-4 leading-snug">{hint}</p>
+              <p className="text-[12px] text-[#6E6559] mb-4 leading-snug">{hint}</p>
 
               <div className="space-y-3">
                 {list.map((f) => {
@@ -91,12 +91,12 @@ export const SignificanceBoard: React.FC<Props> = ({ listing, onChange }) => {
                       draggable
                       onDragStart={() => setDragKey(f.key)}
                       onDragEnd={() => setDragKey(null)}
-                      className={`rounded-xl border bg-[#0a0f1b] p-3.5 transition-opacity ${dragKey === f.key ? 'opacity-40' : ''} ${
-                        missingWhy ? 'border-amber-400/30' : 'border-white/[0.08]'
+                      className={`rounded-xl border bg-[#FCFBF8] p-3.5 shadow-2xs transition-opacity ${dragKey === f.key ? 'opacity-40' : ''} ${
+                        missingWhy ? 'border-amber-500/45' : 'border-[#181512]/10'
                       }`}
                     >
                       <div className="flex items-start gap-2">
-                        <GripVertical className="w-4 h-4 text-slate-600 mt-1 cursor-grab shrink-0" />
+                        <GripVertical className="w-4 h-4 text-[#8C8275] mt-1 cursor-grab shrink-0" />
                         <div className="flex-1 min-w-0">
                           {isCustom ? (
                             <div className="grid grid-cols-2 gap-2">
@@ -106,7 +106,7 @@ export const SignificanceBoard: React.FC<Props> = ({ listing, onChange }) => {
                           ) : (
                             <div className="flex items-baseline justify-between gap-3">
                               <span className="mono-label">{f.label}</span>
-                              <span className="font-display text-lg text-[#f4efe6] text-right truncate">{f.value}</span>
+                              <span className="font-display text-lg text-[#181512] text-right truncate">{f.value}</span>
                             </div>
                           )}
                           <textarea
@@ -123,19 +123,19 @@ export const SignificanceBoard: React.FC<Props> = ({ listing, onChange }) => {
                                 type="button"
                                 onClick={() => moveTo(f.key, t.tier)}
                                 disabled={t.tier === 'signature' && count('signature') >= 3}
-                                className="px-2 py-1 rounded-md text-[9.5px] font-mono tracking-[0.14em] uppercase text-slate-400 border border-white/[0.08] hover:text-[#f1dfbd] hover:border-[#d1ad7a]/40 disabled:opacity-30 cursor-pointer"
+                                className="px-2 py-1 rounded-md text-[9.5px] font-mono tracking-[0.14em] uppercase text-[#5C5346] border border-[#181512]/12 bg-[#F6F2EA] hover:text-[#5C3D1E] hover:border-[#9A6B3B]/50 disabled:opacity-30 cursor-pointer"
                               >
                                 → {t.title}
                               </button>
                             ))}
                             <span className="flex-1" />
                             {auto?.why && f.why !== auto.why && (
-                              <button type="button" onClick={() => update(f.key, { why: auto.why })} className="p-1 text-slate-500 hover:text-[#d1ad7a] cursor-pointer" title="Use suggested reason">
+                              <button type="button" onClick={() => update(f.key, { why: auto.why })} className="p-1 text-[#786F63] hover:text-[#9A6B3B] cursor-pointer" title="Use suggested reason">
                                 <Wand2 className="w-3.5 h-3.5" />
                               </button>
                             )}
                             {isCustom && (
-                              <button type="button" onClick={() => onChange(facts.filter((x) => x.key !== f.key))} className="p-1 text-slate-500 hover:text-red-300 cursor-pointer" title="Remove fact">
+                              <button type="button" onClick={() => onChange(facts.filter((x) => x.key !== f.key))} className="p-1 text-[#786F63] hover:text-red-600 cursor-pointer" title="Remove fact">
                                 <Trash2 className="w-3.5 h-3.5" />
                               </button>
                             )}
@@ -145,14 +145,14 @@ export const SignificanceBoard: React.FC<Props> = ({ listing, onChange }) => {
                     </article>
                   );
                 })}
-                {list.length === 0 && <p className="text-[12px] text-slate-600 italic py-6 text-center">Drag facts here</p>}
+                {list.length === 0 && <p className="text-[12px] text-[#8C8275] italic py-6 text-center">Drag facts here</p>}
               </div>
             </div>
           );
         })}
       </div>
 
-      <div className="rounded-2xl border border-dashed border-white/15 p-5">
+      <div className="rounded-2xl border border-dashed border-[#181512]/20 bg-[#F6F2EA]/50 p-5">
         <div className="mono-label mb-3">Add a fact the specs can't capture</div>
         <div className="grid md:grid-cols-[1fr_1fr_2fr_auto] gap-3">
           <input className="lux-input" placeholder="Label, e.g. Rooftop" value={draft.label} onChange={(e) => setDraft({ ...draft, label: e.target.value })} />
