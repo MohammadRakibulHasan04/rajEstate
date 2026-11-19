@@ -143,7 +143,8 @@ function ensureFramesDecoded() {
   decodePromise = Promise.all(
     images.map((img) => {
       if (img.complete && img.naturalWidth) {
-        return pinBitmap(img).then(settle, settle);
+        settle();
+        return Promise.resolve();
       }
       const p = img.decode
         ? img.decode()
@@ -151,7 +152,7 @@ function ensureFramesDecoded() {
             img.onload = () => res();
             img.onerror = () => rej();
           });
-      return p.then(() => pinBitmap(img)).then(settle, settle);
+      return p.then(settle, settle);
     })
   ).then(() => undefined);
 }

@@ -2,8 +2,8 @@ import React, { useEffect, useLayoutEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { ArrowUpRight, Compass, KeyRound, ShieldCheck, TrendingUp } from 'lucide-react';
-import bgImg from '../../assets/hero-images/bg.png';
-import fgImg from '../../assets/hero-images/fg.png';
+import bgImg from '../../assets/hero-images/bg.webp';
+import fgImg from '../../assets/hero-images/fg.webp';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -13,42 +13,24 @@ export interface CinematicHeroProps {
   onExplore: () => void;
 }
 
-const HERO_FLOATING_CARDS = [
+const HERO_TAGLINE_WORDS = ['রাজশাহীতে', 'প্রপার্টি', 'খোঁজা', 'হোক', 'আরও', 'সহজ!'] as const;
+
+const HERO_CARDS = [
   {
     title: 'Buy',
-    tag: 'Verified Homes',
     Icon: KeyRound,
-    positionClass:
-      'left-4 sm:left-8 md:left-12 lg:left-16 top-[46%] sm:top-[47%] md:top-[46%]',
-    parallaxY: -95,
-    depthFactor: 1.15,
   },
   {
     title: 'Sell',
-    tag: 'Private Advisory',
     Icon: TrendingUp,
-    positionClass:
-      'left-6 sm:left-14 md:left-20 lg:left-28 bottom-[13%] sm:bottom-[15%] md:bottom-[14%]',
-    parallaxY: -70,
-    depthFactor: 0.85,
   },
   {
     title: 'Find',
-    tag: 'Prime Addresses',
     Icon: Compass,
-    positionClass:
-      'right-4 sm:right-8 md:right-12 lg:right-16 top-[44%] sm:top-[45%] md:top-[44%]',
-    parallaxY: -105,
-    depthFactor: 1.25,
   },
   {
     title: 'Deliver',
-    tag: 'Turnkey Reality',
     Icon: ShieldCheck,
-    positionClass:
-      'right-6 sm:right-14 md:right-20 lg:right-28 bottom-[12%] sm:bottom-[14%] md:bottom-[13%]',
-    parallaxY: -78,
-    depthFactor: 0.95,
   },
 ] as const;
 
@@ -59,106 +41,86 @@ export const CinematicHero: React.FC<CinematicHeroProps> = ({
   const sectionRef = useRef<HTMLElement>(null);
   const bgLayerRef = useRef<HTMLDivElement>(null);
   const bgImgRef = useRef<HTMLImageElement>(null);
+  const taglineWrapRef = useRef<HTMLDivElement>(null);
+  const taglineRef = useRef<HTMLDivElement>(null);
+  const taglineWordWrapRefs = useRef<(HTMLSpanElement | null)[]>([]);
+  const taglineWordBaseRefs = useRef<(HTMLSpanElement | null)[]>([]);
+  const taglineWordFillRefs = useRef<(HTMLSpanElement | null)[]>([]);
   const titlePrimaryWrapRef = useRef<HTMLDivElement>(null);
   const titlePrimaryTextRef = useRef<HTMLSpanElement>(null);
   const titleSecondaryWrapRef = useRef<HTMLDivElement>(null);
   const titleSecondaryTextRef = useRef<HTMLSpanElement>(null);
   const fgLayerRef = useRef<HTMLDivElement>(null);
   const fgImgRef = useRef<HTMLImageElement>(null);
-  const cardScrollRefs = useRef<(HTMLDivElement | null)[]>([]);
-  const cardFloatRefs = useRef<(HTMLButtonElement | null)[]>([]);
-  const bottomBarRef = useRef<HTMLDivElement>(null);
+  const bottomDockRef = useRef<HTMLDivElement>(null);
 
   const hasEnteredRef = useRef(false);
 
-  // Subtle interactive pointer depth parallax + ambient floating levitation
+  // Subtle interactive pointer depth parallax
   useEffect(() => {
     const section = sectionRef.current;
     if (!section) return;
 
-    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const floatTweens: gsap.core.Tween[] = [];
-
-    if (!reducedMotion) {
-      cardFloatRefs.current.forEach((el, idx) => {
-        if (!el) return;
-        floatTweens.push(
-          gsap.to(el, {
-            y: idx % 2 === 0 ? -7 : 7,
-            duration: 2.6 + idx * 0.35,
-            repeat: -1,
-            yoyo: true,
-            ease: 'sine.inOut',
-            delay: idx * 0.25,
-          })
-        );
-      });
-    }
-
     const mq = window.matchMedia('(pointer: fine) and (prefers-reduced-motion: no-preference)');
-    if (!mq.matches) {
-      return () => {
-        floatTweens.forEach((t) => t.kill());
-      };
-    }
+    if (!mq.matches) return;
 
     const xBgTo = bgImgRef.current
-      ? gsap.quickTo(bgImgRef.current, 'x', { duration: 1.1, ease: 'power3.out' })
+      ? gsap.quickTo(bgImgRef.current, 'x', { duration: 0.55, ease: 'power2.out' })
       : null;
     const yBgTo = bgImgRef.current
-      ? gsap.quickTo(bgImgRef.current, 'y', { duration: 1.1, ease: 'power3.out' })
+      ? gsap.quickTo(bgImgRef.current, 'y', { duration: 0.55, ease: 'power2.out' })
+      : null;
+
+    const xTaglineTo = taglineRef.current
+      ? gsap.quickTo(taglineRef.current, 'x', { duration: 0.5, ease: 'power2.out' })
       : null;
 
     const xPrimaryTo = titlePrimaryTextRef.current
-      ? gsap.quickTo(titlePrimaryTextRef.current, 'x', { duration: 0.9, ease: 'power3.out' })
+      ? gsap.quickTo(titlePrimaryTextRef.current, 'x', { duration: 0.5, ease: 'power2.out' })
       : null;
 
     const xSecondaryTo = titleSecondaryTextRef.current
-      ? gsap.quickTo(titleSecondaryTextRef.current, 'x', { duration: 0.85, ease: 'power3.out' })
+      ? gsap.quickTo(titleSecondaryTextRef.current, 'x', { duration: 0.5, ease: 'power2.out' })
       : null;
 
     const xFgTo = fgImgRef.current
-      ? gsap.quickTo(fgImgRef.current, 'x', { duration: 0.75, ease: 'power3.out' })
+      ? gsap.quickTo(fgImgRef.current, 'x', { duration: 0.45, ease: 'power2.out' })
       : null;
 
-    const cardQuickX = cardFloatRefs.current.map((el, i) =>
-      el
-        ? gsap.quickTo(el, 'x', {
-            duration: 0.65 + i * 0.06,
-            ease: 'power3.out',
-          })
-        : null
-    );
+    let viewW = window.innerWidth;
+    let viewH = window.innerHeight;
+    const onResize = () => {
+      viewW = window.innerWidth;
+      viewH = window.innerHeight;
+    };
 
     const onPointerMove = (e: PointerEvent) => {
-      const rect = section.getBoundingClientRect();
-      if (rect.bottom < 0 || rect.top > window.innerHeight) return;
-      const nx = ((e.clientX - rect.left) / Math.max(1, rect.width)) * 2 - 1;
-      const ny = ((e.clientY - rect.top) / Math.max(1, rect.height)) * 2 - 1;
+      if (window.scrollY > 12) return;
+      const nx = (e.clientX / Math.max(1, viewW)) * 2 - 1;
+      const ny = (e.clientY / Math.max(1, viewH)) * 2 - 1;
 
-      xBgTo?.(-nx * 10);
-      yBgTo?.(-ny * 8);
-      xPrimaryTo?.(-nx * 18);
-      xSecondaryTo?.(-nx * 13);
-      xFgTo?.(nx * 10);
-      cardQuickX.forEach((qx, i) => {
-        qx?.(nx * 16 * HERO_FLOATING_CARDS[i].depthFactor);
-      });
+      xBgTo?.(-nx * 8);
+      yBgTo?.(-ny * 6);
+      xTaglineTo?.(-nx * 12);
+      xPrimaryTo?.(-nx * 14);
+      xSecondaryTo?.(-nx * 10);
+      xFgTo?.(nx * 8);
     };
 
     const onPointerLeave = () => {
       xBgTo?.(0);
       yBgTo?.(0);
+      xTaglineTo?.(0);
       xPrimaryTo?.(0);
       xSecondaryTo?.(0);
       xFgTo?.(0);
-      cardQuickX.forEach((qx) => qx?.(0));
     };
 
+    window.addEventListener('resize', onResize, { passive: true });
     window.addEventListener('pointermove', onPointerMove, { passive: true });
     section.addEventListener('pointerleave', onPointerLeave, { passive: true });
     return () => {
-      floatTweens.forEach((t) => t.kill());
+      window.removeEventListener('resize', onResize);
       window.removeEventListener('pointermove', onPointerMove);
       section.removeEventListener('pointerleave', onPointerLeave);
     };
@@ -170,20 +132,22 @@ export const CinematicHero: React.FC<CinematicHeroProps> = ({
     if (!section) return;
 
     const ctx = gsap.context(() => {
-      gsap.set(bgLayerRef.current, { scale: 1.08, yPercent: 0, force3D: true });
-      gsap.set(titlePrimaryWrapRef.current, { yPercent: 0, scale: 1, force3D: true });
-      gsap.set(titleSecondaryWrapRef.current, { yPercent: 0, scale: 1, force3D: true });
-      gsap.set(fgLayerRef.current, { yPercent: 14, scale: 1, force3D: true });
+      gsap.set(bgLayerRef.current, { scale: 1.06, yPercent: 0, force3D: true });
+      gsap.set(taglineWrapRef.current, { yPercent: 0, force3D: true });
+      gsap.set(titlePrimaryWrapRef.current, { yPercent: 0, force3D: true });
+      gsap.set(titleSecondaryWrapRef.current, { yPercent: 0, force3D: true });
+      gsap.set(fgLayerRef.current, { yPercent: 12, scale: 1, force3D: true });
 
       const tl = gsap.timeline({
         defaults: { ease: 'none', force3D: true },
         scrollTrigger: {
           trigger: section,
           start: 'top top',
-          end: '+=145%',
+          end: '+=78%',
           pin: true,
-          scrub: 0.65,
+          scrub: 0.2,
           anticipatePin: 1,
+          fastScrollEnd: true,
           refreshPriority: 1,
           invalidateOnRefresh: true,
         },
@@ -192,61 +156,89 @@ export const CinematicHero: React.FC<CinematicHeroProps> = ({
       // Layer 0: Background sky subtle push-back and downward horizon drift
       tl.fromTo(
         bgLayerRef.current,
-        { scale: 1.08, yPercent: 0 },
-        { scale: 1.0, yPercent: 9, duration: 1 },
+        { scale: 1.06, yPercent: 0 },
+        { scale: 1.0, yPercent: 7, duration: 1 },
         0
       );
 
-      // Layer 1A: 'Jonopod' in white ITC Bauhaus parallaxes DOWNWARD behind the transparent PNG building
+      // Layer 10: Tagline stays clearly visible in upper sky while highlighting & bolding left-to-right
+      tl.fromTo(
+        taglineWrapRef.current,
+        { yPercent: 0 },
+        { yPercent: 24, duration: 1 },
+        0
+      );
+
+      const wordWraps = taglineWordWrapRefs.current.filter(Boolean);
+      const wordBases = taglineWordBaseRefs.current.filter(Boolean);
+      const wordFills = taglineWordFillRefs.current.filter(Boolean);
+
+      if (wordBases.length > 0) {
+        tl.fromTo(
+          wordBases,
+          { clipPath: 'inset(-25% 0% -25% 0%)' },
+          {
+            clipPath: 'inset(-25% 0% -25% 100%)',
+            duration: 0.16,
+            stagger: 0.12,
+            ease: 'none',
+          },
+          0.02
+        );
+      }
+
+      if (wordFills.length > 0) {
+        tl.fromTo(
+          wordFills,
+          { clipPath: 'inset(-25% 100% -25% 0%)' },
+          {
+            clipPath: 'inset(-25% 0% -25% 0%)',
+            duration: 0.16,
+            stagger: 0.12,
+            ease: 'none',
+          },
+          0.02
+        );
+      }
+
+      if (wordWraps.length > 0) {
+        tl.fromTo(
+          wordWraps,
+          { scale: 0.96, y: 2 },
+          {
+            scale: 1.05,
+            y: -1,
+            duration: 0.18,
+            stagger: 0.12,
+            ease: 'power1.out',
+          },
+          0.02
+        );
+      }
+
+      // Layer 1A: 'Jonopod' in white ITC Bauhaus parallaxes DOWNWARD behind the transparent building
       tl.fromTo(
         titlePrimaryWrapRef.current,
-        { yPercent: 0, scale: 1, opacity: 1 },
-        { yPercent: 95, scale: 0.91, opacity: 0.9, duration: 1 },
+        { yPercent: 0 },
+        { yPercent: 88, duration: 1 },
         0
       );
 
       // Layer 1B: 'Properties' in white ITC Bauhaus parallaxes DOWNWARD behind the building
       tl.fromTo(
         titleSecondaryWrapRef.current,
-        { yPercent: 0, scale: 1, opacity: 1 },
-        { yPercent: 112, scale: 0.89, opacity: 0.82, duration: 1 },
+        { yPercent: 0 },
+        { yPercent: 104, duration: 1 },
         0
       );
 
-      // Layer 2: Foreground transparent PNG building rises UPWARD and scales forward in front of 'Jonopod Properties'
+      // Layer 2: Foreground transparent building rises UPWARD and scales forward in front of 'Jonopod Properties'
       tl.fromTo(
         fgLayerRef.current,
-        { yPercent: 14, scale: 1 },
-        { yPercent: -3, scale: 1.085, duration: 1 },
+        { yPercent: 12, scale: 1 },
+        { yPercent: -2, scale: 1.06, duration: 1 },
         0
       );
-
-      // Layer 3: 4 compact floating glass cards (in front, z-30) parallax with ScrollTrigger
-      cardScrollRefs.current.forEach((cardWrap, idx) => {
-        if (!cardWrap) return;
-        const cfg = HERO_FLOATING_CARDS[idx];
-        tl.fromTo(
-          cardWrap,
-          { y: 0, scale: 1, autoAlpha: 1 },
-          {
-            y: cfg.parallaxY,
-            scale: 0.92,
-            autoAlpha: 0,
-            duration: 0.72,
-            ease: 'power1.inOut',
-          },
-          idx * 0.04
-        );
-      });
-
-      if (bottomBarRef.current) {
-        tl.fromTo(
-          bottomBarRef.current,
-          { y: 0, autoAlpha: 1 },
-          { y: 24, autoAlpha: 0, duration: 0.45 },
-          0
-        );
-      }
     }, section);
 
     return () => ctx.revert();
@@ -258,182 +250,200 @@ export const CinematicHero: React.FC<CinematicHeroProps> = ({
     hasEnteredRef.current = true;
 
     const ctx = gsap.context(() => {
-      const cards = cardFloatRefs.current.filter(Boolean);
       const tl = gsap.timeline({ defaults: { ease: 'expo.out', force3D: true } });
 
       tl.fromTo(
-        titlePrimaryTextRef.current,
-        { yPercent: 32, scale: 0.94, autoAlpha: 0 },
-        { yPercent: 0, scale: 1, autoAlpha: 1, duration: 1.45 },
-        0.1
+        taglineRef.current,
+        { y: 16, autoAlpha: 0 },
+        { y: 0, autoAlpha: 1, duration: 1.0 },
+        0.02
       )
         .fromTo(
+          titlePrimaryTextRef.current,
+          { yPercent: 28, autoAlpha: 0 },
+          { yPercent: 0, autoAlpha: 1, duration: 1.1 },
+          0.08
+        )
+        .fromTo(
           titleSecondaryTextRef.current,
-          { yPercent: 38, scale: 0.94, autoAlpha: 0 },
-          { yPercent: 0, scale: 1, autoAlpha: 1, duration: 1.45 },
-          0.2
+          { yPercent: 32, autoAlpha: 0 },
+          { yPercent: 0, autoAlpha: 1, duration: 1.1 },
+          0.14
         )
         .fromTo(
           fgImgRef.current,
-          { yPercent: 8, scale: 0.97, autoAlpha: 0 },
-          { yPercent: 0, scale: 1, autoAlpha: 1, duration: 1.55 },
-          0.05
-        )
-        .fromTo(
-          cards,
-          { y: 26, scale: 0.9, autoAlpha: 0 },
-          { y: 0, scale: 1, autoAlpha: 1, duration: 1.15, stagger: 0.08 },
-          0.36
-        )
-        .fromTo(
-          bottomBarRef.current,
-          { y: 20, autoAlpha: 0 },
-          { y: 0, autoAlpha: 1, duration: 1.1 },
-          0.48
+          { yPercent: 6, autoAlpha: 0 },
+          { yPercent: 0, autoAlpha: 1, duration: 1.15 },
+          0.02
         );
     }, sectionRef.current);
 
-    ScrollTrigger.refresh();
     return () => ctx.revert();
   }, [ready]);
 
   return (
-    <section
-      id="home"
-      ref={sectionRef}
-      aria-label="Jonopod Properties"
-      className="relative h-screen h-[100dvh] w-full overflow-hidden bg-[#1e78e8] select-none"
-    >
-      {/* =====================================================================
-          LAYER 0 (z-0): SKY BACKGROUND IMAGE (src/assets/hero-images/bg.png)
-      ====================================================================== */}
-      <div
-        ref={bgLayerRef}
-        data-hero-bg
-        className="pointer-events-none absolute inset-0 z-0 will-change-transform"
+    <>
+      <section
+        id="home"
+        ref={sectionRef}
+        aria-label="Jonopod Properties"
+        className="relative z-10 h-screen h-[100dvh] w-full overflow-hidden bg-[#1e78e8] select-none"
       >
-        <img
-          ref={bgImgRef}
-          src={bgImg}
-          alt=""
-          aria-hidden="true"
-          className="h-full w-full scale-[1.04] object-cover object-center will-change-transform"
-          draggable={false}
-        />
-      </div>
-
-      {/* =====================================================================
-          LAYER 1 (z-10): WHITE 'Jonopod' + 'Properties' IN ITC BAUHAUS
-          Generous top blank sky space below the navbar, strictly BEHIND fg.png
-      ====================================================================== */}
-      <div className="pointer-events-none absolute inset-x-0 top-0 z-10 flex flex-col items-center pt-[15.5vh] sm:pt-[16.5vh] md:pt-[17.5vh] px-4">
-        <h1 className="w-full flex flex-col items-center text-center">
-          <div
-            ref={titlePrimaryWrapRef}
-            data-hero-title-primary
-            className="w-full flex justify-center will-change-transform"
-          >
-            <span
-              ref={titlePrimaryTextRef}
-              style={{ fontFamily: "'ITC Bauhaus', 'itc bauhaus', 'itc bauhuas', sans-serif" }}
-              className="block font-bauhaus font-bold text-white text-[17vw] sm:text-[16.2vw] md:text-[15.2vw] lg:text-[14.4vw] leading-[0.82] tracking-[-0.015em] whitespace-nowrap drop-shadow-[0_8px_30px_rgba(8,38,94,0.28)] will-change-transform"
-            >
-              Jonopod
-            </span>
-          </div>
-
-          <div
-            ref={titleSecondaryWrapRef}
-            data-hero-title-secondary
-            className="w-full flex justify-center mt-1 sm:mt-1.5 md:mt-2 will-change-transform"
-          >
-            <span
-              ref={titleSecondaryTextRef}
-              style={{ fontFamily: "'ITC Bauhaus', 'itc bauhaus', 'itc bauhuas', sans-serif" }}
-              className="block font-bauhaus font-bold text-white text-[11.8vw] sm:text-[11.2vw] md:text-[10.4vw] lg:text-[9.8vw] leading-[0.86] tracking-[0.015em] whitespace-nowrap drop-shadow-[0_8px_28px_rgba(8,38,94,0.28)] will-change-transform"
-            >
-              Properties
-            </span>
-          </div>
-        </h1>
-      </div>
-
-      {/* =====================================================================
-          LAYER 2 (z-20): FOREGROUND TRANSPARENT PNG (src/assets/hero-images/fg.png)
-          Renders in front of 'Jonopod' & 'Properties' so the building overlaps the text
-      ====================================================================== */}
-      <div
-        ref={fgLayerRef}
-        data-hero-fg
-        className="pointer-events-none absolute inset-0 z-20 flex items-end justify-center will-change-transform"
-      >
-        <img
-          ref={fgImgRef}
-          src={fgImg}
-          alt="Jonopod luxury architectural residence"
-          onLoad={() => ScrollTrigger.refresh()}
-          className="h-full w-full object-cover object-bottom will-change-transform drop-shadow-[0_-10px_35px_rgba(15,23,42,0.22)]"
-          draggable={false}
-        />
-        {/* Subtle bottom vignette for seamless grounding */}
+        {/* =====================================================================
+            LAYER 0 (z-0): SKY BACKGROUND IMAGE (src/assets/hero-images/bg.webp)
+        ====================================================================== */}
         <div
-          aria-hidden="true"
-          className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-[#0f1c0b]/35 via-transparent to-transparent"
-        />
-      </div>
+          ref={bgLayerRef}
+          data-hero-bg
+          className="pointer-events-none absolute inset-0 z-0 will-change-transform"
+        >
+          <img
+            ref={bgImgRef}
+            src={bgImg}
+            alt=""
+            aria-hidden="true"
+            fetchPriority="high"
+            decoding="async"
+            className="h-full w-full scale-[1.04] object-cover object-center"
+            draggable={false}
+          />
+        </div>
+
+        {/* =====================================================================
+            LAYER 1 (z-10): SCROLL-HIGHLIGHTED TAGLINE + WHITE 'Jonopod' + 'Properties'
+            Strictly BEHIND fg.webp
+        ====================================================================== */}
+        <div className="pointer-events-none absolute inset-x-0 top-0 z-10 flex flex-col items-center pt-[10.5vh] sm:pt-[11vh] md:pt-[11.5vh] px-4">
+          <div
+            ref={taglineWrapRef}
+            className="mb-3 sm:mb-4 md:mb-5 flex flex-col items-center will-change-transform"
+          >
+            <div
+              ref={taglineRef}
+              aria-label="রাজশাহীতে প্রপার্টি খোঁজা হোক আরও সহজ!"
+              className="inline-flex flex-wrap items-center justify-center gap-x-2.5 sm:gap-x-3.5 md:gap-x-4 gap-y-1 font-sans text-2xl sm:text-3xl md:text-4xl lg:text-[2.65rem] xl:text-[2.95rem] leading-[1.28] tracking-[0.01em] text-center"
+            >
+              {HERO_TAGLINE_WORDS.map((word, idx) => (
+                <span
+                  key={word}
+                  ref={(el) => {
+                    taglineWordWrapRefs.current[idx] = el;
+                  }}
+                  className="relative inline-block will-change-transform"
+                >
+                  {/* Base initial black state */}
+                  <span
+                    ref={(el) => {
+                      taglineWordBaseRefs.current[idx] = el;
+                    }}
+                    style={{ clipPath: 'inset(-25% 0% -25% 0%)' }}
+                    className="block font-bold text-[#181512] select-none"
+                  >
+                    {word}
+                  </span>
+                  {/* Left-to-right scroll-scrubbed white fill */}
+                  <span
+                    ref={(el) => {
+                      taglineWordFillRefs.current[idx] = el;
+                    }}
+                    aria-hidden="true"
+                    style={{ clipPath: 'inset(-25% 100% -25% 0%)' }}
+                    className="absolute inset-0 font-bold text-white [text-shadow:0_6px_26px_rgba(8,38,94,0.38)]"
+                  >
+                    {word}
+                  </span>
+                </span>
+              ))}
+            </div>
+          </div>
+
+          <h1 className="w-full flex flex-col items-center text-center">
+            <div
+              ref={titlePrimaryWrapRef}
+              data-hero-title-primary
+              className="w-full flex justify-center will-change-transform"
+            >
+              <span
+                ref={titlePrimaryTextRef}
+                style={{ fontFamily: "'ITC Bauhaus', 'itc bauhaus', 'itc bauhuas', sans-serif" }}
+                className="block font-bauhaus font-bold text-white text-[14.5vw] sm:text-[13.8vw] md:text-[12.8vw] lg:text-[12vw] leading-[0.82] tracking-[-0.015em] whitespace-nowrap [text-shadow:0_8px_30px_rgba(8,38,94,0.28)]"
+              >
+                Jonopod
+              </span>
+            </div>
+
+            <div
+              ref={titleSecondaryWrapRef}
+              data-hero-title-secondary
+              className="w-full flex justify-center mt-1 sm:mt-1.5 md:mt-2 will-change-transform"
+            >
+              <span
+                ref={titleSecondaryTextRef}
+                style={{ fontFamily: "'ITC Bauhaus', 'itc bauhaus', 'itc bauhuas', sans-serif" }}
+                className="block font-bauhaus font-bold text-white text-[10vw] sm:text-[9.5vw] md:text-[8.8vw] lg:text-[8.2vw] leading-[0.86] tracking-[0.015em] whitespace-nowrap [text-shadow:0_8px_28px_rgba(8,38,94,0.28)]"
+              >
+                Properties
+              </span>
+            </div>
+          </h1>
+        </div>
+
+        {/* =====================================================================
+            LAYER 2 (z-20): FOREGROUND TRANSPARENT WEBP (src/assets/hero-images/fg.webp)
+            Renders in front of 'Jonopod' & 'Properties' so the building overlaps the text
+        ====================================================================== */}
+        <div
+          ref={fgLayerRef}
+          data-hero-fg
+          className="pointer-events-none absolute inset-0 z-20 flex items-end justify-center will-change-transform"
+        >
+          <img
+            ref={fgImgRef}
+            src={fgImg}
+            alt="Jonopod luxury architectural residence"
+            fetchPriority="high"
+            decoding="async"
+            className="h-full w-full object-cover object-bottom"
+            draggable={false}
+          />
+          {/* Subtle bottom vignette for seamless grounding */}
+          <div
+            aria-hidden="true"
+            className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-[#0f1c0b]/35 via-transparent to-transparent"
+          />
+        </div>
+      </section>
 
       {/* =====================================================================
-          LAYER 3 (z-30): 4 COMPACT FLOATING GLASS CARDS (Buy, Sell, Find, Deliver)
-          Positioned IN FRONT (not behind the building), floating with ScrollTrigger
+          BRIDGE BAR (z-30): STRADDLES 50% IN HERO & 50% IN PHILOSOPHY SECTION
       ====================================================================== */}
-      <div className="pointer-events-none absolute inset-0 z-30 mx-auto max-w-[92rem]">
-        {HERO_FLOATING_CARDS.map(({ title, tag, Icon, positionClass }, idx) => (
+      <div className="relative z-30 h-0 w-full select-none">
+        <div className="pointer-events-none absolute inset-x-0 top-0 -translate-y-1/2 flex justify-center px-4 sm:px-6">
           <div
-            key={title}
-            ref={(el) => {
-              cardScrollRefs.current[idx] = el;
-            }}
-            className={`absolute ${positionClass} will-change-transform`}
+            ref={bottomDockRef}
+            className="pointer-events-auto w-full max-w-4xl rounded-lg sm:rounded-xl bg-[#FAF9F6] border border-[#181512]/10 shadow-[0_22px_55px_-12px_rgba(15,23,42,0.28)] px-3 py-2 sm:px-4 sm:py-2.5 md:px-5 md:py-3"
           >
-            <button
-              ref={(el) => {
-                cardFloatRefs.current[idx] = el;
-              }}
-              type="button"
-              onClick={onExplore}
-              className="pointer-events-auto group flex items-center gap-2.5 sm:gap-3 rounded-2xl bg-white/22 hover:bg-white/34 backdrop-blur-xl border border-white/50 hover:border-white/80 px-3 py-2 sm:px-3.5 sm:py-2.5 shadow-[0_14px_34px_-8px_rgba(15,23,42,0.28),inset_0_1px_0_rgba(255,255,255,0.65)] transition-colors duration-300 cursor-pointer will-change-transform"
-            >
-              <span className="inline-flex h-8 w-8 sm:h-9 sm:w-9 shrink-0 items-center justify-center rounded-xl bg-white/30 border border-white/55 text-white shadow-xs">
-                <Icon className="h-4 w-4 text-white drop-shadow-[0_1px_4px_rgba(0,0,0,0.25)]" />
-              </span>
+            <div className="grid grid-cols-2 md:grid-cols-4 items-center gap-y-2 md:gap-y-0 md:divide-x md:divide-[#181512]/10">
+              {HERO_CARDS.map(({ title, Icon }) => (
+                <button
+                  key={title}
+                  type="button"
+                  onClick={onExplore}
+                  className="group flex items-center justify-center gap-3 px-3 sm:px-5 py-2 text-center transition-colors cursor-pointer rounded-md md:rounded-none hover:bg-[#181512]/[0.03] md:hover:bg-transparent"
+                >
+                  <span className="inline-flex h-9 w-9 sm:h-10 sm:w-10 shrink-0 items-center justify-center rounded-lg bg-[#181512]/[0.06] group-hover:bg-[#181512] text-[#181512] group-hover:text-white transition-colors duration-300">
+                    <Icon className="h-4 w-4 sm:h-[18px] sm:w-[18px]" />
+                  </span>
 
-              <div className="text-left pr-1">
-                <div className="flex items-center gap-1">
-                  <span className="font-sans text-xs sm:text-sm font-semibold tracking-tight text-white drop-shadow-[0_1px_6px_rgba(0,0,0,0.3)]">
+                  <span className="font-sans text-sm sm:text-base font-semibold tracking-tight text-[#181512] group-hover:text-[#9A6B3B] transition-colors">
                     {title}
                   </span>
-                  <ArrowUpRight className="h-3 w-3 text-white/85 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-                </div>
-                <span className="block font-mono text-[9px] sm:text-[10px] tracking-[0.12em] uppercase text-white/85 drop-shadow-[0_1px_4px_rgba(0,0,0,0.25)]">
-                  {tag}
-                </span>
-              </div>
-            </button>
+                </button>
+              ))}
+            </div>
           </div>
-        ))}
-      </div>
-
-      {/* Bottom center scroll indicator */}
-      <div
-        ref={bottomBarRef}
-        aria-hidden="true"
-        className="pointer-events-none absolute bottom-5 left-1/2 -translate-x-1/2 z-30 hidden md:flex flex-col items-center gap-1.5 text-white/90 drop-shadow-[0_2px_8px_rgba(0,0,0,0.4)]"
-      >
-        <span className="font-mono text-[9px] tracking-[0.28em] uppercase">Scroll to Parallax</span>
-        <div className="h-7 w-px bg-white/40 overflow-hidden relative">
-          <div className="absolute inset-x-0 top-0 h-1/2 bg-white animate-pulse" />
         </div>
       </div>
-    </section>
+    </>
   );
 };
