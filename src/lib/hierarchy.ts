@@ -8,7 +8,7 @@
    - anything the apartment leaves empty (location, developer, contact,
      amenities, nearby places, hero image…) is inherited from the project
 ------------------------------------------------------------------- */
-import { Listing, Unit } from '../types/listing';
+import { Listing, Unit, defaultSectionsForNew } from '../types/listing';
 import { slugify } from './format';
 
 /** The project's unit row this apartment is linked to, if any. */
@@ -47,7 +47,6 @@ export function withParent(child: Listing, parent: Listing | null | undefined): 
     price: unit && unit.price > 0 ? { ...child.price, amount: unit.price } : child.price,
     location: {
       area: pick(child.location.area, parent.location.area) || '',
-      areaBn: pick(child.location.areaBn, parent.location.areaBn) || '',
       city: pick(child.location.city, parent.location.city) || '',
       address: pick(child.location.address, parent.location.address) || '',
       mapEmbedUrl: pick(child.location.mapEmbedUrl, parent.location.mapEmbedUrl),
@@ -58,7 +57,8 @@ export function withParent(child: Listing, parent: Listing | null | undefined): 
       landTitle: pick(child.trust.landTitle, parent.trust.landTitle),
       milestones: child.trust.milestones.length ? child.trust.milestones : parent.trust.milestones,
     },
-    contact: child.contact.phone?.trim() ? child.contact : parent.contact,
+    // A unit page either has its own contact person or uses the project's as a whole.
+    contact: child.contact.phone?.trim() || child.contact.name?.trim() ? child.contact : parent.contact,
     amenities: child.amenities.length ? child.amenities : parent.amenities,
     nearby: child.nearby.length ? child.nearby : parent.nearby,
     media: {
@@ -98,18 +98,16 @@ export function draftFromUnit(project: Listing, unit: Unit, uid: string): Listin
     construction: project.construction,
     featured: false,
     title: `${project.title} · Unit ${unit.code}`,
-    titleBn: project.titleBn ? `${project.titleBn} · ইউনিট ${unit.code}` : '',
-    taglineBn: '',
     summary: '',
-    location: { areaBn: '', area: '', city: '', address: '' },
+    location: { area: '', city: '', address: '' },
     price: { amount: 0, negotiable: project.price.negotiable },
     core: {},
     facts: [],
     units: [],
     media: { hero: { url: '' }, gallery: [], floorPlans: [] },
-    chapters: [],
     nearby: [],
     amenities: [],
+    sections: project.sections ? project.sections.filter((s) => s.type !== 'custom') : defaultSectionsForNew(),
     trust: { developer: '', milestones: [] },
     contact: { phone: '' },
     seo: {},

@@ -59,7 +59,7 @@ export const ListingCard: React.FC<ListingCardProps> = ({ listing, index = 0, si
           <div className="flex items-end justify-between gap-4">
             <div className="min-w-0 flex-1">
               <h3 className="font-display font-light text-3xl md:text-4xl leading-[1.25] text-[#FAF7F2] truncate py-0.5">
-                {listing.titleBn || listing.title}
+                {listing.title}
               </h3>
               <div className="mt-2 flex items-center gap-2 text-[11px] font-mono tracking-[0.18em] uppercase text-[#E6DFD3]">
                 <MapPin className="w-3.5 h-3.5 text-[#E4C799]" />
@@ -74,11 +74,8 @@ export const ListingCard: React.FC<ListingCardProps> = ({ listing, index = 0, si
       </figure>
 
       <figcaption className="mt-4 flex items-baseline justify-between gap-4 text-[10.5px] font-mono tracking-[0.22em] uppercase">
-        <span className="text-[#3D362E] font-medium truncate">{listing.title}</span>
-        <span className="text-gradient-gold font-semibold shrink-0">
-          {priceLabel(listing)}
-          {stats && stats.total > 0 && <span className="text-[#786F63] font-normal"> · {stats.available} left</span>}
-        </span>
+        <span className="text-gradient-gold font-semibold truncate">{priceLabel(listing)}</span>
+        {stats && stats.total > 0 && <span className="text-[#786F63] shrink-0">{stats.available} units left</span>}
       </figcaption>
     </Link>
   );

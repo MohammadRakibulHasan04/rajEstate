@@ -50,7 +50,10 @@ service cloud.firestore {
         && d.slug is string && d.slug.matches('^[a-z0-9-]{1,80}$')
         && d.kind in ['single', 'project']
         && d.publish in ['draft', 'published', 'archived']
-        && (!('parent' in d) || (d.parent is map && d.parent.id is string && d.parent.id.size() > 0));
+        && (!('summary' in d) || (d.summary is string && d.summary.size() <= 5000))
+        && (!('parent' in d) || (d.parent is map && d.parent.id is string && d.parent.id.size() > 0))
+        && (!('contact' in d) || (d.contact is map && d.contact.phone is string && d.contact.phone.size() <= 20))
+        && (!('sections' in d) || (d.sections is list && d.sections.size() <= 40));
     }
 
     // Listings: the public sees published only; admins manage everything.

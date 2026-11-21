@@ -1,8 +1,10 @@
 /* ------------------------------------------------------------------
    LISTING MODEL
    A listing is either a single property (one flat / house / plot) or a
-   project (a building containing many units). Every fact is ranked by
-   significance so the detail page can give it the weight it deserves.
+   project (a building containing many units).
+
+   Language convention: names, labels and headings are English; free-text
+   descriptions (summary, custom section bodies) are written in Bangla.
 ------------------------------------------------------------------- */
 
 export type ListingKind = 'single' | 'project';
@@ -46,6 +48,7 @@ export interface MediaImage {
   room?: string;
 }
 
+/** @deprecated Editorial chapters are no longer edited or displayed. Kept only so legacy documents still type-check. */
 export interface StoryChapter {
   kicker: string;
   titleBn: string;
@@ -127,6 +130,49 @@ export interface ParentLink {
   unitId?: string;
 }
 
+/* ── Contact ───────────────────────────────────────────────────── */
+
+export interface ListingContact {
+  /** Person or desk handling enquiries, e.g. "Rafiq Ahmed". */
+  name?: string;
+  /** e.g. "Sales Manager" */
+  designation?: string;
+  /** Agency / developer office, e.g. "Jonopod Properties". */
+  company?: string;
+  phone: string;
+  whatsapp?: string;
+  email?: string;
+  /** Free text, e.g. "Sat–Thu, 10:00 AM – 7:00 PM". */
+  hours?: string;
+  /** Sales office / site office address. */
+  address?: string;
+}
+
+/* ── Page sections ─────────────────────────────────────────────── */
+
+/** Optional, admin-controlled blocks of the public detail page. */
+export type BuiltInSectionType = 'specifications' | 'floorPlans' | 'amenities' | 'location' | 'legal' | 'progress' | 'video';
+
+export interface BuiltInSection {
+  id: BuiltInSectionType;
+  type: BuiltInSectionType;
+  enabled: boolean;
+}
+
+/** Free-form block written by the admin (e.g. "Payment Plan"). */
+export interface CustomSection {
+  id: string;
+  type: 'custom';
+  enabled: boolean;
+  /** Heading (English). */
+  title: string;
+  /** Body text (Bangla). */
+  body: string;
+  imageUrl?: string;
+}
+
+export type ListingSection = BuiltInSection | CustomSection;
+
 export interface Listing {
   id: string;
   slug: string;
@@ -138,13 +184,18 @@ export interface Listing {
   construction: ConstructionState;
   featured: boolean;
 
+  /** Display name (English). */
   title: string;
-  titleBn: string;
-  taglineBn: string;
+  /** @deprecated Single-language titles are used now; kept for legacy documents. */
+  titleBn?: string;
+  /** @deprecated No longer edited or displayed. */
+  taglineBn?: string;
+  /** Property description (Bangla). */
   summary: string;
 
   location: {
-    areaBn: string;
+    /** @deprecated Single-language area names are used now. */
+    areaBn?: string;
     area: string;
     city: string;
     address: string;
@@ -168,9 +219,13 @@ export interface Listing {
     videoUrl?: string;
   };
 
-  chapters: StoryChapter[];
+  /** @deprecated Editorial chapters are no longer edited or displayed. */
+  chapters?: StoryChapter[];
   nearby: NearbyPlace[];
   amenities: AmenityItem[];
+
+  /** Order and visibility of optional page sections. Resolve with `resolveSections()`. */
+  sections?: ListingSection[];
 
   trust: {
     developer: string;
@@ -179,11 +234,7 @@ export interface Listing {
     milestones: Milestone[];
   };
 
-  contact: {
-    phone: string;
-    whatsapp?: string;
-    email?: string;
-  };
+  contact: ListingContact;
 
   seo?: {
     title?: string;
@@ -220,6 +271,24 @@ export const NEARBY_LABELS: Record<NearbyType, string> = {
   other: 'Landmark',
 };
 
+/** Canonical order of the optional page sections. */
+export const BUILT_IN_SECTION_TYPES: BuiltInSectionType[] = [
+  'specifications',
+  'floorPlans',
+  'amenities',
+  'location',
+  'legal',
+  'progress',
+  'video',
+];
+
+/** Sections switched on for a brand-new listing. The rest can be added from the editor. */
+const NEW_LISTING_SECTIONS: ReadonlySet<BuiltInSectionType> = new Set(['floorPlans', 'amenities', 'location', 'legal']);
+
+export function defaultSectionsForNew(): ListingSection[] {
+  return BUILT_IN_SECTION_TYPES.map((type) => ({ id: type, type, enabled: NEW_LISTING_SECTIONS.has(type) }));
+}
+
 export function emptyListing(uid = ''): Listing {
   const now = new Date().toISOString();
   return {
@@ -231,18 +300,16 @@ export function emptyListing(uid = ''): Listing {
     construction: 'ready',
     featured: false,
     title: '',
-    titleBn: '',
-    taglineBn: '',
     summary: '',
-    location: { areaBn: '', area: '', city: 'Dhaka', address: '' },
+    location: { area: '', city: 'Dhaka', address: '' },
     price: { amount: 0, negotiable: false },
     core: {},
     facts: [],
     units: [],
     media: { hero: { url: '' }, gallery: [], floorPlans: [] },
-    chapters: [],
     nearby: [],
     amenities: [],
+    sections: defaultSectionsForNew(),
     trust: { developer: '', milestones: [] },
     contact: { phone: '' },
     seo: {},

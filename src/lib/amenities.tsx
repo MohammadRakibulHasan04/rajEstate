@@ -63,21 +63,21 @@ const ICON_MAP: Record<AmenityIconKey, AmenityIconMeta> = Object.fromEntries(
 ) as Record<AmenityIconKey, AmenityIconMeta>;
 
 export const COMMON_AMENITY_PRESETS: AmenityItem[] = [
-  { label: 'লিফট', icon: 'elevator', detail: 'High-speed passenger lift' },
-  { label: '২৪/৭ নিরাপত্তা', icon: 'security', detail: 'Guarded entry & patrol' },
-  { label: 'জেনারেটর', icon: 'generator', detail: 'Full backup power' },
-  { label: 'গ্যাস লাইন', icon: 'gas', detail: 'Dedicated kitchen supply' },
-  { label: 'ইন্টারকম', icon: 'intercom', detail: 'Gate-to-residence line' },
-  { label: 'সিসিটিভি', icon: 'cctv', detail: '24-hour camera coverage' },
-  { label: 'ফায়ার সেফটি', icon: 'fire-safety', detail: 'Detection & extinguishers' },
-  { label: 'ছাদ বাগান', icon: 'rooftop-garden', detail: 'Landscaped roof terrace' },
-  { label: 'পার্কিং', icon: 'parking', detail: 'Reserved ground bay' },
-  { label: 'জিমনেসিয়াম', icon: 'gym', detail: 'Residents fitness suite' },
-  { label: 'সুইমিং পুল', icon: 'pool', detail: 'Temperature-controlled pool' },
-  { label: 'কমিউনিটি হল', icon: 'community-hall', detail: 'Event & lounge space' },
-  { label: 'নামাজ ঘর', icon: 'prayer-room', detail: 'Dedicated prayer space' },
-  { label: 'শিশুদের খেলার জায়গা', icon: 'playground', detail: 'Safe outdoor play zone' },
-  { label: 'সোলার প্যানেল', icon: 'solar', detail: 'Renewable roof grid' },
+  { label: 'Lift', icon: 'elevator', detail: 'High-speed passenger lift' },
+  { label: '24/7 Security', icon: 'security', detail: 'Guarded entry & patrol' },
+  { label: 'Generator Backup', icon: 'generator', detail: 'Full backup power' },
+  { label: 'Gas Line', icon: 'gas', detail: 'Dedicated kitchen supply' },
+  { label: 'Intercom', icon: 'intercom', detail: 'Gate-to-residence line' },
+  { label: 'CCTV', icon: 'cctv', detail: '24-hour camera coverage' },
+  { label: 'Fire Safety', icon: 'fire-safety', detail: 'Detection & extinguishers' },
+  { label: 'Rooftop Garden', icon: 'rooftop-garden', detail: 'Landscaped roof terrace' },
+  { label: 'Car Parking', icon: 'parking', detail: 'Reserved ground bay' },
+  { label: 'Gymnasium', icon: 'gym', detail: 'Residents fitness suite' },
+  { label: 'Swimming Pool', icon: 'pool', detail: 'Temperature-controlled pool' },
+  { label: 'Community Hall', icon: 'community-hall', detail: 'Event & lounge space' },
+  { label: 'Prayer Room', icon: 'prayer-room', detail: 'Dedicated prayer space' },
+  { label: 'Kids Play Area', icon: 'playground', detail: 'Safe outdoor play zone' },
+  { label: 'Solar Panels', icon: 'solar', detail: 'Renewable roof grid' },
 ];
 
 /** Infers the best matching icon key from a Bengali or English amenity label. */

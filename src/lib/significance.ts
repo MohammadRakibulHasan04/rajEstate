@@ -3,7 +3,7 @@
    Turns raw specs into ranked facts that each explain *why* they
    matter, and scores how well a listing tells its story.
 ------------------------------------------------------------------- */
-import { Fact, FactTier, Listing } from '../types/listing';
+import { CATEGORY_LABELS, Fact, FactTier, Listing } from '../types/listing';
 import { formatBdt, formatNumber, monthsUntil, formatMonth, ordinal, sqftToSqm } from './format';
 
 export interface EffectivePrice {
@@ -46,7 +46,7 @@ export function facingWhy(facing?: string): string | undefined {
   if (f.includes('south')) {
     if (f.includes('west'))
       return 'Gets the south breeze, but the afternoon sun hits the west side. Shaded balconies help keep it cool.';
-    return 'Catches the দখিনা বাতাস (south breeze) all year and soft winter sun, with less direct summer heat.';
+    return 'Catches the south breeze all year and soft winter sun, with less direct summer heat.';
   }
   if (f.includes('west')) return 'Strong afternoon sun warms the rooms by evening. Heat-reflective curtains are worth budgeting for.';
   if (f.includes('east')) return 'Morning light fills the rooms early, and the interiors stay cool through the afternoon.';
@@ -218,34 +218,96 @@ export function suggestWhy(key: string, l: Listing): string | undefined {
   return deriveCoreFacts(l).find((f) => f.key === key)?.why;
 }
 
-/* ── Story score ───────────────────────────────────────────────── */
+/* ── Specifications for display ────────────────────────────────── */
 
-export interface ScoreTip {
-  label: string;
-  done: boolean;
-  weight: number;
+/** Keys of facts computed from `core` specs. Anything else is an admin-written specification. */
+export const CORE_FACT_KEYS: ReadonlySet<string> = new Set([
+  'size',
+  'facing',
+  'floor',
+  'rooms',
+  'ppsf',
+  'handover',
+  'parking',
+  'balconies',
+  'land',
+  'backup',
+]);
+
+export const isCoreFact = (f: Fact) => CORE_FACT_KEYS.has(f.key);
+
+/** Admin-written specifications (e.g. "Flooring: Homogeneous tiles"). */
+export function customFacts(l: Listing): Fact[] {
+  return l.facts.filter((f) => !isCoreFact(f) && f.label?.trim() && f.value?.trim());
 }
 
-export function scoreListing(l: Listing): { score: number; tips: ScoreTip[] } {
-  const { signature, defining } = factsByTier(l);
-  const ranked = [...signature, ...defining];
-  const price = effectivePrice(l);
-  const tips: ScoreTip[] = [
-    { label: 'Hero image set', done: !!l.media.hero.url, weight: 10 },
-    { label: 'At least 5 gallery images', done: l.media.gallery.length >= 5, weight: 10 },
-    { label: 'Floor plan added', done: l.media.floorPlans.length > 0 || l.units.some((u) => u.floorPlanUrl), weight: 8 },
-    { label: 'Bangla title & tagline', done: !!l.titleBn.trim() && !!l.taglineBn.trim(), weight: 8 },
-    { label: 'Summary of 120+ characters', done: l.summary.trim().length >= 120, weight: 6 },
-    { label: '1–3 signature facts chosen', done: signature.length >= 1, weight: 12 },
-    { label: '4+ defining facts', done: defining.length >= 4, weight: 10 },
-    { label: 'Every ranked fact explains "why"', done: ranked.length > 0 && ranked.every((f) => !!f.why?.trim()), weight: 12 },
-    { label: '3+ nearby places', done: l.nearby.length >= 3, weight: 8 },
-    { label: 'Developer & approval details', done: !!l.trust.developer.trim() && !!l.trust.rajukApproval?.trim(), weight: 6 },
-    { label: 'Contact phone', done: !!l.contact.phone.trim(), weight: 5 },
-    { label: 'Price or units set', done: price.amount > 0, weight: 5 },
+export interface SpecItem {
+  key: string;
+  label: string;
+  value: string;
+}
+
+/**
+ * Splits the structured specs into a short headline row (`primary`) and the
+ * remaining property details. Every spec appears in exactly one of the two,
+ * so the page never repeats a number.
+ */
+export function listingSpecs(l: Listing, unitCode?: string): { primary: SpecItem[]; details: SpecItem[] } {
+  const c = l.core;
+  const range = sizeRange(l);
+  const sizeValue = range
+    ? range.min === range.max
+      ? `${formatNumber(range.min)} sq ft`
+      : `${formatNumber(range.min)}–${formatNumber(range.max)} sq ft`
+    : undefined;
+
+  const primary: SpecItem[] = [];
+  const details: SpecItem[] = [
+    {
+      key: 'type',
+      label: 'Property Type',
+      value: l.kind === 'project' ? `${CATEGORY_LABELS[l.category]} Project` : CATEGORY_LABELS[l.category],
+    },
   ];
-  const score = tips.reduce((s, t) => s + (t.done ? t.weight : 0), 0);
-  return { score, tips };
+  if (unitCode) details.push({ key: 'unit', label: 'Unit', value: unitCode });
+
+  if (l.kind === 'project') {
+    if (l.units.length) primary.push({ key: 'units', label: 'Total Units', value: formatNumber(l.units.length) });
+    if (sizeValue) primary.push({ key: 'size', label: 'Unit Sizes', value: sizeValue });
+    const beds = Array.from(new Set(l.units.map((u) => u.beds).filter((b) => b > 0))).sort((a, b) => a - b);
+    if (beds.length) {
+      primary.push({ key: 'beds', label: 'Bedrooms', value: beds.length > 1 ? `${beds[0]}–${beds[beds.length - 1]}` : String(beds[0]) });
+    }
+    if (c.totalFloors) primary.push({ key: 'storeys', label: 'Storeys', value: String(c.totalFloors) });
+    if (c.landKatha) details.push({ key: 'land', label: 'Land Area', value: `${c.landKatha} katha` });
+  } else {
+    if (c.beds) primary.push({ key: 'beds', label: 'Bedrooms', value: String(c.beds) });
+    if (c.baths) primary.push({ key: 'baths', label: 'Bathrooms', value: String(c.baths) });
+    if (sizeValue) primary.push({ key: 'size', label: 'Area', value: sizeValue });
+    if (c.landKatha) {
+      (primary.length < 4 ? primary : details).push({ key: 'land', label: 'Land Area', value: `${c.landKatha} katha` });
+    }
+    if (c.floor) {
+      details.push({ key: 'floor', label: 'Floor', value: c.totalFloors ? `${ordinal(c.floor)} of ${c.totalFloors}` : ordinal(c.floor) });
+    } else if (c.totalFloors) {
+      details.push({ key: 'storeys', label: 'Building Height', value: `${c.totalFloors} storeys` });
+    }
+  }
+
+  if (c.facing) details.push({ key: 'facing', label: 'Facing', value: c.facing });
+  if (c.balconies) details.push({ key: 'balconies', label: 'Balconies', value: String(c.balconies) });
+  if (c.parking) details.push({ key: 'parking', label: 'Car Parking', value: String(c.parking) });
+  if (l.construction !== 'ready' && c.handover) details.push({ key: 'handover', label: 'Expected Handover', value: formatMonth(c.handover) });
+
+  return { primary, details };
+}
+
+/** Price per square foot, or null when it can't be computed honestly. */
+export function pricePerSqft(l: Listing): number | null {
+  const price = effectivePrice(l);
+  const range = sizeRange(l);
+  if (!price.amount || !range?.min) return null;
+  return Math.round(price.amount / range.min);
 }
 
 export function priceLabel(l: Listing, bn = false): string {

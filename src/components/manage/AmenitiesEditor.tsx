@@ -65,7 +65,7 @@ export const AmenitiesEditor: React.FC<AmenitiesEditorProps> = ({ value, onChang
       <div className="rounded-2xl border border-[#181512]/10 bg-[#F6F2EA]/75 p-4 space-y-3">
         <div className="flex items-center justify-between gap-2">
           <span className="mono-label !text-[9.5px] text-[#6E6559]">
-            Quick-Toggle Presets (Click to add or remove with icon)
+            Quick add (click to toggle)
           </span>
           <span className="text-[10px] font-mono text-[#9A6B3B] font-medium">
             {items.length} selected
@@ -146,7 +146,7 @@ export const AmenitiesEditor: React.FC<AmenitiesEditorProps> = ({ value, onChang
                   <div>
                     <TextInput
                       className="!py-2.5 !text-xs"
-                      placeholder="Amenity title (e.g. লিফট / High-Speed Lift)"
+                      placeholder="Amenity name (e.g. High-Speed Lift)"
                       value={item.label}
                       onChange={(label) => {
                         const inferred = inferAmenityIcon(label);
@@ -270,7 +270,7 @@ export const AmenitiesEditor: React.FC<AmenitiesEditorProps> = ({ value, onChang
         className="btn-quiet !py-2.5 !px-4"
       >
         <Plus className="w-3.5 h-3.5 text-[#9A6B3B]" />
-        <span>Add Amenity &amp; Icon</span>
+        <span>Add Custom Amenity</span>
       </button>
     </div>
   );

@@ -3,11 +3,11 @@ import { ArrowRight, Bookmark, Phone } from 'lucide-react';
 import { Listing } from '../../types/listing';
 import { priceLabel } from '../../lib/significance';
 import { useAuth } from '../../context/AuthContext';
-import { telHref } from './InquiryPanel';
+import { telHref } from '../../lib/contact';
 
 /**
- * Floating action dock: price + primary actions, shown after the hero
- * and hidden while the inquiry form itself is on screen.
+ * Mobile action bar: price + primary actions, shown after the gallery and
+ * hidden while the enquiry form is on screen. Desktop uses the sticky contact card.
  */
 export const ActionDock: React.FC<{ listing: Listing; onInquire: () => void }> = ({ listing, onInquire }) => {
   const { isPropertySaved, toggleSaveProperty } = useAuth();
@@ -39,13 +39,13 @@ export const ActionDock: React.FC<{ listing: Listing; onInquire: () => void }> =
 
   return (
     <div
-      className="dock fixed bottom-4 md:bottom-6 left-1/2 z-[80] w-[calc(100%-2rem)] max-w-3xl"
+      className="dock lg:hidden fixed bottom-4 left-1/2 z-[80] w-[calc(100%-2rem)] max-w-3xl"
       data-visible={visible}
       aria-hidden={!visible}
     >
       <div className="panel-glass rounded-full pl-6 pr-2 py-2 flex items-center gap-4 shadow-[0_24px_60px_-20px_rgba(24,21,18,0.22)]">
         <div className="min-w-0 flex-1">
-          <div className="font-display text-lg leading-[1.3] truncate text-[#181512] py-0.5">{listing.titleBn || listing.title}</div>
+          <div className="font-display text-lg leading-[1.3] truncate text-[#181512] py-0.5">{listing.title}</div>
           <div className="text-[10px] font-mono tracking-[0.2em] uppercase text-gradient-gold font-semibold truncate">{priceLabel(listing)}</div>
         </div>
         <button
@@ -69,8 +69,8 @@ export const ActionDock: React.FC<{ listing: Listing; onInquire: () => void }> =
           </a>
         )}
         <button id="dock-inquire" onClick={onInquire} className="btn-gold !py-3 !px-5 !text-[10px]" tabIndex={visible ? 0 : -1}>
-          <span className="hidden sm:inline">Arrange a visit</span>
-          <span className="sm:hidden">Visit</span>
+          <span className="hidden sm:inline">Request a Visit</span>
+          <span className="sm:hidden">Enquire</span>
           <ArrowRight className="w-3.5 h-3.5" />
         </button>
       </div>

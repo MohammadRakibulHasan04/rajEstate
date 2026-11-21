@@ -16,11 +16,14 @@ import {
   updateDoc,
 } from 'firebase/firestore';
 import { db, handleFirestoreError, OperationType } from './firebase';
-import { Listing, PublishState, Unit } from '../types/listing';
+import { Fact, Listing, MediaImage, PublishState, Unit } from '../types/listing';
 import { normalizeAmenities } from './amenities';
 import { SEED_LISTINGS } from '../data/seedListings';
 import { TourInquiry } from '../types/property';
 import { draftFromUnit } from './hierarchy';
+import { normalizeContact } from './contact';
+import { normalizeSections } from './sections';
+import { customFacts } from './significance';
 
 const COL = 'listings';
 
@@ -31,10 +34,10 @@ function clean<T>(v: T): T {
 
 function fromDoc(id: string, data: Record<string, unknown>): Listing {
   const l = data as unknown as Listing;
-  const rawContact = l.contact || { phone: '' };
+  const rawContact = normalizeContact(l.contact);
   const contact = {
     ...rawContact,
-    email: rawContact.email === 'info@aura.com.bd' ? 'info@jonopodproperties.com' : rawContact.email,
+    ...(rawContact.email === 'info@aura.com.bd' ? { email: 'info@jonopodproperties.com' } : {}),
   };
   const seo = l.seo
     ? {
@@ -46,23 +49,79 @@ function fromDoc(id: string, data: Record<string, unknown>): Listing {
   return {
     ...l,
     id,
+    title: typeof l.title === 'string' ? l.title : '',
+    summary: typeof l.summary === 'string' ? l.summary : '',
     facts: Array.isArray(l.facts) ? l.facts : [],
     units: Array.isArray(l.units) ? l.units : [],
     chapters: Array.isArray(l.chapters) ? l.chapters : [],
     nearby: Array.isArray(l.nearby) ? l.nearby : [],
     amenities: normalizeAmenities(l.amenities),
+    sections: normalizeSections(l.sections),
     media: {
       hero: l.media?.hero || { url: '' },
       gallery: Array.isArray(l.media?.gallery) ? l.media.gallery : [],
       floorPlans: Array.isArray(l.media?.floorPlans) ? l.media.floorPlans : [],
       videoUrl: l.media?.videoUrl,
     },
-    location: l.location || { area: '', areaBn: '', city: 'Dhaka', address: '' },
+    location: l.location || { area: '', city: 'Dhaka', address: '' },
     price: l.price || { amount: 0, negotiable: false },
     core: l.core || {},
-    trust: l.trust || { developer: '', milestones: [] },
+    trust: {
+      ...(l.trust || {}),
+      developer: typeof l.trust?.developer === 'string' ? l.trust.developer : '',
+      milestones: Array.isArray(l.trust?.milestones) ? l.trust.milestones : [],
+    },
     contact,
     ...(seo ? { seo } : {}),
+  };
+}
+
+/**
+ * Normalises a listing before it is written:
+ * - photos from legacy editorial chapters are moved into the gallery so none are lost
+ * - deprecated fields (Bangla titles, tagline, chapters, Bangla captions) are dropped
+ * - only admin-written specifications are stored; core facts are derived at runtime
+ * - contact, sections and amenities are trimmed and validated
+ */
+export function sanitizeListing(l: Listing): Listing {
+  const { titleBn: _t, taglineBn: _g, chapters, ...rest } = l;
+  const stripCaption = ({ captionBn: _c, ...img }: MediaImage): MediaImage => ({ ...img, url: img.url.trim() });
+
+  const hero = stripCaption(l.media.hero);
+  const seen = new Set<string>(hero.url ? [hero.url] : []);
+  const gallery: MediaImage[] = [];
+  for (const img of l.media.gallery.map(stripCaption)) {
+    if (!img.url || seen.has(img.url)) continue;
+    seen.add(img.url);
+    gallery.push(img);
+  }
+  for (const ch of chapters ?? []) {
+    const url = ch?.imageUrl?.trim();
+    if (!url || seen.has(url)) continue;
+    seen.add(url);
+    gallery.push({ url, room: ch.kicker?.replace(/^The\s+/i, '') || undefined, caption: ch.titleEn || undefined });
+  }
+
+  const { areaBn: _a, ...location } = l.location;
+  const facts: Fact[] = customFacts(l).map((f) => ({ key: f.key, label: f.label.trim(), value: f.value.trim(), tier: 'reference' }));
+
+  return {
+    ...rest,
+    title: l.title.trim(),
+    summary: l.summary.trim(),
+    location: { ...location, area: location.area.trim(), city: location.city.trim(), address: location.address.trim() },
+    facts,
+    media: {
+      hero,
+      gallery,
+      floorPlans: l.media.floorPlans.map(stripCaption).filter((p) => p.url),
+      ...(l.media.videoUrl?.trim() ? { videoUrl: l.media.videoUrl.trim() } : {}),
+    },
+    nearby: l.nearby.filter((p) => p.name.trim()),
+    amenities: normalizeAmenities(l.amenities).filter((a) => a.label.trim()),
+    trust: { ...l.trust, milestones: l.trust.milestones.filter((m) => m.label.trim()) },
+    sections: normalizeSections(l.sections),
+    contact: normalizeContact(l.contact),
   };
 }
 
@@ -445,7 +504,7 @@ export async function isSlugTaken(slug: string, exceptId?: string): Promise<bool
 /** Creates or updates. Returns the document id. */
 export async function saveListing(listing: Listing, uid: string): Promise<string> {
   const now = new Date().toISOString();
-  const { id, ...rest } = listing;
+  const { id, ...rest } = sanitizeListing(listing);
   const payload = clean({ ...rest, updatedAt: now });
   try {
     if (id && !id.startsWith('seed-')) {

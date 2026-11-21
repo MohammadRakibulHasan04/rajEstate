@@ -50,14 +50,11 @@ export const UnitStack: React.FC<Props> = ({ listing, onInquireUnit, unitPages =
   if (!units.length) return null;
 
   return (
-    <div className="mt-20 md:mt-28" data-reveal>
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
-        <div>
-          <div className="eyebrow mb-5">Choose your home</div>
-          <h3 className="font-display font-light text-4xl md:text-5xl leading-[1] text-[#181512]">
-            {stats.available} of {stats.total} <em className="italic text-gradient-gold">still yours to choose.</em>
-          </h3>
-        </div>
+    <div>
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+        <p className="text-sm text-[#4A433B]">
+          <span className="font-medium text-[#181512]">{stats.available}</span> of {stats.total} units available. Select a unit to see its details.
+        </p>
         <div className="flex flex-wrap items-center gap-2">
           <button id="units-only-available" className="chip" data-active={onlyAvailable} onClick={() => setOnlyAvailable((v) => !v)}>
             Available only
@@ -71,9 +68,9 @@ export const UnitStack: React.FC<Props> = ({ listing, onInquireUnit, unitPages =
         </div>
       </div>
 
-      <div className="grid lg:grid-cols-12 gap-8">
+      <div className="grid xl:grid-cols-12 gap-6">
         {/* Building */}
-        <div className="lg:col-span-7 panel p-5 md:p-8">
+        <div className="xl:col-span-7 panel p-5 md:p-6">
           <div className="flex flex-wrap items-center gap-5 mb-6 text-[10px] font-mono tracking-[0.2em] uppercase text-[#6E6559]">
             {(['available', 'booked', 'sold'] as const).map((s) => (
               <span key={s} className="flex items-center gap-2">
@@ -118,9 +115,9 @@ export const UnitStack: React.FC<Props> = ({ listing, onInquireUnit, unitPages =
         </div>
 
         {/* Selected unit */}
-        <aside className="lg:col-span-5">
+        <aside className="xl:col-span-5">
           {selected ? (
-            <div className="panel p-7 md:p-9 lg:sticky lg:top-28">
+            <div className="panel p-6 md:p-7 xl:sticky xl:top-28">
               <div className="flex items-start justify-between gap-4">
                 <div>
                   <div className="mono-label">Unit</div>
@@ -188,7 +185,7 @@ export const UnitStack: React.FC<Props> = ({ listing, onInquireUnit, unitPages =
                   id="unit-page-link"
                   className="btn-gold w-full justify-center mt-8"
                 >
-                  Explore home {selected.code} <ArrowUpRight className="w-4 h-4" />
+                  View Unit {selected.code} <ArrowUpRight className="w-4 h-4" />
                 </Link>
               )}
 
@@ -198,7 +195,7 @@ export const UnitStack: React.FC<Props> = ({ listing, onInquireUnit, unitPages =
                 disabled={selected.status === 'sold'}
                 className={`${selectedPage ? 'btn-quiet mt-3' : 'btn-gold mt-8'} w-full justify-center`}
               >
-                {selected.status === 'sold' ? 'This home is sold' : `Ask about ${selected.code}`} <ArrowRight className="w-4 h-4" />
+                {selected.status === 'sold' ? 'Unit Sold' : `Enquire About ${selected.code}`} <ArrowRight className="w-4 h-4" />
               </button>
             </div>
           ) : null}

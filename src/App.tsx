@@ -15,7 +15,6 @@ import { SavedPortfolioDrawer } from './components/SavedPortfolioDrawer';
 import { Preloader } from './components/home/Preloader';
 import { CinematicHero } from './components/home/CinematicHero';
 import { ManifestoSection } from './components/home/ManifestoSection';
-import { PropertySolutionsSection } from './components/home/PropertySolutionsSection';
 import { ResidencesShowcase } from './components/home/ResidencesShowcase';
 import { hasIntroPlayed, markIntroPlayed, useFramePreloader } from './lib/frames';
 import { ArrowUpRight } from 'lucide-react';
@@ -184,13 +183,7 @@ function AppContent() {
         {/* 2. PHILOSOPHY */}
         <ManifestoSection />
 
-        {/* 3. PROPERTY SOLUTIONS & FEATURES — 50/50 split editorial showcase */}
-        <PropertySolutionsSection
-          onExplore={() => handleNavigate('showcase')}
-          onConsult={() => setBookingProperty(featuredProperty)}
-        />
-
-        {/* 4. SHOWCASE — residences portfolio collection */}
+        {/* 3. SHOWCASE — residences portfolio collection */}
         <ResidencesShowcase />
       </main>
 
@@ -209,7 +202,7 @@ function AppContent() {
               </p>
             </div>
             {[
-              { h: 'Explore', l: [['Philosophy', 'manifesto'], ['Solutions', 'solutions'], ['Residences', 'showcase']] },
+              { h: 'Explore', l: [['Philosophy', 'manifesto'], ['Residences', 'showcase']] },
               { h: 'Experience', l: [['Atelier', 'architects'], ['Advisory', 'advisory']] },
             ].map((col) => (
               <div key={col.h} className="md:col-span-2">

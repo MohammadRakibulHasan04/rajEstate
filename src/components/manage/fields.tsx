@@ -22,23 +22,34 @@ export const Field: React.FC<{
   </div>
 );
 
-export const EditorSection: React.FC<{ id: string; index: string; title: string; titleBn?: string; intro?: string; children: React.ReactNode }> = ({
-  id,
-  index,
-  title,
-  titleBn,
-  intro,
-  children,
-}) => (
-  <section id={id} className="editor-section panel p-6 md:p-9">
-    <header className="flex items-start gap-5 mb-8">
-      <span className="text-outline font-display text-5xl leading-none select-none" aria-hidden="true">{index}</span>
-      <div>
-        <h2 className="font-display text-3xl text-[#181512] leading-tight">
-          {title} {titleBn && <span className="text-[#6E6559] text-2xl">· {titleBn}</span>}
-        </h2>
-        {intro && <p className="mt-2 text-sm text-[#4A433B] max-w-2xl leading-relaxed">{intro}</p>}
+export const EditorSection: React.FC<{
+  id: string;
+  index?: string;
+  title: string;
+  intro?: string;
+  /** Header controls (e.g. reorder / remove). */
+  actions?: React.ReactNode;
+  /** Shown as a quiet badge next to the title. */
+  badge?: string;
+  children: React.ReactNode;
+}> = ({ id, index, title, intro, actions, badge, children }) => (
+  <section id={id} className="editor-section panel p-6 md:p-8 scroll-mt-28" aria-labelledby={`${id}-title`}>
+    <header className="flex items-start justify-between gap-4 mb-7">
+      <div className="flex items-start gap-4 min-w-0">
+        {index && (
+          <span className="font-mono text-xs text-[#9A6B3B] mt-2 shrink-0" aria-hidden="true">
+            {index}
+          </span>
+        )}
+        <div className="min-w-0">
+          <h2 id={`${id}-title`} className="font-display text-2xl text-[#181512] leading-tight flex items-center gap-3 flex-wrap">
+            {title}
+            {badge && <span className="px-2 py-0.5 rounded-md bg-[#181512]/[0.05] text-[10px] font-mono uppercase tracking-wider text-[#6E6559]">{badge}</span>}
+          </h2>
+          {intro && <p className="mt-1.5 text-sm text-[#5C5346] max-w-2xl leading-relaxed">{intro}</p>}
+        </div>
       </div>
+      {actions && <div className="flex items-center gap-1 shrink-0">{actions}</div>}
     </header>
     <div className="space-y-6">{children}</div>
   </section>
@@ -170,6 +181,7 @@ export function Repeater<T>({
   addLabel,
   empty,
   idPrefix,
+  max,
 }: {
   items: T[];
   onChange: (items: T[]) => void;
@@ -178,6 +190,7 @@ export function Repeater<T>({
   addLabel: string;
   empty?: string;
   idPrefix: string;
+  max?: number;
 }) {
   const update = (i: number, patch: Partial<T>) => onChange(items.map((it, j) => (j === i ? { ...it, ...patch } : it)));
   const remove = (i: number) => onChange(items.filter((_, j) => j !== i));
@@ -195,22 +208,24 @@ export function Repeater<T>({
       {items.map((item, i) => (
         <div key={i} className="group relative rounded-xl border border-[#181512]/10 bg-[#F6F2EA]/75 p-4 pr-14">
           {render(item, (p) => update(i, p), i)}
-          <div className="absolute top-3 right-3 flex flex-col gap-1 opacity-70 group-hover:opacity-100 transition-opacity">
-            <button type="button" onClick={() => move(i, -1)} disabled={i === 0} className="p-1.5 rounded-md text-[#5C5346] hover:text-[#181512] hover:bg-[#181512]/5 disabled:opacity-20 cursor-pointer" aria-label="Move up">
+          <div className="absolute top-3 right-3 flex flex-col gap-1 opacity-70 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity">
+            <button type="button" onClick={() => move(i, -1)} disabled={i === 0} className="p-1.5 rounded-md text-[#5C5346] hover:text-[#181512] hover:bg-[#181512]/5 disabled:opacity-20 cursor-pointer" aria-label={`Move item ${i + 1} up`}>
               <ArrowUp className="w-3.5 h-3.5" />
             </button>
-            <button type="button" onClick={() => move(i, 1)} disabled={i === items.length - 1} className="p-1.5 rounded-md text-[#5C5346] hover:text-[#181512] hover:bg-[#181512]/5 disabled:opacity-20 cursor-pointer" aria-label="Move down">
+            <button type="button" onClick={() => move(i, 1)} disabled={i === items.length - 1} className="p-1.5 rounded-md text-[#5C5346] hover:text-[#181512] hover:bg-[#181512]/5 disabled:opacity-20 cursor-pointer" aria-label={`Move item ${i + 1} down`}>
               <ArrowDown className="w-3.5 h-3.5" />
             </button>
-            <button type="button" onClick={() => remove(i)} className="p-1.5 rounded-md text-[#6E6559] hover:text-red-600 hover:bg-red-500/10 cursor-pointer" aria-label="Remove">
+            <button type="button" onClick={() => remove(i)} className="p-1.5 rounded-md text-[#6E6559] hover:text-red-600 hover:bg-red-500/10 cursor-pointer" aria-label={`Remove item ${i + 1}`}>
               <Trash2 className="w-3.5 h-3.5" />
             </button>
           </div>
         </div>
       ))}
-      <button type="button" id={`${idPrefix}-add`} onClick={() => onChange([...items, create()])} className="btn-quiet">
-        <Plus className="w-3.5 h-3.5" /> {addLabel}
-      </button>
+      {(max === undefined || items.length < max) && (
+        <button type="button" id={`${idPrefix}-add`} onClick={() => onChange([...items, create()])} className="btn-quiet">
+          <Plus className="w-3.5 h-3.5" /> {addLabel}
+        </button>
+      )}
     </div>
   );
 }

@@ -30,7 +30,8 @@ import {
   seedListings,
   setInquiryStatus,
 } from '../../lib/listings';
-import { scoreListing, priceLabel } from '../../lib/significance';
+import { priceLabel } from '../../lib/significance';
+import { scoreListing } from '../../lib/completeness';
 import { linkedUnit, withParent } from '../../lib/hierarchy';
 import { useAuth } from '../../context/AuthContext';
 import { Link, navigate } from '../../lib/router';
@@ -78,8 +79,8 @@ export const ManageDashboard: React.FC = () => {
     if (filterKind !== 'all' && l.kind !== filterKind) return false;
     if (search.trim()) {
       const q = search.toLowerCase();
-      const matchTitle = eff.title.toLowerCase().includes(q) || eff.titleBn.toLowerCase().includes(q);
-      const matchArea = eff.location.area.toLowerCase().includes(q) || eff.location.areaBn.toLowerCase().includes(q);
+      const matchTitle = eff.title.toLowerCase().includes(q);
+      const matchArea = eff.location.area.toLowerCase().includes(q) || eff.location.address.toLowerCase().includes(q);
       const matchDev = eff.trust.developer.toLowerCase().includes(q);
       if (!matchTitle && !matchArea && !matchDev) return false;
     }
@@ -407,11 +408,6 @@ export const ManageDashboard: React.FC = () => {
                             <h3 className="font-display text-2xl text-[#181512] truncate">
                               {listing.title}
                             </h3>
-                            {listing.titleBn && (
-                              <span className="text-[#5C5346] font-sans text-sm">
-                                · {listing.titleBn}
-                              </span>
-                            )}
                             {parent && (
                               <Link
                                 to={`/manage/edit/${parent.id}`}
