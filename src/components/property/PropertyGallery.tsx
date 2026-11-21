@@ -16,9 +16,9 @@ interface Props {
 }
 
 const pill =
-  'inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#FAF7F2]/92 hover:bg-[#FFFFFF] backdrop-blur-md border border-[#181512]/15 hover:border-[#9A6B3B] text-xs sm:text-[13px] font-medium text-[#181512] transition-colors cursor-pointer shadow-md';
+  'inline-flex items-center gap-1.5 sm:gap-2 px-2.5 py-1 sm:px-3.5 sm:py-1.5 md:px-4 md:py-2 rounded-full bg-[#FAF7F2]/92 hover:bg-[#FFFFFF] backdrop-blur-md border border-[#181512]/15 hover:border-[#9A6B3B] text-[11px] sm:text-xs md:text-[13px] font-medium text-[#181512] transition-colors cursor-pointer shadow-md shrink-0 whitespace-nowrap';
 const arrow =
-  'absolute top-1/2 -translate-y-1/2 z-20 w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-[#FAF7F2]/88 hover:bg-[#FFFFFF] backdrop-blur-md border border-[#181512]/15 hover:border-[#9A6B3B] text-[#181512] flex items-center justify-center transition-colors cursor-pointer shadow-lg';
+  'absolute top-1/2 -translate-y-1/2 z-20 w-8 h-8 sm:w-10 sm:h-10 md:w-11 md:h-11 rounded-full bg-[#FAF7F2]/88 hover:bg-[#FFFFFF] backdrop-blur-md border border-[#181512]/15 hover:border-[#9A6B3B] text-[#181512] flex items-center justify-center transition-colors cursor-pointer shadow-lg';
 
 /** Primary photo stage with two thumbnails. Every image opens the lightbox. */
 export const PropertyGallery: React.FC<Props> = ({
@@ -138,7 +138,7 @@ export const PropertyGallery: React.FC<Props> = ({
           {(current.room || current.caption) && (
             <div
               key={`badge-${current.caption || current.room}`}
-              className="pointer-events-none absolute top-4 left-4 px-3.5 py-1.5 rounded-full bg-[#FAF7F2]/90 backdrop-blur-md border border-[#181512]/10 text-[11px] font-mono tracking-[0.2em] uppercase text-[#181512] z-20 transition-opacity duration-300"
+              className="pointer-events-none absolute top-3 left-3 sm:top-4 sm:left-4 px-2.5 py-1 sm:px-3.5 sm:py-1.5 rounded-full bg-[#FAF7F2]/90 backdrop-blur-md border border-[#181512]/10 text-[9.5px] sm:text-[11px] font-mono tracking-[0.2em] uppercase text-[#181512] z-20 transition-opacity duration-300"
             >
               {current.caption || current.room}
             </div>
@@ -146,33 +146,41 @@ export const PropertyGallery: React.FC<Props> = ({
 
           {total > 1 && (
             <>
-              <button type="button" id="gallery-prev" onClick={(e) => step(e, -1)} aria-label="Previous photo" className={`${arrow} left-3.5 sm:left-5`}>
-                <ChevronLeft className="w-5 h-5" />
+              <button type="button" id="gallery-prev" onClick={(e) => step(e, -1)} aria-label="Previous photo" className={`${arrow} left-2 sm:left-4`}>
+                <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
               </button>
-              <button type="button" id="gallery-next" onClick={(e) => step(e, 1)} aria-label="Next photo" className={`${arrow} right-3.5 sm:right-5`}>
-                <ChevronRight className="w-5 h-5" />
+              <button type="button" id="gallery-next" onClick={(e) => step(e, 1)} aria-label="Next photo" className={`${arrow} right-2 sm:right-4`}>
+                <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
               </button>
             </>
           )}
 
-          <div className="absolute bottom-4 left-4 sm:bottom-5 sm:left-5 z-20 flex flex-wrap items-center gap-2" onClick={(e) => e.stopPropagation()}>
-            <button type="button" id="gallery-all" onClick={() => onOpen(active % total)} className={pill}>
-              <Images className="w-4 h-4 text-[#9A6B3B]" /> All Photos
-            </button>
-            {onFloorPlans && (
-              <button type="button" id="gallery-floorplans" onClick={onFloorPlans} className={pill}>
-                <Layers className="w-4 h-4 text-[#9A6B3B]" /> Floor Plans
+          <div
+            className="absolute bottom-3 left-3 right-3 sm:bottom-5 sm:left-5 sm:right-5 z-20 flex items-center justify-between gap-1.5 sm:gap-2 pointer-events-none"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar pointer-events-auto">
+              <button type="button" id="gallery-all" onClick={() => onOpen(active % total)} className={pill}>
+                <Images className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#9A6B3B] shrink-0" />
+                <span><span className="hidden sm:inline">All </span>Photos</span>
               </button>
-            )}
-            {onVideo && (
-              <button type="button" id="gallery-video" onClick={onVideo} className={pill}>
-                <Play className="w-4 h-4 text-[#9A6B3B]" /> Project Video
-              </button>
-            )}
-          </div>
+              {onFloorPlans && (
+                <button type="button" id="gallery-floorplans" onClick={onFloorPlans} className={pill}>
+                  <Layers className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#9A6B3B] shrink-0" />
+                  <span><span className="hidden sm:inline">Floor </span>Plans</span>
+                </button>
+              )}
+              {onVideo && (
+                <button type="button" id="gallery-video" onClick={onVideo} className={pill}>
+                  <Play className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#9A6B3B] shrink-0" />
+                  <span><span className="hidden sm:inline">Project </span>Video</span>
+                </button>
+              )}
+            </div>
 
-          <div className="pointer-events-none absolute bottom-4 right-4 sm:bottom-5 sm:right-5 px-3.5 py-1.5 rounded-full bg-[#FAF7F2]/92 border border-[#181512]/15 text-xs font-mono text-[#181512] shadow-md z-20">
-            {(active % total) + 1}/{total}
+            <div className="pointer-events-auto px-2.5 py-1 sm:px-3.5 sm:py-1.5 rounded-full bg-[#FAF7F2]/92 border border-[#181512]/15 text-[10.5px] sm:text-xs font-mono text-[#181512] shadow-md shrink-0">
+              {(active % total) + 1}/{total}
+            </div>
           </div>
         </div>
 
