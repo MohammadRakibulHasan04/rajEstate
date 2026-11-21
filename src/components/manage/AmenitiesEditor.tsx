@@ -42,7 +42,7 @@ export const AmenitiesEditor: React.FC<AmenitiesEditorProps> = ({ value, onChang
   const addCustom = () => {
     const next: AmenityItem[] = [
       ...items,
-      { label: '', icon: 'sparkles', detail: '' },
+      { label: '', icon: 'sparkles' },
     ];
     onChange(next);
     setOpenPickerIndex(next.length - 1);
@@ -65,10 +65,10 @@ export const AmenitiesEditor: React.FC<AmenitiesEditorProps> = ({ value, onChang
       <div className="rounded-2xl border border-[#181512]/10 bg-[#F6F2EA]/75 p-4 space-y-3">
         <div className="flex items-center justify-between gap-2">
           <span className="mono-label !text-[9.5px] text-[#6E6559]">
-            Quick add (click to toggle)
+            দ্রুত যোগ করুন (ক্লিক করে নির্বাচন করুন)
           </span>
           <span className="text-[10px] font-mono text-[#9A6B3B] font-medium">
-            {items.length} selected
+            {items.length}টি সুবিধা নির্বাচিত
           </span>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -98,7 +98,7 @@ export const AmenitiesEditor: React.FC<AmenitiesEditorProps> = ({ value, onChang
       {/* Individual Amenity Cards List */}
       {items.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-[#181512]/15 bg-[#F6F2EA]/50 p-6 text-center text-xs text-[#786F63]">
-          No amenities added yet. Click any preset above or add a custom amenity with an icon below.
+          এখনও কোনো সুযোগ-সুবিধা যোগ করা হয়নি। ওপরের বাটন থেকে ক্লিক করে অথবা নিচে নতুন সুবিধা যোগ করুন।
         </div>
       ) : (
         <div className="space-y-3">
@@ -129,7 +129,7 @@ export const AmenitiesEditor: React.FC<AmenitiesEditorProps> = ({ value, onChang
                     </span>
                     <div className="min-w-[92px]">
                       <span className="block text-[9px] font-mono uppercase tracking-[0.2em] text-[#9A6B3B]">
-                        Icon
+                        আইকন
                       </span>
                       <span className="block text-xs text-[#181512] font-medium truncate max-w-[110px]">
                         {meta.label}
@@ -145,8 +145,9 @@ export const AmenitiesEditor: React.FC<AmenitiesEditorProps> = ({ value, onChang
                   {/* Amenity Name Input */}
                   <div>
                     <TextInput
-                      className="!py-2.5 !text-xs"
-                      placeholder="Amenity name (e.g. High-Speed Lift)"
+                      lang="bn"
+                      className="!py-2.5 !text-xs font-bn"
+                      placeholder="সুবিধার নাম (যেমন: উচ্চগতির লিফট)"
                       value={item.label}
                       onChange={(label) => {
                         const inferred = inferAmenityIcon(label);
@@ -163,10 +164,11 @@ export const AmenitiesEditor: React.FC<AmenitiesEditorProps> = ({ value, onChang
                   {/* Optional Subtitle / Descriptor */}
                   <div>
                     <TextInput
-                      className="!py-2.5 !text-xs"
-                      placeholder={`Subtitle (default: ${meta.category})`}
+                      lang="bn"
+                      className="!py-2.5 !text-xs font-bn"
+                      placeholder="সংক্ষিপ্ত বিবরণ (ঐচ্ছিক)"
                       value={item.detail || ''}
-                      onChange={(detail) => updateAt(idx, { detail })}
+                      onChange={(detail) => updateAt(idx, { detail: detail.trim() ? detail : undefined })}
                     />
                   </div>
 
@@ -214,14 +216,14 @@ export const AmenitiesEditor: React.FC<AmenitiesEditorProps> = ({ value, onChang
                   <div className="pt-3 border-t border-[#181512]/[0.08] space-y-2.5">
                     <div className="flex items-center justify-between">
                       <span className="mono-label !text-[9.5px] text-[#9A6B3B]">
-                        Select Icon for &ldquo;{item.label || 'Amenity'}&rdquo;
+                        &ldquo;{item.label || 'সুবিধা'}&rdquo;-এর জন্য আইকন নির্বাচন করুন
                       </span>
                       <button
                         type="button"
                         onClick={() => setOpenPickerIndex(null)}
                         className="text-[10px] font-mono uppercase tracking-wider text-[#6E6559] hover:text-[#181512] cursor-pointer"
                       >
-                        Done
+                        সম্পন্ন
                       </button>
                     </div>
                     <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-2">
@@ -270,7 +272,7 @@ export const AmenitiesEditor: React.FC<AmenitiesEditorProps> = ({ value, onChang
         className="btn-quiet !py-2.5 !px-4"
       >
         <Plus className="w-3.5 h-3.5 text-[#9A6B3B]" />
-        <span>Add Custom Amenity</span>
+        <span>+ নতুন সুবিধা যোগ করুন</span>
       </button>
     </div>
   );

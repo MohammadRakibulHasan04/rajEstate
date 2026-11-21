@@ -25,8 +25,10 @@ export function scoreListing(l: Listing): { score: number; tips: ScoreTip[] } {
         ? !!(l.core.landKatha || l.core.sizeSqft)
         : !!(l.core.sizeSqft && l.core.beds && l.core.baths);
 
+  const hasTitle = l.titleMode === 'price' ? price.amount > 0 || !!l.title.trim() : !!l.title.trim();
+
   const tips: ScoreTip[] = [
-    { label: 'Title and description (120+ characters)', done: !!l.title.trim() && l.summary.trim().length >= 120, weight: 14, target: 'basics' },
+    { label: 'Title and description (120+ characters)', done: hasTitle && l.summary.trim().length >= 120, weight: 14, target: 'basics' },
     { label: 'Area and full address', done: !!l.location.area.trim() && !!l.location.address.trim(), weight: 10, target: 'location' },
     {
       label: l.kind === 'project' ? 'Unit inventory added' : isLand ? 'Land size' : 'Size, bedrooms and bathrooms',

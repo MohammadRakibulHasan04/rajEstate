@@ -1,8 +1,7 @@
 import React from 'react';
 import { Clock, Mail, MapPin, MessageCircle, Phone, UserRound } from 'lucide-react';
 import { Listing } from '../../types/listing';
-import { priceLabel, pricePerSqft, unitStats } from '../../lib/significance';
-import { formatNumber } from '../../lib/format';
+import { displayTitle, hasCustomName, isPriceAsTitle, unitStats } from '../../lib/significance';
 import { hasAnyContact, mailHref, telHref, waHref } from '../../lib/contact';
 
 interface Props {
@@ -18,30 +17,26 @@ const initials = (name: string) =>
     .map((w) => w[0]!.toUpperCase())
     .join('');
 
-/** Price and the person to talk to. Sticky beside the content on desktop. */
+/** Contact card sticky beside the content on desktop. */
 export const ContactCard: React.FC<Props> = ({ listing, onEnquire }) => {
   const c = listing.contact;
   const stats = listing.kind === 'project' ? unitStats(listing) : null;
-  const ppsf = listing.kind === 'project' ? null : pricePerSqft(listing);
   const whatsapp = c.whatsapp?.trim() || '';
   const pageUrl = typeof window !== 'undefined' ? window.location.href : '';
-  const waText = `Hello, I'm interested in ${listing.title}. ${pageUrl}`;
+  const labelForMsg = isPriceAsTitle(listing) && hasCustomName(listing) ? `${listing.title} (${displayTitle(listing)})` : displayTitle(listing);
+  const waText = `Hello, I'm interested in ${labelForMsg}. ${pageUrl}`;
 
   return (
     <div className="panel p-6 sm:p-7 space-y-6" id="contact-card">
       <div>
-        <div className="flex items-center justify-between gap-3">
-          <span className="mono-label">{listing.kind === 'project' ? 'Starting From' : 'Asking Price'}</span>
-          {listing.price.negotiable && listing.kind !== 'project' && (
-            <span className="px-2.5 py-0.5 rounded-full border border-[#9A6B3B]/40 bg-[#9A6B3B]/10 text-[9.5px] font-mono tracking-[0.2em] uppercase text-[#684724]">
-              Negotiable
-            </span>
-          )}
+        <div
+          lang="bn"
+          className="font-nakkhatra font-normal text-2xl sm:text-[26px] text-gradient-gold leading-[1.4]"
+        >
+          বিস্তারিত জানতে যোগাযোগ করুন
         </div>
-        <div className="mt-1.5 font-display font-light text-4xl text-gradient-gold leading-tight">{priceLabel(listing).replace(/^From /, '')}</div>
-        {ppsf && <div className="mt-1 text-xs font-mono text-[#786F63]">৳ {formatNumber(ppsf)} per sq ft</div>}
         {stats && stats.total > 0 && (
-          <div className="mt-1 text-xs font-mono text-[#786F63]">
+          <div className="mt-1.5 text-xs font-mono text-[#786F63]">
             {stats.available} of {stats.total} units available
           </div>
         )}
@@ -62,8 +57,13 @@ export const ContactCard: React.FC<Props> = ({ listing, onEnquire }) => {
       )}
 
       <div className="flex flex-col gap-2.5">
-        <button type="button" id="card-enquire" onClick={onEnquire} className="btn-gold w-full justify-center">
-          Request a Visit
+        <button
+          type="button"
+          id="card-enquire"
+          onClick={onEnquire}
+          className="btn-gold font-nakkhatra !text-[15px] !tracking-normal w-full justify-center"
+        >
+          সরাসরি সাইট ভিজিট
         </button>
         {hasAnyContact(c) && (
           <div className={`grid ${c.phone && whatsapp ? 'grid-cols-2' : 'grid-cols-1'} gap-2.5`}>
@@ -92,7 +92,7 @@ export const ContactCard: React.FC<Props> = ({ listing, onEnquire }) => {
           {c.email && (
             <li className="flex items-center gap-3 min-w-0">
               <Mail className="w-3.5 h-3.5 text-[#9A6B3B] shrink-0" />
-              <a href={mailHref(c.email, listing.title)} className="hover:text-[#9A6B3B] truncate">{c.email}</a>
+              <a href={mailHref(c.email, labelForMsg)} className="hover:text-[#9A6B3B] truncate">{c.email}</a>
             </li>
           )}
           {c.hours && (

@@ -32,17 +32,38 @@
 }
 
 @font-face {
-  font-family: 'ChayanaTeesta';
-  src: url('./assets/fonts/Li-Chayana-Teesta-Unicode.ttf') format('truetype');
+  font-family: 'AlinurNakkhatra';
+  src: url('./assets/fonts/Li_Alinur_Nakkhatra_Unicode.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: normal;
   font-display: swap;
-  unicode-range: U+0980-U+09FF, U+200C-U+200D;
+  unicode-range: U+0964-0965, U+0980-09FF, U+200C-200D;
+}
+
+@font-face {
+  font-family: 'Li_Alinur_Nakkhatra_Unicode';
+  src: url('./assets/fonts/Li_Alinur_Nakkhatra_Unicode.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
 }
 
 @font-face {
   font-family: 'PurnoPran';
   src: url('./assets/fonts/Li-Purno-Pran-Unicode.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: normal;
   font-display: swap;
-  unicode-range: U+0980-U+09FF, U+200C-U+200D;
+  size-adjust: 108%;
+  unicode-range: U+0964-0965, U+0980-09FF, U+200C-200D;
+}
+
+@font-face {
+  font-family: 'Li-Purno-Pran';
+  src: url('./assets/fonts/Li-Purno-Pran-Unicode.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
 }
 
 /* ------------------------------------------------------------------
@@ -76,7 +97,7 @@
 
 @layer base {
   :root {
-    --font-display-family: 'ChayanaTeesta', 'Cormorant Garamond', 'Times New Roman', serif;
+    --font-display-family: 'AlinurNakkhatra', 'Cormorant Garamond', 'Times New Roman', serif;
     --font-sans-family: 'PurnoPran', 'Manrope', -apple-system, BlinkMacSystemFont, sans-serif;
     --font-mono-family: 'JetBrains Mono', ui-monospace, monospace;
     --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
@@ -111,8 +132,37 @@
   line-height: 1.25;
 }
 
+.font-stat {
+  font-family: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-feature-settings: 'lnum' 1, 'tnum' 1;
+  font-variant-numeric: lining-nums tabular-nums;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
 .font-sans {
   font-family: var(--font-sans-family);
+}
+
+.font-bn,
+[lang='bn']:not(.font-display):not(.font-nakkhatra) {
+  font-family: 'Li-Purno-Pran', 'PurnoPran', 'Manrope', -apple-system, BlinkMacSystemFont, sans-serif;
+  letter-spacing: 0em;
+  font-feature-settings: 'kern' 1, 'liga' 1, 'clig' 1, 'calt' 1;
+  font-variant-ligatures: common-ligatures contextual;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+.font-nakkhatra {
+  font-family: 'Li_Alinur_Nakkhatra_Unicode', 'AlinurNakkhatra', 'Cormorant Garamond', 'Times New Roman', serif !important;
+  letter-spacing: 0em !important;
+  font-feature-settings: 'kern' 1, 'liga' 1, 'clig' 1, 'calt' 1;
+  font-variant-ligatures: common-ligatures contextual;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
 .font-mono {
@@ -425,10 +475,23 @@
   border: 1px solid rgba(24, 21, 18, 0.13);
   background: #F8F7F4;
   color: #181512;
-  font-size: 14px;
+  font-family: var(--font-sans-family);
+  font-size: 14.5px;
+  letter-spacing: 0em;
+  font-feature-settings: 'kern' 1, 'liga' 1, 'clig' 1, 'calt' 1;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
   padding: 12px 14px;
   outline: none;
   transition: border-color 0.3s ease, background 0.3s ease, box-shadow 0.3s ease;
+}
+
+.lux-input[lang='bn'],
+.lux-textarea[lang='bn'] {
+  font-family: 'Li-Purno-Pran', 'PurnoPran', 'Manrope', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 17px;
+  line-height: 1.75;
+  letter-spacing: 0em;
 }
 
 .lux-input::placeholder,

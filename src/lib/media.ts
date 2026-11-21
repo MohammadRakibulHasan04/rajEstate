@@ -35,34 +35,169 @@ export function parseImageUrls(input: string): string[] {
 }
 
 const YT_ID = /^[\w-]{6,20}$/;
+const DIRECT_VIDEO_RE = /\.(mp4|webm|ogg|mov|m4v)(?:[?#].*)?$/i;
 
-/** Converts YouTube / Vimeo watch or share links into an embeddable player URL. */
-export function videoEmbedUrl(url?: string): string | null {
-  if (!url?.trim()) return null;
+export interface VideoEmbedMeta {
+  provider: 'youtube' | 'vimeo' | 'direct' | 'gdrive' | 'facebook' | 'iframe';
+  providerLabel: string;
+  embedUrl: string;
+  autoplayUrl: string;
+  sourceUrl: string;
+  thumbnailUrl?: string;
+  fallbackThumbnailUrl?: string;
+  videoId?: string;
+}
+
+/**
+ * Parses YouTube, Vimeo, Google Drive, Facebook, direct video files (.mp4/.webm),
+ * or raw `<iframe src="…">` snippets into a structured professional embed descriptor.
+ */
+export function parseVideoEmbed(rawInput?: string): VideoEmbedMeta | null {
+  if (!rawInput?.trim()) return null;
+  const extracted = extractEmbedSrc(rawInput);
+  if (!extracted) return null;
+
+  // Relative direct video path (e.g. "/videos/overview.mp4")
+  if (extracted.startsWith('/') && !extracted.startsWith('//') && DIRECT_VIDEO_RE.test(extracted)) {
+    return {
+      provider: 'direct',
+      providerLabel: 'Direct HD Video',
+      embedUrl: extracted,
+      autoplayUrl: extracted,
+      sourceUrl: extracted,
+    };
+  }
+
   let u: URL;
   try {
-    u = new URL(url.trim());
+    u = new URL(extracted);
   } catch {
     return null;
   }
-  const host = u.hostname.replace(/^(www|m)\./, '');
+  if (u.protocol !== 'https:' && u.protocol !== 'http:') return null;
 
-  if (host === 'youtu.be') {
-    const id = u.pathname.slice(1).split('/')[0];
-    return YT_ID.test(id) ? `https://www.youtube-nocookie.com/embed/${id}` : null;
+  const host = u.hostname.replace(/^(www|m)\./, '').toLowerCase();
+
+  // 1. Direct video file on HTTPS/HTTP
+  if (DIRECT_VIDEO_RE.test(u.pathname)) {
+    return {
+      provider: 'direct',
+      providerLabel: 'Direct HD Video',
+      embedUrl: u.toString(),
+      autoplayUrl: u.toString(),
+      sourceUrl: u.toString(),
+    };
   }
-  if (host === 'youtube.com' || host === 'youtube-nocookie.com') {
-    const v = u.searchParams.get('v');
-    if (v && YT_ID.test(v)) return `https://www.youtube-nocookie.com/embed/${v}`;
-    const m = u.pathname.match(/^\/(?:embed|shorts|live)\/([\w-]+)/);
-    return m && YT_ID.test(m[1]) ? `https://www.youtube-nocookie.com/embed/${m[1]}` : null;
+
+  // 2. YouTube (watch, youtu.be, shorts, live, embed)
+  if (host === 'youtu.be' || host === 'youtube.com' || host === 'youtube-nocookie.com') {
+    let id = '';
+    if (host === 'youtu.be') {
+      id = u.pathname.slice(1).split('/')[0];
+    } else {
+      id = u.searchParams.get('v') || '';
+      if (!id) {
+        const m = u.pathname.match(/^\/(?:embed|shorts|live|v)\/([\w-]+)/);
+        if (m) id = m[1];
+      }
+    }
+    if (YT_ID.test(id)) {
+      const startParam = u.searchParams.get('t') || u.searchParams.get('start');
+      const startSec = startParam ? parseInt(startParam.replace(/\D/g, ''), 10) : 0;
+      const startQuery = startSec > 0 ? `&start=${startSec}` : '';
+      const base = `https://www.youtube-nocookie.com/embed/${id}?rel=0&modestbranding=1&playsinline=1${startQuery}`;
+      return {
+        provider: 'youtube',
+        providerLabel: 'YouTube Presentation',
+        videoId: id,
+        embedUrl: base,
+        autoplayUrl: `${base}&autoplay=1`,
+        sourceUrl: `https://www.youtube.com/watch?v=${id}`,
+        thumbnailUrl: `https://i.ytimg.com/vi/${id}/maxresdefault.jpg`,
+        fallbackThumbnailUrl: `https://i.ytimg.com/vi/${id}/hqdefault.jpg`,
+      };
+    }
   }
-  if (host === 'vimeo.com') {
-    const m = u.pathname.match(/^\/(\d+)/);
-    return m ? `https://player.vimeo.com/video/${m[1]}` : null;
+
+  // 3. Vimeo (vimeo.com/123456, vimeo.com/123456/hash, player.vimeo.com/video/123456)
+  if (host === 'vimeo.com' || host === 'player.vimeo.com') {
+    const m =
+      u.pathname.match(/^\/video\/(\d+)/) ||
+      u.pathname.match(/^\/(?:channels\/[\w-]+\/|groups\/[\w-]+\/videos\/|manage\/videos\/)?(\d+)(?:\/([\w-]+))?/);
+    if (m) {
+      const id = m[1];
+      const hash = m[2] || u.searchParams.get('h') || '';
+      const hashQuery = hash ? `&h=${encodeURIComponent(hash)}` : '';
+      const base = `https://player.vimeo.com/video/${id}?dnt=1&title=0&byline=0&portrait=0${hashQuery}`;
+      return {
+        provider: 'vimeo',
+        providerLabel: 'Vimeo Presentation',
+        videoId: id,
+        embedUrl: base,
+        autoplayUrl: `${base}&autoplay=1`,
+        sourceUrl: `https://vimeo.com/${id}`,
+      };
+    }
   }
-  if (host === 'player.vimeo.com' && /^\/video\/\d+/.test(u.pathname)) return `https://player.vimeo.com${u.pathname}`;
+
+  // 4. Google Drive shared video
+  if (host === 'drive.google.com') {
+    const m = u.pathname.match(/\/file\/d\/([\w-]+)/);
+    if (m) {
+      const id = m[1];
+      const preview = `https://drive.google.com/file/d/${id}/preview`;
+      return {
+        provider: 'gdrive',
+        providerLabel: 'Google Drive Video',
+        videoId: id,
+        embedUrl: preview,
+        autoplayUrl: preview,
+        sourceUrl: `https://drive.google.com/file/d/${id}/view`,
+      };
+    }
+  }
+
+  // 5. Facebook video
+  if (host === 'facebook.com' || host === 'fb.watch') {
+    if (u.pathname.includes('/plugins/video.php')) {
+      return {
+        provider: 'facebook',
+        providerLabel: 'Facebook Video',
+        embedUrl: u.toString(),
+        autoplayUrl: u.toString(),
+        sourceUrl: u.toString(),
+      };
+    }
+    if (host === 'fb.watch' || /\/videos\/|\/watch\/|\/reel\//.test(u.pathname)) {
+      const pluginUrl = `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(u.toString())}&show_text=0`;
+      return {
+        provider: 'facebook',
+        providerLabel: 'Facebook Video',
+        embedUrl: pluginUrl,
+        autoplayUrl: `${pluginUrl}&autoplay=1`,
+        sourceUrl: u.toString(),
+      };
+    }
+  }
+
+  // 6. Generic iframe / embed URLs (e.g. Matterport, Wistia, Loom, Cloudflare Stream)
+  if (/<iframe/i.test(rawInput) || /\/embed\/|\/player\/|player\.|watch\./i.test(u.toString())) {
+    const sep = u.search ? '&' : '?';
+    return {
+      provider: 'iframe',
+      providerLabel: 'Embedded Presentation',
+      embedUrl: u.toString(),
+      autoplayUrl: `${u.toString()}${sep}autoplay=1`,
+      sourceUrl: u.toString(),
+    };
+  }
+
   return null;
+}
+
+/** Converts supported video links or iframe snippets into an embeddable player URL. */
+export function videoEmbedUrl(url?: string): string | null {
+  return parseVideoEmbed(url)?.embedUrl ?? null;
 }
 
 /**

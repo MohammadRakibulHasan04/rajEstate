@@ -6,7 +6,7 @@ import { ArrowLeft } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { Link, goBack, restorePendingScroll, useDocumentMeta } from '../lib/router';
 import { useChildListings, useListingBySlug, useParentListing, usePublishedListings } from '../lib/listings';
-import { listingSpecs, priceLabel } from '../lib/significance';
+import { displayTitle, listingSpecs, priceLabel } from '../lib/significance';
 import { isTopLevel, linkedUnit, unitPageMap, withParent } from '../lib/hierarchy';
 import { listingPhotos } from '../lib/media';
 import { publicSectionId, SECTION_META, visibleSections } from '../lib/sections';
@@ -14,6 +14,7 @@ import { Unit } from '../types/listing';
 
 import { PropertyGallery } from '../components/property/PropertyGallery';
 import { PropertyHeader } from '../components/property/PropertyHeader';
+import { ProjectVideoSection } from '../components/property/ProjectVideoSection';
 import { PropertyOverview } from '../components/property/PropertyOverview';
 import { PageSection } from '../components/property/PageSection';
 import { ListingSectionView } from '../components/property/ListingSectionView';
@@ -30,7 +31,7 @@ import logoImg from '../assets/logo.png';
 
 gsap.registerPlugin(ScrollTrigger);
 
-type Viewer = { kind: 'photos' | 'plans'; index: number } | null;
+type Viewer = { kind: 'photos' | 'plans' | 'satellite'; index: number } | null;
 
 export const PropertyPage: React.FC<{ slug: string }> = ({ slug }) => {
   const { isAdmin, adminChecking, isPropertySaved, toggleSaveProperty } = useAuth();
@@ -50,7 +51,26 @@ export const PropertyPage: React.FC<{ slug: string }> = ({ slug }) => {
 
   const photos = useMemo(() => (listing ? listingPhotos(listing) : []), [listing]);
   const specs = useMemo(() => (listing ? listingSpecs(listing, ownUnit?.code) : { primary: [], details: [] }), [listing, ownUnit?.code]);
-  const sections = useMemo(() => (listing ? visibleSections(listing) : []), [listing]);
+  const sections = useMemo(() => (listing ? visibleSections(listing).filter((s) => s.type !== 'video') : []), [listing]);
+
+  // Resolve video URL for both single properties and multi-unit projects (falling back to child unit video or published showcase video for demo projects)
+  const effectiveVideoUrl = useMemo(() => {
+    if (!listing) return '';
+    if (listing.media.videoUrl?.trim()) return listing.media.videoUrl.trim();
+    if (listing.kind === 'project') {
+      const childVideo = family.find((c) => c.media.videoUrl?.trim())?.media.videoUrl?.trim();
+      if (childVideo) return childVideo;
+      const fallbackVideo = published.find((p) => p.media.videoUrl?.trim())?.media.videoUrl?.trim();
+      if (fallbackVideo) return fallbackVideo;
+    }
+    return '';
+  }, [listing, family, published]);
+
+  const listingWithVideo = useMemo(
+    () => (listing && effectiveVideoUrl && !listing.media.videoUrl?.trim() ? { ...listing, media: { ...listing.media, videoUrl: effectiveVideoUrl } } : listing),
+    [listing, effectiveVideoUrl]
+  );
+  const hasVideo = !!effectiveVideoUrl;
 
   const rootRef = useRef<HTMLDivElement>(null);
   const progressRef = useRef<HTMLDivElement>(null);
@@ -60,7 +80,7 @@ export const PropertyPage: React.FC<{ slug: string }> = ({ slug }) => {
   const [copied, setCopied] = useState(false);
 
   useDocumentMeta(
-    listing ? listing.seo?.title || `${listing.title} · ${listing.location.area || listing.location.city} | Jonopod Properties` : 'Property | Jonopod Properties',
+    listing ? listing.seo?.title || `${displayTitle(listing)} · ${listing.location.area || listing.location.city} | Jonopod Properties` : 'Property | Jonopod Properties',
     listing ? listing.seo?.description || listing.summary.replace(/\s+/g, ' ').slice(0, 158) : undefined
   );
 
@@ -88,7 +108,7 @@ export const PropertyPage: React.FC<{ slug: string }> = ({ slug }) => {
   const share = async () => {
     const url = window.location.href;
     try {
-      if (navigator.share) await navigator.share({ title: listing?.title, url });
+      if (navigator.share) await navigator.share({ title: listing ? displayTitle(listing) : undefined, url });
       else {
         await navigator.clipboard.writeText(url);
         setCopied(true);
@@ -106,13 +126,14 @@ export const PropertyPage: React.FC<{ slug: string }> = ({ slug }) => {
   const navItems = useMemo<[string, string][]>(() => {
     if (!listing) return [];
     return [
+      ...(hasVideo ? ([['video', SECTION_META.video.navLabel]] as [string, string][]) : []),
       ...(hasOverview ? ([['overview', 'Overview']] as [string, string][]) : []),
       ...(hasUnits ? ([['plan', 'Units']] as [string, string][]) : []),
       ...(parentProject ? ([['building', 'Project']] as [string, string][]) : []),
       ...sections.map((s): [string, string] => [publicSectionId(s), s.type === 'custom' ? s.title : SECTION_META[s.type].navLabel]),
       ['inquiry', 'Enquire'],
     ];
-  }, [listing, hasOverview, hasUnits, parentProject, sections]);
+  }, [listing, hasVideo, hasOverview, hasUnits, parentProject, sections]);
 
   /* Reading Progress listener */
   useEffect(() => {
@@ -270,10 +291,10 @@ export const PropertyPage: React.FC<{ slug: string }> = ({ slug }) => {
         <div className="max-w-[96rem] mx-auto px-4 sm:px-6 md:px-10 xl:px-14">
           <PropertyGallery
             photos={photos}
-            title={listing.title}
+            title={displayTitle(listing)}
             onOpen={(index) => setViewer({ kind: 'photos', index })}
             onFloorPlans={sectionTypes.has('floorPlans') ? () => scrollTo('floorPlans') : undefined}
-            onVideo={sectionTypes.has('video') ? () => scrollTo('video') : undefined}
+            onVideo={hasVideo ? () => scrollTo('video') : undefined}
             paused={viewer !== null}
           />
 
@@ -284,6 +305,8 @@ export const PropertyPage: React.FC<{ slug: string }> = ({ slug }) => {
               <div className="lg:hidden mt-8">
                 <ContactCard listing={listing} onEnquire={() => scrollTo('inquiry')} />
               </div>
+
+              {hasVideo && listingWithVideo && <ProjectVideoSection listing={listingWithVideo} />}
 
               <PropertyOverview summary={listing.summary} details={specs.details} />
 
@@ -296,7 +319,13 @@ export const PropertyPage: React.FC<{ slug: string }> = ({ slug }) => {
               {parentProject && <ProjectLink project={parentProject} unit={ownUnit} unitPages={unitPages} currentId={listing.id} />}
 
               {sections.map((s) => (
-                <ListingSectionView key={s.id} listing={listing} section={s} onOpenPlan={(index) => setViewer({ kind: 'plans', index })} />
+                <ListingSectionView
+                  key={s.id}
+                  listing={listing}
+                  section={s}
+                  onOpenPlan={(index) => setViewer({ kind: 'plans', index })}
+                  onOpenSatellite={() => setViewer({ kind: 'satellite', index: 0 })}
+                />
               ))}
             </div>
 
@@ -334,7 +363,7 @@ export const PropertyPage: React.FC<{ slug: string }> = ({ slug }) => {
             <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" /> All Properties
           </Link>
           <img src={logoImg} alt="Jonopod Properties" className="h-8 w-auto object-contain opacity-85" />
-          <span className="text-[10px] font-mono tracking-[0.26em] uppercase text-[#6E6559]">{priceLabel(listing)}</span>
+          <span lang="bn" className="font-nakkhatra text-base tracking-normal text-[#6E6559]">{priceLabel(listing)}</span>
         </div>
       </footer>
 
@@ -345,6 +374,14 @@ export const PropertyPage: React.FC<{ slug: string }> = ({ slug }) => {
       )}
       {viewer?.kind === 'plans' && floorPlans.length > 0 && (
         <Lightbox images={floorPlans} index={viewer.index} onIndex={(index) => setViewer({ kind: 'plans', index })} onClose={() => setViewer(null)} />
+      )}
+      {viewer?.kind === 'satellite' && listing.media.satelliteImage?.url && (
+        <Lightbox
+          images={[listing.media.satelliteImage]}
+          index={0}
+          onIndex={() => {}}
+          onClose={() => setViewer(null)}
+        />
       )}
     </div>
   );

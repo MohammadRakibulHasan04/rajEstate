@@ -166,7 +166,7 @@ export const PropertyGallery: React.FC<Props> = ({
             )}
             {onVideo && (
               <button type="button" id="gallery-video" onClick={onVideo} className={pill}>
-                <Play className="w-4 h-4 text-[#9A6B3B]" /> Video Tour
+                <Play className="w-4 h-4 text-[#9A6B3B]" /> Project Video
               </button>
             )}
           </div>

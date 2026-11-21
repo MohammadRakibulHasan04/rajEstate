@@ -58,7 +58,7 @@ export const ProjectLink: React.FC<Props> = ({ project, unit, unitPages, current
                 {stats.available} of {stats.total} units available
               </span>
             )}
-            <span className="text-[#684724] font-medium">{priceLabel(project)}</span>
+            <span lang="bn" className="font-nakkhatra text-base text-[#684724] font-normal">{priceLabel(project)}</span>
           </div>
           <span className="mt-4 inline-flex items-center gap-1.5 text-sm text-[#9A6B3B]">
             View Project <ArrowUpRight className="w-4 h-4" />

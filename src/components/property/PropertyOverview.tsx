@@ -8,7 +8,7 @@ export const PropertyOverview: React.FC<{ summary: string; details: SpecItem[] }
   return (
     <PageSection id="overview" title="Overview">
       {summary.trim() && (
-        <p lang="bn" className="text-[16px] leading-[1.9] text-[#3D362E] whitespace-pre-line max-w-3xl">
+        <p lang="bn" className="font-bn text-[17.5px] sm:text-[18.5px] leading-[1.85] text-[#2E2822] whitespace-pre-line max-w-3xl">
           {summary}
         </p>
       )}

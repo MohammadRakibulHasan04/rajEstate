@@ -14,7 +14,11 @@ import { slugify } from './format';
 /** The project's unit row this apartment is linked to, if any. */
 export function linkedUnit(child: Listing, parent: Listing | null | undefined): Unit | undefined {
   if (!parent || !child.parent?.unitId) return undefined;
-  return parent.units.find((u) => u.id === child.parent!.unitId);
+  const target = child.parent.unitId;
+  return (
+    parent.units.find((u) => u.id === target) ||
+    parent.units.find((u) => u.code.toLowerCase() === target.toLowerCase())
+  );
 }
 
 const pick = (own: string | undefined, inherited: string | undefined) => (own && own.trim() ? own : inherited);
@@ -29,7 +33,7 @@ export function withParent(child: Listing, parent: Listing | null | undefined): 
     core.sizeSqft = unit.sizeSqft || core.sizeSqft;
     core.beds = unit.beds || core.beds;
     core.baths = unit.baths || core.baths;
-    core.balconies = unit.balconies || core.balconies;
+    core.balconies = unit.balconies !== undefined ? unit.balconies : (core.balconies ?? parent.core.balconies);
     core.floor = unit.floor || core.floor;
     core.facing = unit.facing || core.facing;
   }
@@ -39,12 +43,13 @@ export function withParent(child: Listing, parent: Listing | null | undefined): 
   core.landKatha = core.landKatha ?? parent.core.landKatha;
 
   const unitPlan = unit?.floorPlanUrl ? [{ url: unit.floorPlanUrl, caption: `Unit ${unit.code} plan` }] : [];
+  const hasOwnPrice = child.price.amount > 0 || Boolean(child.price.label?.trim());
 
   return {
     ...child,
     construction: parent.construction,
     core,
-    price: unit && unit.price > 0 ? { ...child.price, amount: unit.price } : child.price,
+    price: hasOwnPrice ? child.price : unit && unit.price > 0 ? { ...child.price, amount: unit.price } : child.price,
     location: {
       area: pick(child.location.area, parent.location.area) || '',
       city: pick(child.location.city, parent.location.city) || '',
@@ -65,6 +70,7 @@ export function withParent(child: Listing, parent: Listing | null | undefined): 
       ...child.media,
       hero: child.media.hero.url ? child.media.hero : parent.media.hero,
       floorPlans: child.media.floorPlans.length ? child.media.floorPlans : unitPlan,
+      satelliteImage: child.media.satelliteImage?.url ? child.media.satelliteImage : parent.media.satelliteImage,
       videoUrl: child.media.videoUrl || parent.media.videoUrl,
     },
   };

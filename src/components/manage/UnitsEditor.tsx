@@ -98,10 +98,10 @@ export const UnitsEditor: React.FC<Props> = ({ units, onChange, unitPages = {}, 
 
       {units.length > 0 && (
         <div className="overflow-x-auto rounded-xl border border-[#181512]/10 bg-[#FCFBF8]">
-          <table className="w-full text-sm min-w-[980px]">
+          <table className="w-full text-sm min-w-[1040px]">
             <thead>
               <tr className="text-left border-b border-[#181512]/10 bg-[#F3EFE7]">
-                {['Code', 'Floor', 'Sq ft', 'Bed', 'Bath', 'Facing', 'Price ৳', 'Status', 'Plan URL', 'Detail Page', ''].map((h) => (
+                {['Code', 'Floor', 'Sq ft', 'Bed', 'Bath', 'Balcony', 'Facing', 'Price ৳', 'Status', 'Plan URL', 'Detail Page', ''].map((h) => (
                   <th key={h} className="px-3 py-3 mono-label font-normal">{h}</th>
                 ))}
               </tr>
@@ -116,6 +116,7 @@ export const UnitsEditor: React.FC<Props> = ({ units, onChange, unitPages = {}, 
                   <td className="px-2 py-1.5 w-24"><input type="number" className="lux-input !py-1.5 !px-2 !text-[13px]" value={u.sizeSqft} onChange={(e) => update(u.id, { sizeSqft: num(e.target.value) })} /></td>
                   <td className="px-2 py-1.5 w-16"><input type="number" className="lux-input !py-1.5 !px-2 !text-[13px]" value={u.beds} onChange={(e) => update(u.id, { beds: num(e.target.value) })} /></td>
                   <td className="px-2 py-1.5 w-16"><input type="number" className="lux-input !py-1.5 !px-2 !text-[13px]" value={u.baths} onChange={(e) => update(u.id, { baths: num(e.target.value) })} /></td>
+                  <td className="px-2 py-1.5 w-16"><input type="number" min={0} className="lux-input !py-1.5 !px-2 !text-[13px]" value={u.balconies ?? 0} onChange={(e) => update(u.id, { balconies: num(e.target.value) })} /></td>
                   <td className="px-2 py-1.5 w-32">
                     <select className="lux-select !py-1.5 !px-2 !text-[13px]" value={u.facing} onChange={(e) => update(u.id, { facing: e.target.value })}>
                       {FACINGS.map((f) => <option key={f}>{f}</option>)}
@@ -123,7 +124,7 @@ export const UnitsEditor: React.FC<Props> = ({ units, onChange, unitPages = {}, 
                   </td>
                   <td className="px-2 py-1.5 w-36">
                     <input type="number" className="lux-input !py-1.5 !px-2 !text-[13px]" value={u.price} onChange={(e) => update(u.id, { price: num(e.target.value) })} />
-                    <span className="block text-[10px] font-mono text-[#786F63] mt-0.5 px-1">{formatBdt(u.price, { short: true })}</span>
+                    <span lang="bn" className="block text-xs font-nakkhatra text-[#786F63] mt-0.5 px-1">{formatBdt(u.price, { short: true })}</span>
                   </td>
                   <td className="px-2 py-1.5 w-32">
                     <select

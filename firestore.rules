@@ -47,12 +47,13 @@ service cloud.firestore {
     function isValidListing() {
       let d = incoming();
       return d.title is string && d.title.size() > 0 && d.title.size() <= 160
+        && (!('titleMode' in d) || d.titleMode in ['name', 'price'])
         && d.slug is string && d.slug.matches('^[a-z0-9-]{1,80}$')
         && d.kind in ['single', 'project']
         && d.publish in ['draft', 'published', 'archived']
         && (!('summary' in d) || (d.summary is string && d.summary.size() <= 5000))
         && (!('parent' in d) || (d.parent is map && d.parent.id is string && d.parent.id.size() > 0))
-        && (!('contact' in d) || (d.contact is map && d.contact.phone is string && d.contact.phone.size() <= 20))
+        && (!('contact' in d) || (d.contact is map && (!('phone' in d.contact) || (d.contact.phone is string && d.contact.phone.size() <= 30))))
         && (!('sections' in d) || (d.sections is list && d.sections.size() <= 40));
     }
 

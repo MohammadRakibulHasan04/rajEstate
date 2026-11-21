@@ -11,6 +11,7 @@ export type ListingKind = 'single' | 'project';
 export type PublishState = 'draft' | 'published' | 'archived';
 export type ConstructionState = 'upcoming' | 'ongoing' | 'ready';
 export type ListingCategory = 'apartment' | 'duplex' | 'penthouse' | 'house' | 'commercial' | 'land';
+export type TitleMode = 'name' | 'price';
 
 export type FactTier = 'signature' | 'defining' | 'reference';
 
@@ -151,7 +152,7 @@ export interface ListingContact {
 /* ── Page sections ─────────────────────────────────────────────── */
 
 /** Optional, admin-controlled blocks of the public detail page. */
-export type BuiltInSectionType = 'specifications' | 'floorPlans' | 'amenities' | 'location' | 'legal' | 'progress' | 'video';
+export type BuiltInSectionType = 'specifications' | 'floorPlans' | 'satellite' | 'amenities' | 'location' | 'legal' | 'progress' | 'video';
 
 export interface BuiltInSection {
   id: BuiltInSectionType;
@@ -186,6 +187,8 @@ export interface Listing {
 
   /** Display name (English). */
   title: string;
+  /** Controls whether the property displays its name ('name', default) or asking price ('price') as the primary title. */
+  titleMode?: TitleMode;
   /** @deprecated Single-language titles are used now; kept for legacy documents. */
   titleBn?: string;
   /** @deprecated No longer edited or displayed. */
@@ -203,8 +206,12 @@ export interface Listing {
   };
 
   price: {
-    /** For projects this is ignored in favour of the lowest available unit. */
+    /** Minimum / primary numeric price in BDT. For projects, if > 0 this overrides the lowest available unit price. */
     amount: number;
+    /** Optional maximum numeric price in BDT when displaying a price range (e.g. ৳ ১.৮ কোটি – ২.৫ কোটি). */
+    maxAmount?: number;
+    /** Optional custom formatted price text in Bangla (e.g. "৳ ২.৮৫ কোটি" or "৳ ১.৮ কোটি – ২.৫ কোটি"). */
+    label?: string;
     negotiable: boolean;
   };
 
@@ -216,6 +223,7 @@ export interface Listing {
     hero: MediaImage;
     gallery: MediaImage[];
     floorPlans: MediaImage[];
+    satelliteImage?: MediaImage;
     videoUrl?: string;
   };
 
@@ -275,6 +283,7 @@ export const NEARBY_LABELS: Record<NearbyType, string> = {
 export const BUILT_IN_SECTION_TYPES: BuiltInSectionType[] = [
   'specifications',
   'floorPlans',
+  'satellite',
   'amenities',
   'location',
   'legal',
@@ -283,7 +292,7 @@ export const BUILT_IN_SECTION_TYPES: BuiltInSectionType[] = [
 ];
 
 /** Sections switched on for a brand-new listing. The rest can be added from the editor. */
-const NEW_LISTING_SECTIONS: ReadonlySet<BuiltInSectionType> = new Set(['floorPlans', 'amenities', 'location', 'legal']);
+const NEW_LISTING_SECTIONS: ReadonlySet<BuiltInSectionType> = new Set(['video', 'floorPlans', 'satellite', 'amenities', 'location', 'legal']);
 
 export function defaultSectionsForNew(): ListingSection[] {
   return BUILT_IN_SECTION_TYPES.map((type) => ({ id: type, type, enabled: NEW_LISTING_SECTIONS.has(type) }));
@@ -300,6 +309,7 @@ export function emptyListing(uid = ''): Listing {
     construction: 'ready',
     featured: false,
     title: '',
+    titleMode: 'name',
     summary: '',
     location: { area: '', city: 'Dhaka', address: '' },
     price: { amount: 0, negotiable: false },

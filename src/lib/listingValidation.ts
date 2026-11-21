@@ -7,6 +7,7 @@ import { Listing } from '../types/listing';
 import { isValidEmail, isValidPhone } from './contact';
 import { isImageUrl, isSafeHttpUrl, videoEmbedUrl } from './media';
 import { resolveSections } from './sections';
+import { effectivePrice } from './significance';
 
 export type ValidationIntent = 'draft' | 'publish';
 
@@ -27,12 +28,25 @@ export function validateListing(form: Listing, effective: Listing, intent: Valid
   const add = (target: string, message: string) => issues.push({ target, message });
 
   /* Identity */
-  if (!form.title.trim()) add('basics', 'Title is required.');
-  else if (form.title.trim().length > 160) add('basics', 'Title must be 160 characters or fewer.');
+  const usePriceTitle = form.titleMode === 'price';
+  if (usePriceTitle) {
+    if (form.title.trim().length > 160) add('basics', 'Property name must be 160 characters or fewer.');
+    const hasPrice = effectivePrice(effective).amount > 0 || Boolean(effective.price.label?.trim());
+    if (!hasPrice) {
+      add('basics', 'Enter a price (or switch to Name as Title) so the property has a headline.');
+    }
+  } else {
+    if (!form.title.trim()) add('basics', 'Title is required.');
+    else if (form.title.trim().length > 160) add('basics', 'Title must be 160 characters or fewer.');
+  }
   if (!SLUG_RE.test(form.slug)) add('basics', 'URL slug may only use lowercase letters, numbers and hyphens (max 80).');
 
   /* Numbers */
   if (form.price.amount < 0) add('specs', 'Price cannot be negative.');
+  if (form.price.maxAmount !== undefined && form.price.maxAmount < 0) add('specs', 'Max price cannot be negative.');
+  if (form.price.maxAmount && form.price.amount > 0 && form.price.maxAmount < form.price.amount) {
+    add('specs', 'Max price must be greater than or equal to the minimum price.');
+  }
   if (form.kind === 'project') {
     const codes = form.units.map((u) => u.code.trim().toLowerCase()).filter(Boolean);
     if (new Set(codes).size !== codes.length) add('specs', 'Unit codes must be unique.');
@@ -47,11 +61,14 @@ export function validateListing(form: Listing, effective: Listing, intent: Valid
 
   /* Links */
   if (form.media.hero.url.trim() && !isImageUrl(form.media.hero.url)) add('media', 'Cover photo must be an https:// link or a /path on this site.');
+  if (form.media.satelliteImage?.url?.trim() && !isImageUrl(form.media.satelliteImage.url)) {
+    add('section-satellite', 'Satellite image must be a valid https:// link or a /path on this site.');
+  }
   if (form.location.mapEmbedUrl?.trim() && !isSafeHttpUrl(form.location.mapEmbedUrl)) {
     add('section-location', 'Map embed must be a valid https:// link.');
   }
   if (form.media.videoUrl?.trim() && !videoEmbedUrl(form.media.videoUrl) && !isSafeHttpUrl(form.media.videoUrl)) {
-    add('section-video', 'Video link must be a valid URL.');
+    add('basics', 'Project overview video link must be a valid URL or embed code.');
   }
 
   /* Custom sections */

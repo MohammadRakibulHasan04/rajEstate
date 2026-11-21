@@ -23,13 +23,37 @@ import { TourInquiry } from '../types/property';
 import { draftFromUnit } from './hierarchy';
 import { normalizeContact } from './contact';
 import { normalizeSections } from './sections';
-import { customFacts } from './significance';
+import { customFacts, fallbackListingName } from './significance';
 
 const COL = 'listings';
 
 /** Firestore rejects `undefined`; a JSON round-trip strips it. */
 function clean<T>(v: T): T {
   return JSON.parse(JSON.stringify(v));
+}
+
+function normalizeUnit(u: Partial<Unit>, fallbackBalconies?: number): Unit {
+  const baths = typeof u.baths === 'number' && !Number.isNaN(u.baths) ? u.baths : Number(u.baths) || 0;
+  const rawBalc = u.balconies;
+  const balconies =
+    typeof rawBalc === 'number' && !Number.isNaN(rawBalc)
+      ? rawBalc
+      : rawBalc !== undefined && rawBalc !== null && String(rawBalc).trim() !== ''
+        ? Number(rawBalc) || 0
+        : fallbackBalconies ?? (baths > 0 ? baths : 2);
+  return {
+    id: String(u.id || ''),
+    code: String(u.code || ''),
+    floor: typeof u.floor === 'number' && !Number.isNaN(u.floor) ? u.floor : Number(u.floor) || 1,
+    sizeSqft: typeof u.sizeSqft === 'number' && !Number.isNaN(u.sizeSqft) ? u.sizeSqft : Number(u.sizeSqft) || 0,
+    beds: typeof u.beds === 'number' && !Number.isNaN(u.beds) ? u.beds : Number(u.beds) || 0,
+    baths,
+    balconies,
+    facing: String(u.facing || 'South'),
+    price: typeof u.price === 'number' && !Number.isNaN(u.price) ? u.price : Number(u.price) || 0,
+    status: u.status === 'booked' || u.status === 'sold' ? u.status : 'available',
+    ...(u.floorPlanUrl ? { floorPlanUrl: String(u.floorPlanUrl) } : {}),
+  };
 }
 
 function fromDoc(id: string, data: Record<string, unknown>): Listing {
@@ -50,9 +74,10 @@ function fromDoc(id: string, data: Record<string, unknown>): Listing {
     ...l,
     id,
     title: typeof l.title === 'string' ? l.title : '',
+    titleMode: l.titleMode === 'price' ? 'price' : 'name',
     summary: typeof l.summary === 'string' ? l.summary : '',
     facts: Array.isArray(l.facts) ? l.facts : [],
-    units: Array.isArray(l.units) ? l.units : [],
+    units: Array.isArray(l.units) ? l.units.map((u) => normalizeUnit(u, l.core?.balconies)) : [],
     chapters: Array.isArray(l.chapters) ? l.chapters : [],
     nearby: Array.isArray(l.nearby) ? l.nearby : [],
     amenities: normalizeAmenities(l.amenities),
@@ -61,10 +86,20 @@ function fromDoc(id: string, data: Record<string, unknown>): Listing {
       hero: l.media?.hero || { url: '' },
       gallery: Array.isArray(l.media?.gallery) ? l.media.gallery : [],
       floorPlans: Array.isArray(l.media?.floorPlans) ? l.media.floorPlans : [],
+      ...(l.media?.satelliteImage?.url ? { satelliteImage: l.media.satelliteImage } : {}),
       videoUrl: l.media?.videoUrl,
     },
     location: l.location || { area: '', city: 'Dhaka', address: '' },
-    price: l.price || { amount: 0, negotiable: false },
+    price: {
+      amount: typeof l.price?.amount === 'number' && !Number.isNaN(l.price.amount) ? l.price.amount : Number(l.price?.amount) || 0,
+      ...(typeof l.price?.maxAmount === 'number' && l.price.maxAmount > 0
+        ? { maxAmount: l.price.maxAmount }
+        : Number(l.price?.maxAmount) > 0
+          ? { maxAmount: Number(l.price?.maxAmount) }
+          : {}),
+      negotiable: Boolean(l.price?.negotiable),
+      ...(typeof l.price?.label === 'string' && l.price.label.trim() ? { label: l.price.label.trim() } : {}),
+    },
     core: l.core || {},
     trust: {
       ...(l.trust || {}),
@@ -104,17 +139,32 @@ export function sanitizeListing(l: Listing): Listing {
 
   const { areaBn: _a, ...location } = l.location;
   const facts: Fact[] = customFacts(l).map((f) => ({ key: f.key, label: f.label.trim(), value: f.value.trim(), tier: 'reference' }));
+  const rawSat = l.media.satelliteImage;
+  const satelliteImage = rawSat?.url?.trim() ? stripCaption(rawSat) : undefined;
+
+  const titleMode = l.titleMode === 'price' ? 'price' : 'name';
+  const trimmedTitle = l.title.trim();
+  const resolvedTitle = trimmedTitle || (titleMode === 'price' ? fallbackListingName(l) : '');
 
   return {
     ...rest,
-    title: l.title.trim(),
+    title: resolvedTitle,
+    titleMode,
     summary: l.summary.trim(),
+    price: {
+      amount: Math.max(0, Number(l.price?.amount) || 0),
+      ...(Number(l.price?.maxAmount) > 0 ? { maxAmount: Math.max(0, Number(l.price?.maxAmount) || 0) } : {}),
+      negotiable: Boolean(l.price?.negotiable),
+      ...(l.price?.label?.trim() ? { label: l.price.label.trim() } : {}),
+    },
     location: { ...location, area: location.area.trim(), city: location.city.trim(), address: location.address.trim() },
+    units: Array.isArray(l.units) ? l.units.map((u) => normalizeUnit(u, l.core?.balconies)) : [],
     facts,
     media: {
       hero,
       gallery,
       floorPlans: l.media.floorPlans.map(stripCaption).filter((p) => p.url),
+      ...(satelliteImage ? { satelliteImage } : {}),
       ...(l.media.videoUrl?.trim() ? { videoUrl: l.media.videoUrl.trim() } : {}),
     },
     nearby: l.nearby.filter((p) => p.name.trim()),
@@ -129,7 +179,7 @@ export const PUBLISHED_SEEDS = SEED_LISTINGS.filter((l) => l.publish === 'publis
 
 /* ── Smart In-Memory + Session Cache ───────────────────────────── */
 
-const SESSION_CACHE_KEY = 'jonopod_listings_cache_v1';
+const SESSION_CACHE_KEY = 'jonopod_listings_cache_v2';
 
 interface ListingsCache {
   published: { listings: Listing[]; fromSeed: boolean } | null;
@@ -138,6 +188,7 @@ interface ListingsCache {
   bySlug: Map<string, Listing>;
   childrenByParent: Map<string, Listing[]>;
   inquiries: TourInquiry[] | null;
+  hasFirestoreData: boolean;
 }
 
 const cache: ListingsCache = {
@@ -147,6 +198,7 @@ const cache: ListingsCache = {
   bySlug: new Map(),
   childrenByParent: new Map(),
   inquiries: null,
+  hasFirestoreData: false,
 };
 
 function indexListing(l: Listing) {
@@ -160,6 +212,7 @@ function indexListings(list: Listing[]) {
 }
 
 function rebuildParentIndex(list: Listing[]) {
+  cache.childrenByParent.clear();
   const map = new Map<string, Listing[]>();
   for (const l of list) {
     if (l.parent?.id) {
@@ -177,6 +230,7 @@ function persistSessionCache() {
     const payload = {
       published: cache.published,
       items: Array.from(cache.byId.values()),
+      hasFirestoreData: cache.hasFirestoreData,
     };
     sessionStorage.setItem(SESSION_CACHE_KEY, JSON.stringify(payload));
   } catch {
@@ -192,6 +246,15 @@ function persistSessionCache() {
     const raw = sessionStorage.getItem(SESSION_CACHE_KEY);
     if (!raw) return;
     const parsed = JSON.parse(raw);
+    if (parsed?.hasFirestoreData) {
+      cache.hasFirestoreData = true;
+      for (const [k, v] of cache.byId.entries()) {
+        if (k.startsWith('seed-')) {
+          cache.byId.delete(k);
+          if (cache.bySlug.get(v.slug)?.id === k) cache.bySlug.delete(v.slug);
+        }
+      }
+    }
     if (Array.isArray(parsed?.items)) {
       indexListings(parsed.items);
       rebuildParentIndex(parsed.items);
@@ -207,7 +270,7 @@ function persistSessionCache() {
 
 function getCachedBySlug(slug: string, isAdmin: boolean): Listing | null {
   const hit = cache.bySlug.get(slug);
-  if (hit && (hit.publish === 'published' || isAdmin || import.meta.env.DEV)) {
+  if (hit && (hit.publish === 'published' || isAdmin)) {
     return hit;
   }
   return null;
@@ -230,6 +293,66 @@ function notifyPublished(next: PublishedState) {
   publishedSubscribers.forEach((cb) => cb(next));
 }
 
+/** Keeps all cache layers and live subscribers consistent after a write/delete. */
+function upsertInCache(item: Listing, previousSlug?: string) {
+  cache.hasFirestoreData = true;
+  if (previousSlug && previousSlug !== item.slug) {
+    cache.bySlug.delete(previousSlug);
+  }
+  // Remove any seed placeholder sharing the same slug
+  for (const [k, v] of cache.byId.entries()) {
+    if (k.startsWith('seed-') && (v.slug === item.slug || v.slug === previousSlug)) {
+      cache.byId.delete(k);
+    }
+  }
+  indexListing(item);
+
+  if (cache.all) {
+    const filtered = cache.all.filter(
+      (l) => l.id !== item.id && !(l.id.startsWith('seed-') && (l.slug === item.slug || l.slug === previousSlug))
+    );
+    cache.all = sortListings([...filtered, item]);
+  }
+
+  const basePublished = cache.published?.fromSeed ? [] : (cache.published?.listings ?? []);
+  const withoutCurrent = basePublished.filter(
+    (l) => l.id !== item.id && !(l.id.startsWith('seed-') && (l.slug === item.slug || l.slug === previousSlug))
+  );
+  const nextPublished = item.publish === 'published' ? sortListings([...withoutCurrent, item]) : sortListings(withoutCurrent);
+  cache.published = { listings: nextPublished, fromSeed: false };
+  notifyPublished({ listings: nextPublished, loading: false, fromSeed: false });
+
+  rebuildParentIndex(Array.from(cache.byId.values()));
+  persistSessionCache();
+}
+
+function removeFromCache(id: string) {
+  cache.hasFirestoreData = true;
+  const prev = cache.byId.get(id);
+  cache.byId.delete(id);
+  if (prev?.slug) {
+    cache.bySlug.delete(prev.slug);
+    for (const [k, v] of cache.byId.entries()) {
+      if (k.startsWith('seed-') && v.slug === prev.slug) {
+        cache.byId.delete(k);
+      }
+    }
+  }
+  if (cache.all) {
+    cache.all = cache.all.filter((l) => l.id !== id && !(prev?.slug && l.id.startsWith('seed-') && l.slug === prev.slug));
+  }
+  if (cache.published) {
+    const nextPub = cache.published.listings.filter(
+      (l) => l.id !== id && !(prev?.slug && l.id.startsWith('seed-') && l.slug === prev.slug)
+    );
+    cache.published = { listings: nextPub, fromSeed: false };
+    notifyPublished({ listings: nextPub, loading: false, fromSeed: false });
+  }
+  cache.childrenByParent.delete(id);
+  rebuildParentIndex(Array.from(cache.byId.values()));
+  persistSessionCache();
+}
+
 function ensurePublishedSubscription() {
   if (publishedUnsub) return;
   const q = query(collection(db, COL), where('publish', '==', 'published'));
@@ -238,12 +361,17 @@ function ensurePublishedSubscription() {
     (snap) => {
       const list = snap.docs.map((d) => fromDoc(d.id, d.data()));
       if (list.length) {
+        cache.hasFirestoreData = true;
         const sorted = sortListings(list);
         cache.published = { listings: sorted, fromSeed: false };
         indexListings(sorted);
-        rebuildParentIndex(sorted);
+        rebuildParentIndex(Array.from(cache.byId.values()));
         persistSessionCache();
         notifyPublished({ listings: sorted, loading: false, fromSeed: false });
+      } else if (cache.hasFirestoreData || (cache.all && cache.all.length > 0)) {
+        cache.published = { listings: [], fromSeed: false };
+        persistSessionCache();
+        notifyPublished({ listings: [], loading: false, fromSeed: false });
       } else {
         cache.published = { listings: PUBLISHED_SEEDS, fromSeed: true };
         indexListings(PUBLISHED_SEEDS);
@@ -304,10 +432,27 @@ export function useAllListings(enabled: boolean) {
     return onSnapshot(
       collection(db, COL),
       (snap) => {
-        const sorted = sortListings(snap.docs.map((d) => fromDoc(d.id, d.data())));
+        const docs = snap.docs.map((d) => fromDoc(d.id, d.data()));
+        if (docs.length > 0) {
+          cache.hasFirestoreData = true;
+          for (const [k, v] of cache.byId.entries()) {
+            if (k.startsWith('seed-')) {
+              cache.byId.delete(k);
+              if (cache.bySlug.get(v.slug)?.id === k) {
+                cache.bySlug.delete(v.slug);
+              }
+            }
+          }
+        }
+        const sorted = sortListings(docs);
         cache.all = sorted;
         indexListings(sorted);
         rebuildParentIndex(sorted);
+        if (cache.hasFirestoreData) {
+          const pub = sorted.filter((l) => l.publish === 'published');
+          cache.published = { listings: pub, fromSeed: false };
+          notifyPublished({ listings: pub, loading: false, fromSeed: false });
+        }
         persistSessionCache();
         setState({ listings: sorted, loading: false, error: null });
       },
@@ -346,24 +491,30 @@ export function useListingBySlug(slug: string, isAdmin: boolean) {
     const constraints = isAdmin
       ? [where('slug', '==', slug), limit(1)]
       : [where('slug', '==', slug), where('publish', '==', 'published'), limit(1)];
-    const seed = SEED_LISTINGS.find(
-      (l) => l.slug === slug && (l.publish === 'published' || isAdmin || import.meta.env.DEV)
-    );
 
     return onSnapshot(
       query(collection(db, COL), ...constraints),
       (snap) => {
         if (!snap.empty) {
           const docItem = fromDoc(snap.docs[0].id, snap.docs[0].data());
-          indexListing(docItem);
-          persistSessionCache();
+          upsertInCache(docItem);
           setState({ listing: docItem, loading: false });
         } else {
+          // Only fall back to seeds if Firestore has not been populated/mutated
+          const knownInCache = cache.bySlug.get(slug);
+          const blockedByStatus = knownInCache && !knownInCache.id.startsWith('seed-') && knownInCache.publish !== 'published' && !isAdmin;
+          const allowSeed = !cache.hasFirestoreData && !blockedByStatus;
+          const seed = allowSeed
+            ? SEED_LISTINGS.find((l) => l.slug === slug && (l.publish === 'published' || isAdmin))
+            : undefined;
           setState({ listing: seed ?? null, loading: false });
         }
       },
       (err) => {
         console.warn('Listing lookup failed, trying cache/seed:', err.message);
+        const seed = !cache.hasFirestoreData
+          ? SEED_LISTINGS.find((l) => l.slug === slug && (l.publish === 'published' || isAdmin))
+          : undefined;
         setState({ listing: getCachedBySlug(slug, isAdmin) ?? seed ?? null, loading: false });
       }
     );
@@ -395,11 +546,11 @@ export function useListingById(id: string | null) {
       (snap) => {
         if (snap.exists()) {
           const item = fromDoc(snap.id, snap.data());
-          indexListing(item);
-          persistSessionCache();
+          upsertInCache(item);
           setState({ listing: item, loading: false });
         } else {
-          setState({ listing: null, loading: false });
+          const seed = SEED_LISTINGS.find((l) => l.id === id) ?? null;
+          setState({ listing: seed, loading: false });
         }
       },
       () => setState({ listing: cache.byId.get(id) ?? null, loading: false })
@@ -436,8 +587,7 @@ export function useParentListing(id: string | undefined) {
       (snap) => {
         if (snap.exists()) {
           const item = fromDoc(snap.id, snap.data());
-          indexListing(item);
-          persistSessionCache();
+          upsertInCache(item);
           setState({ listing: item, loading: false });
         } else {
           setState({ listing: seed, loading: false });
@@ -470,7 +620,7 @@ export function useChildListings(parentId: string | undefined, isAdmin: boolean)
       setState({ listings: cached, loading: false });
     }
     const seeds = SEED_LISTINGS.filter(
-      (l) => l.parent?.id === parentId && (l.publish === 'published' || isAdmin || import.meta.env.DEV)
+      (l) => l.parent?.id === parentId && (l.publish === 'published' || isAdmin)
     );
     const constraints = isAdmin
       ? [where('parent.id', '==', parentId)]
@@ -479,7 +629,7 @@ export function useChildListings(parentId: string | undefined, isAdmin: boolean)
       query(collection(db, COL), ...constraints),
       (snap) => {
         const list = snap.docs.map((d) => fromDoc(d.id, d.data()));
-        const resolved = list.length ? list : seeds;
+        const resolved = list.length ? list : (!cache.hasFirestoreData ? seeds : []);
         indexListings(resolved);
         cache.childrenByParent.set(parentId, resolved);
         persistSessionCache();
@@ -504,49 +654,64 @@ export async function isSlugTaken(slug: string, exceptId?: string): Promise<bool
 /** Creates or updates. Returns the document id. */
 export async function saveListing(listing: Listing, uid: string): Promise<string> {
   const now = new Date().toISOString();
+  const prevSlug = listing.id ? cache.byId.get(listing.id)?.slug : undefined;
   const { id, ...rest } = sanitizeListing(listing);
   const payload = clean({ ...rest, updatedAt: now });
   try {
     if (id && !id.startsWith('seed-')) {
       await setDoc(doc(db, COL, id), payload);
       const updated = fromDoc(id, payload as unknown as Record<string, unknown>);
-      indexListing(updated);
-      persistSessionCache();
+      upsertInCache(updated, prevSlug);
       return id;
     }
     const ref = await addDoc(collection(db, COL), { ...payload, createdAt: now, createdBy: uid });
     const created = fromDoc(ref.id, { ...payload, createdAt: now, createdBy: uid } as unknown as Record<string, unknown>);
-    indexListing(created);
-    persistSessionCache();
+    if (id && id.startsWith('seed-')) {
+      cache.byId.delete(id);
+    }
+    upsertInCache(created, prevSlug);
     return ref.id;
   } catch (err) {
-    handleFirestoreError(err, id ? OperationType.UPDATE : OperationType.CREATE, id ? `${COL}/${id}` : COL);
+    handleFirestoreError(err, id && !id.startsWith('seed-') ? OperationType.UPDATE : OperationType.CREATE, id && !id.startsWith('seed-') ? `${COL}/${id}` : COL);
   }
 }
 
-export async function setPublishState(id: string, publish: PublishState) {
+export async function setPublishState(id: string, publish: PublishState, uid = 'admin'): Promise<string> {
   const now = new Date().toISOString();
   try {
-    await updateDoc(doc(db, COL, id), { publish, updatedAt: now });
     const prev = cache.byId.get(id);
-    if (prev) {
-      indexListing({ ...prev, publish, updatedAt: now });
-      persistSessionCache();
+    if (id.startsWith('seed-') && prev) {
+      return await saveListing({ ...prev, publish }, uid);
     }
+    if (prev) {
+      // Sanitize and write full document so legacy documents also pass strict schema rules
+      return await saveListing({ ...prev, publish, updatedAt: now }, prev.createdBy || uid);
+    }
+    await updateDoc(doc(db, COL, id), { publish, updatedAt: now });
+    return id;
   } catch (err) {
     handleFirestoreError(err, OperationType.UPDATE, `${COL}/${id}`);
   }
 }
 
+export async function publishListing(id: string, uid = 'admin'): Promise<string> {
+  return setPublishState(id, 'published', uid);
+}
+
+export async function unpublishListing(id: string, uid = 'admin'): Promise<string> {
+  return setPublishState(id, 'draft', uid);
+}
+
+export async function archiveListing(id: string, uid = 'admin'): Promise<string> {
+  return setPublishState(id, 'archived', uid);
+}
+
 export async function deleteListing(id: string) {
   try {
-    await deleteDoc(doc(db, COL, id));
-    const prev = cache.byId.get(id);
-    if (prev) {
-      cache.byId.delete(id);
-      cache.bySlug.delete(prev.slug);
-      persistSessionCache();
+    if (id && !id.startsWith('seed-')) {
+      await deleteDoc(doc(db, COL, id));
     }
+    removeFromCache(id);
   } catch (err) {
     handleFirestoreError(err, OperationType.DELETE, `${COL}/${id}`);
   }

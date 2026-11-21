@@ -27,7 +27,12 @@ export const SECTION_META: Record<BuiltInSectionType, SectionMeta> = {
     description: 'Finishes, fittings and any detail not covered by the core specs.',
   },
   floorPlans: { label: 'Floor Plans', navLabel: 'Floor Plans', description: 'Dimensioned layout drawings.' },
-  amenities: { label: 'Amenities', navLabel: 'Amenities', description: 'Building facilities and in-home features.' },
+  satellite: {
+    label: 'Satellite Image',
+    navLabel: 'Satellite',
+    description: 'Satellite or aerial view showing the property footprint and surrounding context.',
+  },
+  amenities: { label: 'সুযোগ-সুবিধা', navLabel: 'সুযোগ-সুবিধা', description: 'ভবন ও ফ্ল্যাটের সকল অভ্যন্তরীণ ও নাগরিক সুযোগ-সুবিধা।' },
   location: {
     label: 'Location & Nearby',
     navLabel: 'Location',
@@ -35,7 +40,11 @@ export const SECTION_META: Record<BuiltInSectionType, SectionMeta> = {
   },
   legal: { label: 'Legal & Approvals', navLabel: 'Legal', description: 'Developer, RAJUK approval and land title.' },
   progress: { label: 'Construction Progress', navLabel: 'Progress', description: 'Milestone timeline for ongoing projects.' },
-  video: { label: 'Video Tour', navLabel: 'Video', description: 'A YouTube or Vimeo walkthrough.' },
+  video: {
+    label: 'Project Overview Video',
+    navLabel: 'Project Video',
+    description: 'Overall description and architectural walkthrough video of the project.',
+  },
 };
 
 const isBuiltIn = (t: unknown): t is BuiltInSectionType =>
@@ -79,7 +88,13 @@ export function normalizeSections(raw: unknown): ListingSection[] {
   }
 
   for (const type of BUILT_IN_SECTION_TYPES) {
-    if (!seen.has(type)) out.push({ id: type, type, enabled: false });
+    if (!seen.has(type)) {
+      if (type === 'satellite') {
+        out.push({ id: type, type, enabled: true });
+      } else {
+        out.push({ id: type, type, enabled: false });
+      }
+    }
   }
   return out;
 }
@@ -96,6 +111,8 @@ export function sectionHasContent(l: Listing, s: ListingSection): boolean {
       return customFacts(l).length > 0;
     case 'floorPlans':
       return l.media.floorPlans.some((p) => isImageUrl(p.url));
+    case 'satellite':
+      return isImageUrl(l.media.satelliteImage?.url);
     case 'amenities':
       return l.amenities.some((a) => a.label.trim());
     case 'location':

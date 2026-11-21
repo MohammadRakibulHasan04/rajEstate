@@ -2,7 +2,7 @@ import React from 'react';
 import { ArrowUpRight, MapPin } from 'lucide-react';
 import { Listing, CATEGORY_LABELS, CONSTRUCTION_LABELS } from '../../types/listing';
 import { Link } from '../../lib/router';
-import { factsByTier, priceLabel, unitStats } from '../../lib/significance';
+import { displayTitle, factsByTier, hasCustomName, isPriceAsTitle, priceLabel, unitStats } from '../../lib/significance';
 
 interface ListingCardProps {
   listing: Listing;
@@ -19,18 +19,28 @@ export const ListingCard: React.FC<ListingCardProps> = ({ listing, index = 0, si
   const lead = signature[0] ?? defining[0];
   const stats = listing.kind === 'project' ? unitStats(listing) : null;
 
+  const headline = displayTitle(listing);
+  const priceAsTitle = isPriceAsTitle(listing);
+  const secondaryLabel = priceAsTitle
+    ? hasCustomName(listing)
+      ? listing.title
+      : listing.price.negotiable && listing.kind !== 'project'
+        ? 'Negotiable Price'
+        : CATEGORY_LABELS[listing.category]
+    : priceLabel(listing);
+
   return (
     <Link
       to={`/property/${listing.slug}`}
       id={`listing-card-${listing.slug}`}
       className="group block"
-      aria-label={`${listing.title}, ${listing.location.area}`}
+      aria-label={`${headline}, ${listing.location.area}`}
     >
       <figure className={`parallax-figure ${size === 'large' ? 'aspect-[16/11]' : 'aspect-[4/5]'} rounded-2xl border border-[#181512]/10 shadow-[0_18px_45px_-18px_rgba(24,21,18,0.16)]`}>
         {listing.media.hero.url ? (
           <img
             src={listing.media.hero.url}
-            alt={listing.media.hero.caption || listing.title}
+            alt={listing.media.hero.caption || headline}
             loading="lazy"
             decoding="async"
             className="!inset-0 !h-full transition-transform duration-[1.6s] ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.06]"
@@ -58,8 +68,13 @@ export const ListingCard: React.FC<ListingCardProps> = ({ listing, index = 0, si
           )}
           <div className="flex items-end justify-between gap-4">
             <div className="min-w-0 flex-1">
-              <h3 className="font-display font-light text-3xl md:text-4xl leading-[1.25] text-[#FAF7F2] truncate py-0.5">
-                {listing.title}
+              <h3
+                lang={priceAsTitle ? 'bn' : undefined}
+                className={`${
+                  priceAsTitle ? 'font-nakkhatra font-normal' : 'font-display font-light'
+                } text-3xl md:text-4xl leading-[1.28] text-[#FAF7F2] truncate py-0.5`}
+              >
+                {headline}
               </h3>
               <div className="mt-2 flex items-center gap-2 text-[11px] font-mono tracking-[0.18em] uppercase text-[#E6DFD3]">
                 <MapPin className="w-3.5 h-3.5 text-[#E4C799]" />
@@ -74,7 +89,14 @@ export const ListingCard: React.FC<ListingCardProps> = ({ listing, index = 0, si
       </figure>
 
       <figcaption className="mt-4 flex items-baseline justify-between gap-4 text-[10.5px] font-mono tracking-[0.22em] uppercase">
-        <span className="text-gradient-gold font-semibold truncate">{priceLabel(listing)}</span>
+        <span
+          lang={!priceAsTitle ? 'bn' : undefined}
+          className={`text-gradient-gold truncate ${
+            !priceAsTitle ? 'font-nakkhatra text-lg sm:text-xl font-normal tracking-normal normal-case' : 'font-semibold'
+          }`}
+        >
+          {secondaryLabel}
+        </span>
         {stats && stats.total > 0 && <span className="text-[#786F63] shrink-0">{stats.available} units left</span>}
       </figcaption>
     </Link>

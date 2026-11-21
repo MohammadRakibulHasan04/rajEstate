@@ -4,21 +4,34 @@
    matter, and scores how well a listing tells its story.
 ------------------------------------------------------------------- */
 import { CATEGORY_LABELS, Fact, FactTier, Listing } from '../types/listing';
-import { formatBdt, formatNumber, monthsUntil, formatMonth, ordinal, sqftToSqm } from './format';
+import { formatBdt, formatBdtRange, formatNumber, monthsUntil, formatMonth, ordinal, slugify, sqftToSqm, toBnDigits } from './format';
 
 export interface EffectivePrice {
   amount: number;
+  maxAmount?: number;
   isFrom: boolean;
 }
 
-/** Projects advertise "from" the cheapest available unit. */
+/** Projects advertise "from" the cheapest available unit unless an explicit project price or range is set. */
 export function effectivePrice(l: Listing): EffectivePrice {
+  const rawMax = l.price.maxAmount && l.price.maxAmount > l.price.amount ? l.price.maxAmount : undefined;
+  if (l.price.amount > 0) {
+    return {
+      amount: l.price.amount,
+      ...(rawMax ? { maxAmount: rawMax } : {}),
+      isFrom: !rawMax && l.kind === 'project' && l.units.length > 0,
+    };
+  }
   if (l.kind === 'project' && l.units.length) {
     const pool = l.units.filter((u) => u.status === 'available' && u.price > 0);
     const list = pool.length ? pool : l.units.filter((u) => u.price > 0);
-    if (list.length) return { amount: Math.min(...list.map((u) => u.price)), isFrom: true };
+    if (list.length) {
+      const min = Math.min(...list.map((u) => u.price));
+      const effMax = l.price.maxAmount && l.price.maxAmount > min ? l.price.maxAmount : undefined;
+      return { amount: min, ...(effMax ? { maxAmount: effMax } : {}), isFrom: !effMax };
+    }
   }
-  return { amount: l.price.amount, isFrom: false };
+  return { amount: l.price.amount, ...(rawMax ? { maxAmount: rawMax } : {}), isFrom: false };
 }
 
 export function sizeRange(l: Listing): { min: number; max: number } | null {
@@ -278,11 +291,18 @@ export function listingSpecs(l: Listing, unitCode?: string): { primary: SpecItem
     if (beds.length) {
       primary.push({ key: 'beds', label: 'Bedrooms', value: beds.length > 1 ? `${beds[0]}–${beds[beds.length - 1]}` : String(beds[0]) });
     }
+    const balconies = Array.from(new Set(l.units.map((u) => u.balconies).filter((b) => typeof b === 'number' && b > 0))).sort((a, b) => a - b);
+    if (balconies.length) {
+      primary.push({ key: 'balconies', label: 'Balconies', value: balconies.length > 1 ? `${balconies[0]}–${balconies[balconies.length - 1]}` : String(balconies[0]) });
+    }
     if (c.totalFloors) primary.push({ key: 'storeys', label: 'Storeys', value: String(c.totalFloors) });
     if (c.landKatha) details.push({ key: 'land', label: 'Land Area', value: `${c.landKatha} katha` });
   } else {
     if (c.beds) primary.push({ key: 'beds', label: 'Bedrooms', value: String(c.beds) });
     if (c.baths) primary.push({ key: 'baths', label: 'Bathrooms', value: String(c.baths) });
+    if (c.balconies !== undefined && (c.balconies > 0 || Boolean(unitCode))) {
+      primary.push({ key: 'balconies', label: 'Balconies', value: String(c.balconies) });
+    }
     if (sizeValue) primary.push({ key: 'size', label: 'Area', value: sizeValue });
     if (c.landKatha) {
       (primary.length < 4 ? primary : details).push({ key: 'land', label: 'Land Area', value: `${c.landKatha} katha` });
@@ -295,7 +315,7 @@ export function listingSpecs(l: Listing, unitCode?: string): { primary: SpecItem
   }
 
   if (c.facing) details.push({ key: 'facing', label: 'Facing', value: c.facing });
-  if (c.balconies) details.push({ key: 'balconies', label: 'Balconies', value: String(c.balconies) });
+  if (c.balconies && !primary.some((p) => p.key === 'balconies')) details.push({ key: 'balconies', label: 'Balconies', value: String(c.balconies) });
   if (c.parking) details.push({ key: 'parking', label: 'Car Parking', value: String(c.parking) });
   if (l.construction !== 'ready' && c.handover) details.push({ key: 'handover', label: 'Expected Handover', value: formatMonth(c.handover) });
 
@@ -310,9 +330,74 @@ export function pricePerSqft(l: Listing): number | null {
   return Math.round(price.amount / range.min);
 }
 
-export function priceLabel(l: Listing, bn = false): string {
+export function priceLabel(l: Listing, bn = true): string {
+  if (l.price.label?.trim()) {
+    return bn ? toBnDigits(l.price.label.trim()) : l.price.label.trim();
+  }
   const p = effectivePrice(l);
+  if (p.amount > 0 && p.maxAmount && p.maxAmount > p.amount) {
+    return formatBdtRange(p.amount, p.maxAmount, { bn });
+  }
   const base = formatBdt(p.amount, { bn });
   if (!p.amount) return base;
   return p.isFrom ? (bn ? `${base} থেকে` : `From ${base}`) : base;
+}
+
+/** True when the listing is configured to display its price as the main headline/title. */
+export function isPriceAsTitle(l: Listing): boolean {
+  return l.titleMode === 'price';
+}
+
+/** True when the listing has a distinct custom property name (not empty and not just the formatted price label). */
+export function hasCustomName(l: Listing): boolean {
+  const t = l.title?.trim();
+  if (!t) return false;
+  if (l.price.label?.trim() && (t === l.price.label.trim() || t === toBnDigits(l.price.label.trim()))) return false;
+  return (
+    t !== priceLabel(l, false) &&
+    t !== priceLabel(l, true) &&
+    t !== formatBdtRange(l.price.amount, l.price.maxAmount, { bn: false }) &&
+    t !== formatBdtRange(l.price.amount, l.price.maxAmount, { bn: true }) &&
+    t !== formatBdt(l.price.amount, { bn: false }) &&
+    t !== formatBdt(l.price.amount, { bn: true }) &&
+    t !== 'Price on request' &&
+    t !== 'মূল্য আলোচনা সাপেক্ষে'
+  );
+}
+
+/**
+ * Primary headline/title for a listing across cards, headers and meta tags.
+ * Returns the Bangla formatted price when `titleMode === 'price'`, or the property name otherwise.
+ */
+export function displayTitle(l: Listing, bn = true): string {
+  if (isPriceAsTitle(l)) {
+    if (l.price.label?.trim()) return bn ? toBnDigits(l.price.label.trim()) : l.price.label.trim();
+    const p = effectivePrice(l);
+    if (p.amount > 0) return priceLabel(l, bn);
+    return l.title?.trim() || priceLabel(l, bn);
+  }
+  return l.title?.trim() || priceLabel(l, bn);
+}
+
+/** Fallback string stored in `listing.title` when `titleMode === 'price'` and no custom property name was entered. */
+export function fallbackListingName(l: Listing): string {
+  if (l.price.label?.trim()) return toBnDigits(l.price.label.trim());
+  const p = effectivePrice(l);
+  if (p.amount > 0) return priceLabel(l, true);
+  const parts = [CATEGORY_LABELS[l.category], l.location.area?.trim() || l.location.city?.trim()].filter(Boolean);
+  return parts.join(' · ') || 'মূল্য আলোচনা সাপেক্ষে';
+}
+
+/** Generates a URL slug from either the property name or (when using price as title without a name) category, area and price. */
+export function suggestSlug(l: Listing): string {
+  if (l.title?.trim() && (!isPriceAsTitle(l) || hasCustomName(l))) {
+    const s = slugify(l.title);
+    if (s) return s;
+  }
+  const p = effectivePrice(l);
+  const pricePart = p.amount > 0 ? formatBdt(p.amount, { bn: false }).replace(/৳\s*/, '') : '';
+  const raw = [CATEGORY_LABELS[l.category], l.location.area?.trim() || l.location.city?.trim(), pricePart]
+    .filter(Boolean)
+    .join(' ');
+  return slugify(raw);
 }

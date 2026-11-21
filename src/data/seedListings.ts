@@ -72,13 +72,14 @@ export const BARAKAH: Listing = {
   },
 
   sections: [
+    { id: 'video', type: 'video', enabled: true },
     { id: 'specifications', type: 'specifications', enabled: true },
     { id: 'floorPlans', type: 'floorPlans', enabled: true },
+    { id: 'satellite', type: 'satellite', enabled: true },
     { id: 'amenities', type: 'amenities', enabled: true },
     { id: 'location', type: 'location', enabled: true },
     { id: 'legal', type: 'legal', enabled: true },
     { id: 'progress', type: 'progress', enabled: false },
-    { id: 'video', type: 'video', enabled: false },
   ],
 
   // Approximate travel times; verify and edit from /manage.
@@ -92,14 +93,14 @@ export const BARAKAH: Listing = {
   ],
 
   amenities: [
-    { label: 'Lift', icon: 'elevator', detail: 'High-speed passenger lift' },
-    { label: '24/7 Security', icon: 'security', detail: 'Guarded entry & patrol' },
-    { label: 'Generator Backup', icon: 'generator', detail: 'Full backup power' },
-    { label: 'Gas Line', icon: 'gas', detail: 'Dedicated kitchen supply' },
-    { label: 'Intercom', icon: 'intercom', detail: 'Gate-to-residence line' },
-    { label: 'CCTV', icon: 'cctv', detail: '24-hour camera coverage' },
-    { label: 'Fire Safety', icon: 'fire-safety', detail: 'Detection & extinguishers' },
-    { label: 'Rooftop Garden', icon: 'rooftop-garden', detail: 'Landscaped roof terrace' },
+    { label: 'লিফট', icon: 'elevator' },
+    { label: '২৪/৭ নিরাপত্তা', icon: 'security' },
+    { label: 'জেনারেটর ব্যাকআপ', icon: 'generator' },
+    { label: 'গ্যাস সংযোগ', icon: 'gas' },
+    { label: 'ইন্টারকম', icon: 'intercom' },
+    { label: 'সিসিটিভি', icon: 'cctv' },
+    { label: 'অগ্নি নির্বাপক ব্যবস্থা', icon: 'fire-safety' },
+    { label: 'রুফটপ গার্ডেন', icon: 'rooftop-garden' },
   ],
 
   trust: {
@@ -173,7 +174,9 @@ export const DEMO_PROJECT: Listing = {
   facts: [],
   units: demoUnits(),
   sections: [
+    { id: 'video', type: 'video', enabled: true },
     { id: 'floorPlans', type: 'floorPlans', enabled: true },
+    { id: 'satellite', type: 'satellite', enabled: true },
     { id: 'amenities', type: 'amenities', enabled: true },
     { id: 'location', type: 'location', enabled: true },
     { id: 'progress', type: 'progress', enabled: true },
@@ -186,7 +189,6 @@ export const DEMO_PROJECT: Listing = {
       body: 'বুকিংয়ের সময় মোট মূল্যের ২০% ডাউন পেমেন্ট। বাকি অর্থ নির্মাণকাজের অগ্রগতির সাথে ২৪টি মাসিক কিস্তিতে পরিশোধযোগ্য। এককালীন পরিশোধে বিশেষ ছাড় প্রযোজ্য।',
     },
     { id: 'specifications', type: 'specifications', enabled: false },
-    { id: 'video', type: 'video', enabled: false },
   ],
   trust: {
     developer: 'Demo Developer Ltd.',
@@ -233,7 +235,9 @@ export const DEMO_UNIT_7A: Listing = {
   nearby: [],
   amenities: [],
   sections: [
+    { id: 'video', type: 'video', enabled: true },
     { id: 'floorPlans', type: 'floorPlans', enabled: true },
+    { id: 'satellite', type: 'satellite', enabled: true },
     { id: 'amenities', type: 'amenities', enabled: true },
     { id: 'location', type: 'location', enabled: true },
     { id: 'legal', type: 'legal', enabled: true },

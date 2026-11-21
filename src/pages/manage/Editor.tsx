@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { AlertTriangle, ArrowLeft, ArrowUpRight, Building2, Eye, EyeOff, Send, Save } from 'lucide-react';
+import { AlertTriangle, Archive, ArrowLeft, ArrowUpRight, Building2, Eye, EyeOff, RotateCcw, Send, Save, Trash2 } from 'lucide-react';
 import {
   CATEGORY_LABELS,
   CONSTRUCTION_LABELS,
@@ -13,12 +13,22 @@ import {
   NEARBY_LABELS,
   NearbyType,
   PublishState,
+  TitleMode,
   Unit,
 } from '../../types/listing';
-import { saveListing, useListingById, useAllListings, isSlugTaken, createUnitListing } from '../../lib/listings';
+import { saveListing, deleteListing, useListingById, useAllListings, isSlugTaken, createUnitListing } from '../../lib/listings';
 import { draftFromUnit, linkedUnit, unitPageMap, withParent } from '../../lib/hierarchy';
-import { formatBdt, formatNumber, slugify } from '../../lib/format';
-import { isCoreFact } from '../../lib/significance';
+import { formatBdt, formatBdtRange, formatNumber, fromBnDigits, parseBdtRangeInput, slugify } from '../../lib/format';
+import {
+  displayTitle,
+  effectivePrice,
+  fallbackListingName,
+  hasCustomName,
+  isCoreFact,
+  isPriceAsTitle,
+  priceLabel,
+  suggestSlug,
+} from '../../lib/significance';
 import { extractEmbedSrc } from '../../lib/media';
 import { normalizeAmenities } from '../../lib/amenities';
 import {
@@ -39,7 +49,7 @@ import { Field, EditorSection, TextInput, NumberInput, TextArea, Select, Segment
 import { UnitsEditor } from '../../components/manage/UnitsEditor';
 import { ScoreMeter } from '../../components/manage/ScoreMeter';
 import { AmenitiesEditor } from '../../components/manage/AmenitiesEditor';
-import { PhotosEditor, FloorPlansEditor, VideoEditor } from '../../components/manage/MediaEditors';
+import { PhotosEditor, FloorPlansEditor, SatelliteImageEditor, VideoEditor } from '../../components/manage/MediaEditors';
 import { ContactEditor } from '../../components/manage/ContactEditor';
 import { SpecificationsEditor } from '../../components/manage/SpecificationsEditor';
 import { AddSectionMenu, SectionControls } from '../../components/manage/SectionControls';
@@ -94,6 +104,8 @@ export const ListingEditor: React.FC<EditorProps> = ({ id }) => {
   const [form, setForm] = useState<Listing>(() => emptyListing(uid));
   const [autoSlug, setAutoSlug] = useState(!id);
   const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [creatingUnitId, setCreatingUnitId] = useState<string | null>(null);
   const [hasChanges, setHasChanges] = useState(false);
   const [checkIntent, setCheckIntent] = useState<'draft' | 'publish' | null>(null);
@@ -114,7 +126,7 @@ export const ListingEditor: React.FC<EditorProps> = ({ id }) => {
     () => (parentProject ? unitPageMap(allListings.filter((l) => l.parent?.id === parentProject.id && l.id !== form.id)) : {}),
     [allListings, parentProject, form.id]
   );
-  const sections = useMemo(() => normalizeSections(form.sections), [form.sections]);
+  const sections = useMemo(() => normalizeSections(form.sections).filter((s) => s.type !== 'video'), [form.sections]);
   const enabledSections = useMemo(() => sections.filter((s) => s.enabled), [sections]);
   const issues = useMemo(() => (checkIntent ? validateListing(form, effective, checkIntent) : []), [checkIntent, form, effective]);
 
@@ -195,17 +207,102 @@ export const ListingEditor: React.FC<EditorProps> = ({ id }) => {
   const update = <K extends keyof Listing>(key: K, val: Listing[K]) =>
     edit((prev) => {
       const next = { ...prev, [key]: val };
-      if (key === 'title' && autoSlug) next.slug = slugify(val as string);
+      if ((key === 'title' || key === 'price' || key === 'category' || key === 'titleMode') && autoSlug) {
+        const nextSlug = suggestSlug(withParent(next, parentProject));
+        if (nextSlug) next.slug = nextSlug;
+      }
       return next;
     });
 
-  const updateLocation = (patch: Partial<Listing['location']>) => edit((p) => ({ ...p, location: { ...p.location, ...patch } }));
+  const updateLocation = (patch: Partial<Listing['location']>) =>
+    edit((p) => {
+      const next = { ...p, location: { ...p.location, ...patch } };
+      if (autoSlug && next.titleMode === 'price' && !hasCustomName(next)) {
+        const nextSlug = suggestSlug(withParent(next, parentProject));
+        if (nextSlug) next.slug = nextSlug;
+      }
+      return next;
+    });
   const updateCore = (patch: Partial<Listing['core']>) => edit((p) => ({ ...p, core: { ...p.core, ...patch } }));
   const updateTrust = (patch: Partial<Listing['trust']>) => edit((p) => ({ ...p, trust: { ...p.trust, ...patch } }));
   const updateContact = (patch: Partial<ListingContact>) => edit((p) => ({ ...p, contact: { ...p.contact, ...patch } }));
   const updateMedia = (patch: Partial<Listing['media']>) => edit((p) => ({ ...p, media: { ...p.media, ...patch } }));
   const updateSeo = (patch: Partial<NonNullable<Listing['seo']>>) => edit((p) => ({ ...p, seo: { ...p.seo, ...patch } }));
   const setSections = (fn: (list: ListingSection[]) => ListingSection[]) => edit((p) => ({ ...p, sections: fn(normalizeSections(p.sections)) }));
+
+  const currentPriceAmount = form.price.amount > 0 ? form.price.amount : ownUnit?.price || 0;
+  const currentMaxPriceAmount = form.price.maxAmount && form.price.maxAmount > 0 ? form.price.maxAmount : 0;
+  const currentPriceLabel =
+    form.price.label !== undefined
+      ? form.price.label
+      : effectivePrice(effective).amount > 0
+        ? priceLabel({ ...effective, price: { ...effective.price, label: undefined } }, true)
+        : '';
+
+  const buildAutoPriceLabel = (minAmt: number, maxAmt: number) => {
+    if (minAmt > 0 && maxAmt > minAmt) {
+      return formatBdtRange(minAmt, maxAmt, { bn: true });
+    }
+    const singleAmt = minAmt > 0 ? minAmt : maxAmt;
+    if (singleAmt > 0) {
+      const base = formatBdt(singleAmt, { bn: true });
+      return form.kind === 'project' && form.units.length > 0 && maxAmt <= 0 ? `${base} থেকে` : base;
+    }
+    return '';
+  };
+
+  const handlePriceAmountInput = (raw: string) => {
+    const digits = fromBnDigits(raw).replace(/[^0-9]/g, '');
+    const amount = digits ? Math.max(0, Number(digits)) : 0;
+    const maxAmount = currentMaxPriceAmount;
+    update('price', {
+      ...form.price,
+      amount,
+      ...(maxAmount > 0 ? { maxAmount } : { maxAmount: undefined }),
+      label: buildAutoPriceLabel(amount, maxAmount),
+    });
+  };
+
+  const handleMaxPriceAmountInput = (raw: string) => {
+    const digits = fromBnDigits(raw).replace(/[^0-9]/g, '');
+    const maxAmount = digits ? Math.max(0, Number(digits)) : 0;
+    const amount = currentPriceAmount;
+    update('price', {
+      ...form.price,
+      amount,
+      ...(maxAmount > 0 ? { maxAmount } : { maxAmount: undefined }),
+      label: buildAutoPriceLabel(amount, maxAmount),
+    });
+  };
+
+  const handlePriceLabelInput = (rawLabel: string) => {
+    const parsed = parseBdtRangeInput(rawLabel);
+    update('price', {
+      ...form.price,
+      label: rawLabel,
+      ...(parsed !== null
+        ? {
+            amount: Math.max(0, parsed.amount),
+            ...(parsed.maxAmount && parsed.maxAmount > 0 ? { maxAmount: parsed.maxAmount } : { maxAmount: undefined }),
+          }
+        : {}),
+    });
+  };
+
+  const fillRangeFromUnits = () => {
+    const priced = form.units.filter((u) => u.price > 0);
+    if (!priced.length) return;
+    const avail = priced.filter((u) => u.status === 'available');
+    const pool = avail.length ? avail : priced;
+    const minAmt = Math.min(...pool.map((u) => u.price));
+    const maxAmt = Math.max(...pool.map((u) => u.price));
+    update('price', {
+      ...form.price,
+      amount: minAmt,
+      ...(maxAmt > minAmt ? { maxAmount: maxAmt } : { maxAmount: undefined }),
+      label: buildAutoPriceLabel(minAmt, maxAmt > minAmt ? maxAmt : 0),
+    });
+  };
 
   const specFacts = form.facts.filter((f) => !isCoreFact(f));
   const setSpecFacts = (facts: Fact[]) => update('facts', facts);
@@ -216,7 +313,7 @@ export const ListingEditor: React.FC<EditorProps> = ({ id }) => {
   }, []);
 
   // Highlight the section currently in view.
-  const navIds = useMemo(() => [...FIXED_SECTIONS.map((s) => s.id), 'page-sections', ...enabledSections.map(editorSectionId), 'publish'], [enabledSections]);
+  const navIds = useMemo(() => ['basics', 'project-video', ...FIXED_SECTIONS.slice(1).map((s) => s.id), 'page-sections', ...enabledSections.map(editorSectionId), 'publish'], [enabledSections]);
   useEffect(() => {
     const io = new IntersectionObserver(
       (entries) => {
@@ -235,14 +332,27 @@ export const ListingEditor: React.FC<EditorProps> = ({ id }) => {
   /* ── Persistence ──────────────────────────────────────────────── */
 
   const handleSave = async (target?: PublishState) => {
-    if (saving) return;
+    if (saving || deleting) return;
+    const prevPublish = form.publish;
     const publish = target ?? form.publish;
-    const candidate: Listing = { ...form, slug: form.slug.trim() || slugify(form.title), publish };
+    const rawCandidate: Listing = { ...form, publish };
+    const effectiveCandidate = withParent(rawCandidate, parentProject);
+    const resolvedTitle =
+      rawCandidate.title.trim() || (rawCandidate.titleMode === 'price' ? fallbackListingName(effectiveCandidate) : '');
+    const fallbackSlug =
+      suggestSlug({ ...effectiveCandidate, title: resolvedTitle }) ||
+      existing?.slug ||
+      (resolvedTitle ? `property-${Date.now().toString(36)}` : '');
+    const candidate: Listing = {
+      ...rawCandidate,
+      title: resolvedTitle,
+      slug: form.slug.trim() || fallbackSlug,
+    };
     const intent = publish === 'published' ? 'publish' : 'draft';
     const found = validateListing(candidate, withParent(candidate, parentProject), intent);
     setCheckIntent(intent);
     if (found.length) {
-      toast(`Please fix ${found.length} issue${found.length > 1 ? 's' : ''} before saving.`, 'error');
+      toast(`Please fix ${found.length} issue${found.length > 1 ? 's' : ''} before ${publish === 'published' ? 'publishing' : 'saving'}.`, 'error');
       scrollTo(found[0].target);
       return;
     }
@@ -255,10 +365,26 @@ export const ListingEditor: React.FC<EditorProps> = ({ id }) => {
         return;
       }
       const docId = await saveListing(candidate, uid || 'admin');
-      setForm((prev) => ({ ...prev, slug: candidate.slug, publish }));
+      setForm((prev) => ({ ...prev, id: docId, slug: candidate.slug, publish }));
       setHasChanges(false);
       setCheckIntent(null);
-      toast(publish === 'published' ? 'Saved and published.' : `Saved (${publish}).`, 'ok');
+
+      if (target === 'published' && prevPublish !== 'published') {
+        toast('Property published and live on the showcase.', 'ok');
+      } else if (target === 'draft' && prevPublish === 'published') {
+        toast('Property unpublished and moved to drafts.', 'ok');
+      } else if (target === 'draft' && prevPublish === 'archived') {
+        toast('Property restored from archive to drafts.', 'ok');
+      } else if (target === 'archived' && prevPublish !== 'archived') {
+        toast('Property archived and hidden from public view.', 'ok');
+      } else if (publish === 'published') {
+        toast('Saved and published.', 'ok');
+      } else if (publish === 'archived') {
+        toast('Saved in archive.', 'ok');
+      } else {
+        toast('Draft saved.', 'ok');
+      }
+
       if (!id) {
         try {
           localStorage.removeItem(DRAFT_KEY);
@@ -271,6 +397,29 @@ export const ListingEditor: React.FC<EditorProps> = ({ id }) => {
       toast(errorText(err), 'error');
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (deleting || saving) return;
+    setDeleting(true);
+    try {
+      const targetId = form.id || id;
+      if (targetId) {
+        await deleteListing(targetId);
+      }
+      try {
+        localStorage.removeItem(DRAFT_KEY);
+      } catch {
+        /* ignore */
+      }
+      hasChangesRef.current = false;
+      setHasChanges(false);
+      setShowDeleteModal(false);
+      navigate('/manage', { replace: true });
+    } catch (err) {
+      toast(errorText(err), 'error');
+      setDeleting(false);
     }
   };
 
@@ -320,6 +469,9 @@ export const ListingEditor: React.FC<EditorProps> = ({ id }) => {
   }
 
   const isPublished = form.publish === 'published';
+  const isArchived = form.publish === 'archived';
+  const isDraft = form.publish === 'draft';
+  const isPersisted = Boolean(form.id || id);
   const inheritsFromProject = !!parentProject;
 
   /* ── Section content ──────────────────────────────────────────── */
@@ -342,10 +494,23 @@ export const ListingEditor: React.FC<EditorProps> = ({ id }) => {
             }
           />
         );
+      case 'satellite':
+        return (
+          <>
+            {inheritsFromProject && !form.media.satelliteImage?.url && (
+              <InheritNote what="satellite image" project={parentProject!.title} />
+            )}
+            <SatelliteImageEditor
+              image={form.media.satelliteImage}
+              inheritedImage={parentProject?.media.satelliteImage}
+              onChange={(satelliteImage) => updateMedia({ satelliteImage })}
+            />
+          </>
+        );
       case 'amenities':
         return (
           <>
-            {inheritsFromProject && form.amenities.length === 0 && <InheritNote what="amenities" project={parentProject!.title} />}
+            {inheritsFromProject && form.amenities.length === 0 && <InheritNote what="সুযোগ-সুবিধা" project={parentProject!.title} />}
             <AmenitiesEditor value={form.amenities} onChange={(amenities) => update('amenities', amenities)} />
           </>
         );
@@ -455,40 +620,133 @@ export const ListingEditor: React.FC<EditorProps> = ({ id }) => {
       {toastView}
 
       <header className="sticky top-0 z-40 bg-[#ffffff]/92 backdrop-blur-xl border-b border-[#181512]/[0.08] px-6 md:px-12 py-4">
-        <div className="max-w-[90rem] mx-auto flex items-center justify-between gap-4">
+        <div className="max-w-[90rem] mx-auto flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-4 min-w-0">
             <Link to="/manage" onClick={confirmLeave} className="p-2 rounded-full border border-[#181512]/15 hover:border-[#9A6B3B] text-[#3D362E] transition-colors" title="Back to Dashboard" aria-label="Back to Dashboard">
               <ArrowLeft className="w-4 h-4" />
             </Link>
             <div className="min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
-                <span className="mono-label !text-[9.5px]">{id ? 'Edit Listing' : 'New Listing'}</span>
-                <span className={`px-2 py-0.5 rounded text-[9px] font-mono uppercase tracking-wider ${isPublished ? 'bg-emerald-600/12 text-emerald-800' : 'bg-[#181512]/[0.06] text-[#5C5346]'}`}>{form.publish}</span>
+                <span className="mono-label !text-[9.5px]">{isPersisted ? 'Edit Listing' : 'New Listing'}</span>
+                <span
+                  className={`px-2 py-0.5 rounded text-[9px] font-mono uppercase tracking-wider border ${
+                    isPublished
+                      ? 'bg-emerald-600/12 text-emerald-800 border-emerald-700/30'
+                      : isArchived
+                        ? 'bg-[#181512]/[0.08] text-[#3D362E] border-[#181512]/20'
+                        : 'bg-amber-500/12 text-amber-800 border-amber-700/30'
+                  }`}
+                >
+                  {form.publish}
+                </span>
+                {isPriceAsTitle(form) && (
+                  <span className="px-2 py-0.5 rounded text-[9px] font-mono uppercase tracking-wider border border-[#9A6B3B]/35 bg-[#9A6B3B]/10 text-[#684724]">
+                    Price as Title
+                  </span>
+                )}
                 {hasChanges && <span className="text-[10px] font-mono text-amber-700">Unsaved changes</span>}
               </div>
-              <h1 className="font-display text-xl text-[#181512] truncate max-w-xs sm:max-w-md">{form.title || 'Untitled Listing'}</h1>
+              <h1
+                lang={isPriceAsTitle(form) ? 'bn' : undefined}
+                className={`${isPriceAsTitle(form) ? 'font-nakkhatra font-normal' : 'font-display'} text-xl text-[#181512] truncate max-w-xs sm:max-w-md`}
+              >
+                {displayTitle(effective) || form.title || 'Untitled Listing'}
+              </h1>
             </div>
           </div>
 
-          <div className="flex items-center gap-2.5">
-            {form.id && form.slug && (
-              <a href={`/property/${form.slug}`} target="_blank" rel="noreferrer" className="btn-quiet hidden md:inline-flex" title="Open the saved version in a new tab">
-                <Eye className="w-3.5 h-3.5" /> Preview
-              </a>
+          <div className="flex flex-wrap items-center gap-2">
+            {/* 1. Delete (leftmost) */}
+            <button
+              id="editor-delete-top"
+              type="button"
+              disabled={saving || deleting}
+              onClick={() => setShowDeleteModal(true)}
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full border border-red-500/25 bg-red-500/[0.06] hover:bg-red-500/15 hover:border-red-500/45 text-red-700 text-[11px] font-mono uppercase tracking-wider transition-colors cursor-pointer disabled:opacity-50"
+              title={isPersisted ? 'Permanently delete this property' : 'Discard unsaved draft'}
+              aria-label={isPersisted ? 'Delete property' : 'Discard draft'}
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+              <span>{isPersisted ? 'Delete' : 'Discard'}</span>
+            </button>
+
+            {/* 2. Archive */}
+            {!isArchived && (
+              <button
+                id="editor-archive"
+                type="button"
+                disabled={saving || deleting}
+                onClick={() => handleSave('archived')}
+                className="btn-quiet"
+                title="Archive this property and hide from public view"
+              >
+                <Archive className="w-3.5 h-3.5" /> Archive
+              </button>
             )}
+
+            {/* 3. Unpublish / Publish */}
             {isPublished && (
-              <button id="editor-unpublish" type="button" disabled={saving} onClick={() => handleSave('draft')} className="btn-quiet hidden sm:inline-flex">
+              <button
+                id="editor-unpublish"
+                type="button"
+                disabled={saving || deleting}
+                onClick={() => handleSave('draft')}
+                className="btn-quiet"
+                title="Unpublish and move back to Drafts"
+              >
                 <EyeOff className="w-3.5 h-3.5" /> Unpublish
               </button>
             )}
-            <button id="editor-save" type="button" disabled={saving} onClick={() => handleSave()} className={isPublished ? 'btn-gold !py-2.5 !px-5' : 'btn-quiet'}>
-              <Save className="w-3.5 h-3.5" /> {saving ? 'Saving…' : isPublished ? 'Save Changes' : 'Save Draft'}
-            </button>
+
+            {isArchived && (
+              <button
+                id="editor-unpublish"
+                type="button"
+                disabled={saving || deleting}
+                onClick={() => handleSave('draft')}
+                className="btn-quiet"
+                title="Restore from Archive to Drafts"
+              >
+                <RotateCcw className="w-3.5 h-3.5" /> Unpublish
+              </button>
+            )}
+
             {!isPublished && (
-              <button id="editor-publish" type="button" disabled={saving} onClick={() => handleSave('published')} className="btn-gold !py-2.5 !px-5">
+              <button
+                id="editor-publish"
+                type="button"
+                disabled={saving || deleting}
+                onClick={() => handleSave('published')}
+                className="btn-quiet"
+                title="Validate and publish live on public showcase"
+              >
                 <Send className="w-3.5 h-3.5" /> Publish
               </button>
             )}
+
+            {/* 4. Preview */}
+            {form.id && form.slug && (
+              <a
+                href={`/property/${form.slug}`}
+                target="_blank"
+                rel="noreferrer"
+                className="btn-quiet"
+                title="Open the saved version in a new tab"
+              >
+                <Eye className="w-3.5 h-3.5" /> Preview
+              </a>
+            )}
+
+            {/* 5. Save Changes (rightmost) */}
+            <button
+              id="editor-save"
+              type="button"
+              disabled={saving || deleting}
+              onClick={() => handleSave()}
+              className="btn-gold !py-2.5 !px-5"
+            >
+              <Save className="w-3.5 h-3.5" /> {saving ? 'Saving…' : 'Save Changes'}
+            </button>
           </div>
         </div>
       </header>
@@ -497,8 +755,10 @@ export const ListingEditor: React.FC<EditorProps> = ({ id }) => {
         <aside className="lg:col-span-3">
           <div className="lg:sticky lg:top-24 space-y-5">
             <nav className="panel p-3" aria-label="Form sections">
-              {FIXED_SECTIONS.map((s, i) => (
-                <NavItem key={s.id} label={`${i + 1}. ${s.label}`} active={activeSection === s.id} onClick={() => scrollTo(s.id)} />
+              <NavItem label="1. Basic Information" active={activeSection === 'basics'} onClick={() => scrollTo('basics')} />
+              <NavItem label="Project Overview Video" indent active={activeSection === 'project-video'} onClick={() => scrollTo('project-video')} />
+              {FIXED_SECTIONS.slice(1).map((s, i) => (
+                <NavItem key={s.id} label={`${i + 2}. ${s.label}`} active={activeSection === s.id} onClick={() => scrollTo(s.id)} />
               ))}
               <NavItem label="6. Page Sections" active={activeSection === 'page-sections'} onClick={() => scrollTo('page-sections')} />
               {enabledSections.map((s) => (
@@ -597,7 +857,7 @@ export const ListingEditor: React.FC<EditorProps> = ({ id }) => {
                           const takenBy = siblingUnitPages[u.id];
                           return (
                             <option key={u.id} value={u.id} disabled={!!takenBy}>
-                              Unit {u.code} · Floor {u.floor} · {formatNumber(u.sizeSqft)} sq ft · {formatBdt(u.price, { short: true })} ({u.status}){takenBy ? ` (page: ${takenBy.title})` : ''}
+                              Unit {u.code} · Floor {u.floor} · {formatNumber(u.sizeSqft)} sq ft · {u.beds} bed · {u.baths} bath · {u.balconies ?? 0} balcony · {formatBdt(u.price, { short: true })} ({u.status}){takenBy ? ` (page: ${takenBy.title})` : ''}
                             </option>
                           );
                         })}
@@ -613,9 +873,136 @@ export const ListingEditor: React.FC<EditorProps> = ({ id }) => {
               </div>
             )}
 
-            <Field label="Title *" htmlFor="title">
-              <TextInput id="title" value={form.title} placeholder="e.g. The Barakah Residence" onChange={(t) => update('title', t)} maxLength={160} required aria-invalid={checkIntent !== null && !form.title.trim()} />
+            <Field label="Title Display Mode" hint="Choose whether this property displays its name or its asking price as the main headline.">
+              <Segmented<TitleMode>
+                idPrefix="title-mode"
+                value={form.titleMode || 'name'}
+                onChange={(mode) => update('titleMode', mode)}
+                options={[
+                  {
+                    value: 'name',
+                    label: 'Name as Title',
+                    hint: form.title.trim() && hasCustomName(form) ? `Headline: ${form.title.trim()}` : 'Show property name as the main title (e.g. The Barakah Residence)',
+                  },
+                  {
+                    value: 'price',
+                    label: 'Price as Title (Bangla)',
+                    hint: effectivePrice(effective).amount > 0 || form.price.label?.trim() ? `Headline: ${priceLabel(effective, true)}` : 'Show asking price in Bangla font as the main title (e.g. ৳ ২.৮৫ কোটি)',
+                  },
+                ]}
+              />
             </Field>
+
+            {isPriceAsTitle(form) ? (
+              <div className="rounded-xl border border-[#9A6B3B]/30 bg-[#FAF6EE] p-5 space-y-5">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div>
+                    <span className="mono-label block text-[#684724]">Active Headline Preview (Bangla Font)</span>
+                    <div lang="bn" className="font-nakkhatra font-normal text-2xl sm:text-3xl text-gradient-gold mt-1">
+                      {displayTitle(effective, true)}
+                    </div>
+                  </div>
+                  {form.price.negotiable && (
+                    <span className="px-2.5 py-1 rounded-full border border-[#9A6B3B]/40 bg-[#9A6B3B]/10 text-[10px] font-mono tracking-[0.2em] uppercase text-[#684724]">
+                      Negotiable Price
+                    </span>
+                  )}
+                </div>
+
+                <div className="grid sm:grid-cols-3 gap-4 items-start pt-3 border-t border-[#181512]/[0.08]">
+                  <Field
+                    label="Price / Range Title (Bangla) *"
+                    htmlFor="basics-price-label"
+                    hint="Edit Bangla price or range directly (e.g. ৳ ২.৮৫ কোটি or ৳ ১.৮ কোটি – ২.৫ কোটি)."
+                  >
+                    <TextInput
+                      id="basics-price-label"
+                      lang="bn"
+                      className="font-nakkhatra !text-xl !leading-normal"
+                      value={currentPriceLabel}
+                      placeholder="৳ ১.৮ কোটি – ২.৫ কোটি"
+                      onChange={handlePriceLabelInput}
+                      maxLength={120}
+                    />
+                  </Field>
+
+                  <Field
+                    label="Price / Min Price (BDT)"
+                    htmlFor="basics-price-amount"
+                    hint="Single price or starting price of range (e.g. 18000000)."
+                  >
+                    <TextInput
+                      id="basics-price-amount"
+                      inputMode="numeric"
+                      value={currentPriceAmount > 0 ? String(currentPriceAmount) : ''}
+                      placeholder="18000000"
+                      onChange={handlePriceAmountInput}
+                    />
+                  </Field>
+
+                  <Field
+                    label="Max Price (BDT — Optional Range)"
+                    htmlFor="basics-price-max-amount"
+                    hint="Fill to show a price range (e.g. 25000000). Leave empty for single price."
+                  >
+                    <TextInput
+                      id="basics-price-max-amount"
+                      inputMode="numeric"
+                      value={currentMaxPriceAmount > 0 ? String(currentMaxPriceAmount) : ''}
+                      placeholder="25000000 (optional)"
+                      onChange={handleMaxPriceAmountInput}
+                    />
+                  </Field>
+                </div>
+
+                <div className="flex flex-wrap items-center justify-between gap-4">
+                  <Toggle
+                    id="basics-price-negotiable"
+                    label="Price is negotiable"
+                    checked={form.price.negotiable}
+                    onChange={(negotiable) => update('price', { ...form.price, negotiable })}
+                  />
+                  {form.kind === 'project' && (
+                    <div className="flex flex-wrap items-center gap-2">
+                      {form.units.some((u) => u.price > 0) && (
+                        <button type="button" onClick={fillRangeFromUnits} className="btn-quiet !py-1.5 !px-3 !text-[10.5px]">
+                          Use Unit Price Range
+                        </button>
+                      )}
+                      <button type="button" onClick={() => scrollTo('specs')} className="btn-quiet !py-1.5 !px-3 !text-[10.5px]">
+                        Manage Unit Table
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                <Field
+                  label="Property Name (Optional Subtitle / Reference)"
+                  htmlFor="title"
+                  hint="Optional when using Price as Title. Shown as a secondary label on cards and used for the URL slug."
+                >
+                  <TextInput
+                    id="title"
+                    value={hasCustomName(form) ? form.title : ''}
+                    placeholder="e.g. The Barakah Residence (or leave empty)"
+                    onChange={(t) => update('title', t)}
+                    maxLength={160}
+                  />
+                </Field>
+              </div>
+            ) : (
+              <Field label="Property Name (Title) *" htmlFor="title">
+                <TextInput
+                  id="title"
+                  value={form.title}
+                  placeholder="e.g. The Barakah Residence"
+                  onChange={(t) => update('title', t)}
+                  maxLength={160}
+                  required
+                  aria-invalid={checkIntent !== null && !form.title.trim()}
+                />
+              </Field>
+            )}
 
             <Field label="URL Slug *" htmlFor="slug" hint={`Page address: /property/${form.slug || 'your-slug'}`}>
               <div className="flex gap-3">
@@ -629,13 +1016,21 @@ export const ListingEditor: React.FC<EditorProps> = ({ id }) => {
                     update('slug', slugify(s));
                   }}
                 />
-                <button type="button" onClick={() => { setAutoSlug(true); update('slug', slugify(form.title)); }} className="btn-quiet !py-2.5 shrink-0">
+                <button type="button" onClick={() => { setAutoSlug(true); update('slug', suggestSlug(effective)); }} className="btn-quiet !py-2.5 shrink-0">
                   Generate
                 </button>
               </div>
             </Field>
 
-            <Field label="Description" htmlFor="summary" hint={inheritsFromProject && !form.summary.trim() ? 'Write in Bangla. Required to publish.' : 'Write in Bangla. Shown in the Overview section and used for search results.'}>
+            {/* Project Overview Video — Placed after basic identity info and before Overview description for both Single Property and Project types */}
+            <VideoEditor
+              url={form.media.videoUrl}
+              inheritedUrl={parentProject?.media.videoUrl}
+              isProject={form.kind === 'project'}
+              onChange={(videoUrl) => updateMedia({ videoUrl })}
+            />
+
+            <Field label="Overview Description" htmlFor="summary" hint={inheritsFromProject && !form.summary.trim() ? 'Write in Bangla. Required to publish.' : 'Write in Bangla. Shown in the Overview section and used for search results.'}>
               <TextArea id="summary" lang="bn" rows={6} counter={1500} value={form.summary} onChange={(s) => update('summary', s)} placeholder="ফ্ল্যাটের অবস্থান, আয়তন, আলো-বাতাস ও বিশেষ সুবিধাগুলো সংক্ষেপে লিখুন…" />
             </Field>
 
@@ -665,7 +1060,7 @@ export const ListingEditor: React.FC<EditorProps> = ({ id }) => {
                   <div className="rounded-xl border border-[#9A6B3B]/30 bg-[#9A6B3B]/[0.04] p-4 flex flex-wrap items-center justify-between gap-4">
                     <div className="text-sm text-[#3D362E]">
                       <span className="mono-label block mb-1">Synced from unit {ownUnit.code}</span>
-                      {formatBdt(ownUnit.price)} · {formatNumber(ownUnit.sizeSqft)} sq ft · {ownUnit.beds} bed · {ownUnit.baths} bath · Floor {ownUnit.floor} · {ownUnit.facing} · {ownUnit.status}
+                      {formatBdt(ownUnit.price)} · {formatNumber(ownUnit.sizeSqft)} sq ft · {ownUnit.beds} bed · {ownUnit.baths} bath · {ownUnit.balconies ?? 0} balcony · Floor {ownUnit.floor} · {ownUnit.facing} · {ownUnit.status}
                     </div>
                     <Link to={`/manage/edit/${parentProject.id}`} onClick={confirmLeave} className="btn-quiet !py-2 !text-[10.5px]">
                       Edit Unit <ArrowUpRight className="w-3.5 h-3.5" />
@@ -673,13 +1068,58 @@ export const ListingEditor: React.FC<EditorProps> = ({ id }) => {
                   </div>
                 )}
 
-                <div className="grid sm:grid-cols-2 gap-5 items-end">
-                  <Field label="Price (BDT)" htmlFor="price" hint={ownUnit && ownUnit.price > 0 ? 'Set in the project units table.' : form.price.amount > 0 ? formatBdt(form.price.amount) : 'Leave empty to show "Price on request".'}>
-                    <NumberInput id="price" min={0} step={10000} value={ownUnit && ownUnit.price > 0 ? ownUnit.price : form.price.amount || undefined} placeholder="28500000" disabled={!!(ownUnit && ownUnit.price > 0)} onChange={(p) => update('price', { ...form.price, amount: Math.max(0, p || 0) })} />
+                <div className="grid sm:grid-cols-3 gap-4 items-start">
+                  <Field
+                    label="Price / Range Text (Bangla)"
+                    htmlFor="price-label"
+                    hint="Shown in Bangla font on cards and headers (e.g. ৳ ২.৮৫ কোটি or ৳ ১.৮ কোটি – ২.৫ কোটি)."
+                  >
+                    <TextInput
+                      id="price-label"
+                      lang="bn"
+                      className="font-nakkhatra !text-xl !leading-normal"
+                      value={currentPriceLabel}
+                      placeholder="৳ ২.৮৫ কোটি"
+                      onChange={handlePriceLabelInput}
+                      maxLength={120}
+                    />
                   </Field>
-                  <div className="pb-2">
-                    <Toggle id="price-negotiable" label="Price is negotiable" checked={form.price.negotiable} onChange={(negotiable) => update('price', { ...form.price, negotiable })} />
-                  </div>
+                  <Field
+                    label="Price / Min Price (BDT)"
+                    htmlFor="price"
+                    hint="Single price or starting price of range (e.g. 28500000)."
+                  >
+                    <TextInput
+                      id="price"
+                      inputMode="numeric"
+                      value={currentPriceAmount > 0 ? String(currentPriceAmount) : ''}
+                      placeholder="28500000"
+                      onChange={handlePriceAmountInput}
+                    />
+                  </Field>
+                  <Field
+                    label="Max Price (BDT — Optional Range)"
+                    htmlFor="price-max"
+                    hint="Fill to show a price range (e.g. 32000000). Leave empty for single price."
+                  >
+                    <TextInput
+                      id="price-max"
+                      inputMode="numeric"
+                      value={currentMaxPriceAmount > 0 ? String(currentMaxPriceAmount) : ''}
+                      placeholder="32000000 (optional)"
+                      onChange={handleMaxPriceAmountInput}
+                    />
+                  </Field>
+                </div>
+                <div className="flex flex-wrap items-center gap-6">
+                  <Toggle id="price-negotiable" label="Price is negotiable" checked={form.price.negotiable} onChange={(negotiable) => update('price', { ...form.price, negotiable })} />
+                  <Toggle
+                    id="specs-price-as-title"
+                    label="Use price as property title"
+                    hint="Show formatted Bangla price as the main headline instead of property name."
+                    checked={isPriceAsTitle(form)}
+                    onChange={(usePrice) => update('titleMode', usePrice ? 'price' : 'name')}
+                  />
                 </div>
 
                 {!ownUnit && (
@@ -715,7 +1155,66 @@ export const ListingEditor: React.FC<EditorProps> = ({ id }) => {
                     <Field label="Expected Handover" htmlFor="proj-handover"><TextInput id="proj-handover" type="month" value={form.core.handover} onChange={(handover) => updateCore({ handover })} /></Field>
                   )}
                 </div>
-                <Toggle id="price-negotiable" label="Prices are negotiable" checked={form.price.negotiable} onChange={(negotiable) => update('price', { ...form.price, negotiable })} />
+                <div className="grid sm:grid-cols-3 gap-4 items-start">
+                  <Field
+                    label="Project Price / Range Text (Bangla)"
+                    htmlFor="proj-price-label"
+                    hint="Auto-formatted or custom Bangla price/range (e.g. ৳ ১.৮ কোটি – ২.৫ কোটি)."
+                  >
+                    <TextInput
+                      id="proj-price-label"
+                      lang="bn"
+                      className="font-nakkhatra !text-xl !leading-normal"
+                      value={currentPriceLabel}
+                      placeholder="৳ ১.৮ কোটি – ২.৫ কোটি"
+                      onChange={handlePriceLabelInput}
+                      maxLength={120}
+                    />
+                  </Field>
+                  <Field
+                    label="Min / Starting Price (BDT)"
+                    htmlFor="proj-price-amount"
+                    hint="Starting price in BDT (e.g. 18000000). Leave empty to use lowest unit price."
+                  >
+                    <TextInput
+                      id="proj-price-amount"
+                      inputMode="numeric"
+                      value={form.price.amount > 0 ? String(form.price.amount) : ''}
+                      placeholder={effectivePrice(effective).amount > 0 ? String(effectivePrice(effective).amount) : '18000000'}
+                      onChange={handlePriceAmountInput}
+                    />
+                  </Field>
+                  <Field
+                    label="Max Price (BDT — Optional Range)"
+                    htmlFor="proj-price-max"
+                    hint="Fill to display a price range (e.g. 25000000)."
+                  >
+                    <TextInput
+                      id="proj-price-max"
+                      inputMode="numeric"
+                      value={currentMaxPriceAmount > 0 ? String(currentMaxPriceAmount) : ''}
+                      placeholder="25000000 (optional)"
+                      onChange={handleMaxPriceAmountInput}
+                    />
+                  </Field>
+                </div>
+                <div className="flex flex-wrap items-center justify-between gap-4">
+                  <div className="flex flex-wrap items-center gap-6">
+                    <Toggle id="price-negotiable" label="Prices are negotiable" checked={form.price.negotiable} onChange={(negotiable) => update('price', { ...form.price, negotiable })} />
+                    <Toggle
+                      id="proj-price-as-title"
+                      label="Use price / range as project title"
+                      hint="Display Bangla price or range as the main headline instead of project name."
+                      checked={isPriceAsTitle(form)}
+                      onChange={(usePrice) => update('titleMode', usePrice ? 'price' : 'name')}
+                    />
+                  </div>
+                  {form.units.some((u) => u.price > 0) && (
+                    <button type="button" onClick={fillRangeFromUnits} className="btn-quiet !py-1.5 !px-3.5 !text-[10.5px]">
+                      Use Unit Price Range
+                    </button>
+                  )}
+                </div>
                 <div className="pt-4 border-t border-[#181512]/[0.08]">
                   <UnitsEditor units={form.units} unitPages={unitPages} onCreateUnitPage={handleCreateUnitPage} creatingUnitId={creatingUnitId} onChange={(units) => update('units', units)} />
                 </div>
@@ -782,29 +1281,208 @@ export const ListingEditor: React.FC<EditorProps> = ({ id }) => {
             </EditorSection>
           ))}
 
-          {/* 7. PUBLISHING */}
-          <EditorSection id="publish" index="07" title="Publishing & SEO">
-            <Field label="Visibility" htmlFor="publish-state">
-              <Select
-                id="publish-state"
+          {/* 7. PUBLISHING & LIFECYCLE */}
+          <EditorSection id="publish" index="07" title="Publishing & SEO" intro="Control visibility on the public showcase, search engine metadata, and lifecycle actions.">
+            <Field label="Visibility State">
+              <Segmented
+                idPrefix="publish-state"
                 value={form.publish}
-                onChange={(p) => update('publish', p as PublishState)}
+                onChange={(p) => update('publish', p)}
                 options={[
-                  { value: 'draft', label: 'Draft (visible to admins only)' },
-                  { value: 'published', label: 'Published (visible to everyone)' },
-                  { value: 'archived', label: 'Archived (hidden)' },
+                  { value: 'draft', label: 'Draft (Unpublished)', hint: 'Visible to admins only for curation' },
+                  { value: 'published', label: 'Published (Live)', hint: 'Publicly listed on the showcase' },
+                  { value: 'archived', label: 'Archived', hint: 'Hidden from public view & active drafts' },
                 ]}
               />
             </Field>
+
+            {/* Direct Database Lifecycle Actions */}
+            <div className="rounded-xl border border-[#181512]/12 bg-[#F6F2EA]/70 p-5 space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <div>
+                  <span className="mono-label block text-[#181512]">Property Lifecycle Actions</span>
+                  <p className="text-xs text-[#5C5346] mt-0.5">
+                    {isPublished
+                      ? 'Currently live on the public site. You can unpublish to revert to a draft or archive to store offline.'
+                      : isArchived
+                        ? 'Currently archived and hidden from visitors. You can restore it to draft or publish it directly.'
+                        : 'Currently saved as an unpublished draft. Publish when ready or archive to store away.'}
+                  </p>
+                </div>
+                <span
+                  className={`self-start sm:self-center px-3 py-1 rounded-full text-[10px] font-mono uppercase tracking-widest border font-medium shrink-0 ${
+                    isPublished
+                      ? 'border-emerald-700/40 bg-emerald-600/10 text-emerald-800'
+                      : isArchived
+                        ? 'border-[#181512]/25 bg-[#181512]/[0.07] text-[#3D362E]'
+                        : 'border-amber-700/40 bg-amber-500/12 text-amber-800'
+                  }`}
+                >
+                  Status: {form.publish}
+                </span>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-3 pt-2 border-t border-[#181512]/[0.08]">
+                {/* 1. Delete (leftmost) */}
+                <button
+                  id="form-delete-inline-btn"
+                  type="button"
+                  disabled={saving || deleting}
+                  onClick={() => setShowDeleteModal(true)}
+                  className="btn-danger btn-quiet"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  <span>{isPersisted ? 'Delete' : 'Discard'}</span>
+                </button>
+
+                {/* 2. Archive */}
+                <button
+                  id="form-archive-btn"
+                  type="button"
+                  disabled={saving || deleting || (isArchived && !hasChanges && isPersisted)}
+                  onClick={() => handleSave('archived')}
+                  className="btn-quiet"
+                >
+                  <Archive className="w-3.5 h-3.5" />
+                  <span>Archive</span>
+                </button>
+
+                {/* 3. Unpublish / Publish */}
+                <button
+                  id="form-unpublish-btn"
+                  type="button"
+                  disabled={saving || deleting || (isDraft && !hasChanges && isPersisted)}
+                  onClick={() => handleSave('draft')}
+                  className="btn-quiet"
+                >
+                  <EyeOff className="w-3.5 h-3.5" />
+                  <span>Unpublish</span>
+                </button>
+
+                {!isPublished && (
+                  <button
+                    id="form-publish-btn"
+                    type="button"
+                    disabled={saving || deleting}
+                    onClick={() => handleSave('published')}
+                    className="btn-quiet"
+                  >
+                    <Send className="w-3.5 h-3.5" />
+                    <span>Publish</span>
+                  </button>
+                )}
+
+                {/* 4. Preview */}
+                {form.id && form.slug && (
+                  <a
+                    href={`/property/${form.slug}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="btn-quiet"
+                    title="Open the saved version in a new tab"
+                  >
+                    <Eye className="w-3.5 h-3.5" />
+                    <span>Preview</span>
+                  </a>
+                )}
+
+                {/* 5. Save Changes (rightmost) */}
+                <button
+                  id="form-save-btn"
+                  type="button"
+                  disabled={saving || deleting}
+                  onClick={() => handleSave()}
+                  className="btn-gold !py-2.5 !px-5"
+                >
+                  <Save className="w-3.5 h-3.5" />
+                  <span>{saving ? 'Saving…' : 'Save Changes'}</span>
+                </button>
+              </div>
+            </div>
+
             <Field label="Search Title" htmlFor="seo-title" hint="Leave empty to generate from the title and area.">
-              <TextInput id="seo-title" value={form.seo?.title} placeholder={`${form.title || 'Title'} · ${form.location.area || 'Dhaka'} | Jonopod Properties`} onChange={(title) => updateSeo({ title })} maxLength={70} />
+              <TextInput id="seo-title" value={form.seo?.title} placeholder={`${displayTitle(effective) || 'Title'} · ${form.location.area || 'Dhaka'} | Jonopod Properties`} onChange={(title) => updateSeo({ title })} maxLength={70} />
             </Field>
             <Field label="Search Description" htmlFor="seo-desc" hint="Leave empty to use the start of the description.">
               <TextArea id="seo-desc" rows={2} counter={160} value={form.seo?.description} onChange={(description) => updateSeo({ description })} />
             </Field>
+
+            {/* Danger Zone: Delete Property */}
+            <div className="rounded-xl border border-red-500/25 bg-red-500/[0.04] p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div>
+                <span className="text-xs font-mono uppercase tracking-widest text-red-800 font-semibold block">
+                  {isPersisted ? 'Delete Property' : 'Discard Draft'}
+                </span>
+                <p className="text-xs text-[#5C5346] mt-1 max-w-xl leading-relaxed">
+                  {isPersisted
+                    ? 'Permanently delete this property listing from the database. To temporarily hide it without losing data, use Unpublish or Archive instead.'
+                    : 'Discard this unsaved property draft and clear local changes.'}
+                </p>
+              </div>
+              <button
+                id="form-delete-btn"
+                type="button"
+                disabled={saving || deleting}
+                onClick={() => setShowDeleteModal(true)}
+                className="btn-danger btn-quiet !py-2.5 !px-5 shrink-0 self-start sm:self-center"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                <span>{isPersisted ? 'Delete Property' : 'Discard Draft'}</span>
+              </button>
+            </div>
           </EditorSection>
         </main>
       </div>
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 z-50 bg-[#181512]/45 backdrop-blur-md flex items-center justify-center p-6" role="dialog" aria-modal="true" aria-labelledby="delete-modal-title">
+          <div className="panel panel-glass max-w-md w-full p-8 text-center space-y-6">
+            <div className="w-12 h-12 rounded-full bg-red-500/12 text-red-600 flex items-center justify-center mx-auto">
+              <AlertTriangle className="w-6 h-6" />
+            </div>
+            <div>
+              <h3 id="delete-modal-title" className="font-display text-2xl text-[#181512]">
+                {isPersisted ? 'Delete Property Permanently?' : 'Discard Unsaved Draft?'}
+              </h3>
+              <p className="text-sm text-[#4A433B] mt-2">
+                {isPersisted ? (
+                  <>
+                    Are you sure you wish to permanently delete <strong className="text-[#181512]">"{displayTitle(effective) || form.title || 'Untitled Listing'}"</strong>? This will remove the property from the database and cannot be undone.
+                  </>
+                ) : (
+                  'Are you sure you wish to discard this unsaved draft? All entered details will be cleared.'
+                )}
+              </p>
+              {isPersisted && form.kind === 'project' && childListings.length > 0 && (
+                <p className="text-xs font-mono text-amber-900 bg-amber-500/12 border border-amber-600/30 rounded-xl p-3 mt-3">
+                  Note: {childListings.length} apartment page(s) are linked to this project and will become standalone if you delete it.
+                </p>
+              )}
+            </div>
+            <div className="flex items-center justify-center gap-3">
+              <button
+                type="button"
+                disabled={deleting}
+                onClick={() => setShowDeleteModal(false)}
+                className="btn-ghost"
+              >
+                Cancel
+              </button>
+              <button
+                id="confirm-delete-btn"
+                type="button"
+                disabled={deleting}
+                onClick={handleDelete}
+                className="btn-danger btn-quiet !py-3 !px-6"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                <span>{deleting ? 'Deleting…' : isPersisted ? 'Delete permanently' : 'Discard draft'}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

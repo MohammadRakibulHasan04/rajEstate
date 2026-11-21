@@ -6,6 +6,8 @@ import {
   Pencil,
   Copy,
   Trash2,
+  Archive,
+  RotateCcw,
   Sparkles,
   Building,
   Building2,
@@ -30,7 +32,8 @@ import {
   seedListings,
   setInquiryStatus,
 } from '../../lib/listings';
-import { priceLabel } from '../../lib/significance';
+import { validateListing } from '../../lib/listingValidation';
+import { displayTitle, hasCustomName, isPriceAsTitle, priceLabel } from '../../lib/significance';
 import { scoreListing } from '../../lib/completeness';
 import { linkedUnit, withParent } from '../../lib/hierarchy';
 import { useAuth } from '../../context/AuthContext';
@@ -47,7 +50,7 @@ export const ManageDashboard: React.FC = () => {
 
   const [activeTab, setActiveTab] = useState<'listings' | 'inquiries'>('listings');
   const [search, setSearch] = useState('');
-  const [filterState, setFilterState] = useState<'all' | 'published' | 'draft'>('all');
+  const [filterState, setFilterState] = useState<'all' | 'published' | 'draft' | 'archived'>('all');
   const [filterKind, setFilterKind] = useState<'all' | 'single' | 'project'>('all');
   const [deleteModalListing, setDeleteModalListing] = useState<Listing | null>(null);
   const [seeding, setSeeding] = useState(false);
@@ -55,6 +58,7 @@ export const ManageDashboard: React.FC = () => {
   // Statistics calculation
   const publishedCount = listings.filter((l) => l.publish === 'published').length;
   const draftCount = listings.filter((l) => l.publish === 'draft').length;
+  const archivedCount = listings.filter((l) => l.publish === 'archived').length;
   const projectCount = listings.filter((l) => l.kind === 'project').length;
   const availableUnits = listings.reduce((acc, l) => {
     return acc + (l.units || []).filter((u) => u.status === 'available').length;
@@ -79,7 +83,7 @@ export const ManageDashboard: React.FC = () => {
     if (filterKind !== 'all' && l.kind !== filterKind) return false;
     if (search.trim()) {
       const q = search.toLowerCase();
-      const matchTitle = eff.title.toLowerCase().includes(q);
+      const matchTitle = eff.title.toLowerCase().includes(q) || displayTitle(eff).toLowerCase().includes(q);
       const matchArea = eff.location.area.toLowerCase().includes(q) || eff.location.address.toLowerCase().includes(q);
       const matchDev = eff.trust.developer.toLowerCase().includes(q);
       if (!matchTitle && !matchArea && !matchDev) return false;
@@ -115,9 +119,38 @@ export const ManageDashboard: React.FC = () => {
 
   const handleTogglePublish = async (listing: Listing) => {
     const nextState: PublishState = listing.publish === 'published' ? 'draft' : 'published';
+    if (nextState === 'published') {
+      const parent = listing.parent?.id ? byId.get(listing.parent.id) ?? null : null;
+      const eff = withParent(listing, parent);
+      const issues = validateListing(listing, eff, 'publish');
+      if (issues.length > 0) {
+        toast(`Cannot publish "${listing.title}": ${issues[0].message}`, 'error');
+        return;
+      }
+    }
     try {
-      await setPublishState(listing.id, nextState);
-      toast(`Residence set to ${nextState}`, 'ok');
+      await setPublishState(listing.id, nextState, user?.uid || 'admin');
+      toast(
+        nextState === 'published'
+          ? `Published "${listing.title}"`
+          : `Unpublished "${listing.title}" (moved to drafts)`,
+        'ok'
+      );
+    } catch (err) {
+      toast(errorText(err), 'error');
+    }
+  };
+
+  const handleToggleArchive = async (listing: Listing) => {
+    const nextState: PublishState = listing.publish === 'archived' ? 'draft' : 'archived';
+    try {
+      await setPublishState(listing.id, nextState, user?.uid || 'admin');
+      toast(
+        nextState === 'archived'
+          ? `Archived "${listing.title}"`
+          : `Restored "${listing.title}" to drafts`,
+        'ok'
+      );
     } catch (err) {
       toast(errorText(err), 'error');
     }
@@ -233,7 +266,7 @@ export const ManageDashboard: React.FC = () => {
             <span className="mono-label block text-[#786F63] mb-2">Draft Blueprints</span>
             <div className="font-display font-light text-4xl text-amber-700">{draftCount}</div>
             <span className="text-[11px] font-mono text-[#786F63] mt-2 block">
-              In curation or review
+              {archivedCount > 0 ? `${archivedCount} archived in vault` : 'In curation or review'}
             </span>
           </div>
 
@@ -258,21 +291,19 @@ export const ManageDashboard: React.FC = () => {
         <div className="flex border-b border-[#181512]/[0.08] gap-8">
           <button
             onClick={() => setActiveTab('listings')}
-            className={`pb-4 text-xs font-mono uppercase tracking-widest relative cursor-pointer ${
-              activeTab === 'listings'
+            className={`pb-4 text-xs font-mono uppercase tracking-widest relative cursor-pointer ${activeTab === 'listings'
                 ? 'text-[#181512] font-semibold after:absolute after:bottom-0 after:left-0 after:right-0 after:h-[2px] after:bg-[#9A6B3B]'
                 : 'text-[#6E6559] hover:text-[#181512]'
-            }`}
+              }`}
           >
             All Residences ({listings.length})
           </button>
           <button
             onClick={() => setActiveTab('inquiries')}
-            className={`pb-4 text-xs font-mono uppercase tracking-widest relative cursor-pointer flex items-center gap-2 ${
-              activeTab === 'inquiries'
+            className={`pb-4 text-xs font-mono uppercase tracking-widest relative cursor-pointer flex items-center gap-2 ${activeTab === 'inquiries'
                 ? 'text-[#181512] font-semibold after:absolute after:bottom-0 after:left-0 after:right-0 after:h-[2px] after:bg-[#9A6B3B]'
                 : 'text-[#6E6559] hover:text-[#181512]'
-            }`}
+              }`}
           >
             <span>Inquiries Inbox</span>
             {pendingInquiries > 0 && (
@@ -300,15 +331,14 @@ export const ManageDashboard: React.FC = () => {
 
               <div className="flex flex-wrap items-center gap-2">
                 <div className="flex rounded-xl border border-[#181512]/10 bg-[#EFEAE1] p-1">
-                  {(['all', 'published', 'draft'] as const).map((s) => (
+                  {(['all', 'published', 'draft', 'archived'] as const).map((s) => (
                     <button
                       key={s}
                       onClick={() => setFilterState(s)}
-                      className={`px-3 py-1 text-[11px] font-mono uppercase tracking-wider rounded-lg transition-colors cursor-pointer ${
-                        filterState === s
+                      className={`px-3 py-1 text-[11px] font-mono uppercase tracking-wider rounded-lg transition-colors cursor-pointer ${filterState === s
                           ? 'bg-[#9A6B3B] text-white font-semibold shadow-xs'
                           : 'text-[#5C5346] hover:text-[#181512]'
-                      }`}
+                        }`}
                     >
                       {s}
                     </button>
@@ -320,11 +350,10 @@ export const ManageDashboard: React.FC = () => {
                     <button
                       key={k}
                       onClick={() => setFilterKind(k)}
-                      className={`px-3 py-1 text-[11px] font-mono uppercase tracking-wider rounded-lg transition-colors cursor-pointer ${
-                        filterKind === k
+                      className={`px-3 py-1 text-[11px] font-mono uppercase tracking-wider rounded-lg transition-colors cursor-pointer ${filterKind === k
                           ? 'bg-[#9A6B3B] text-white font-semibold shadow-xs'
                           : 'text-[#5C5346] hover:text-[#181512]'
-                      }`}
+                        }`}
                     >
                       {k}
                     </button>
@@ -369,9 +398,8 @@ export const ManageDashboard: React.FC = () => {
                   return (
                     <div
                       key={listing.id}
-                      className={`panel p-5 md:p-6 transition-all duration-300 hover:border-[#9A6B3B]/45 flex flex-col md:flex-row md:items-center justify-between gap-6 ${
-                        nested ? 'ml-6 md:ml-12 border-l-2 border-l-[#9A6B3B] bg-[#FAF6EE]' : ''
-                      }`}
+                      className={`panel p-5 md:p-6 transition-all duration-300 hover:border-[#9A6B3B]/45 flex flex-col md:flex-row md:items-center justify-between gap-6 ${nested ? 'ml-6 md:ml-12 border-l-2 border-l-[#9A6B3B] bg-[#FAF6EE]' : ''
+                        }`}
                     >
                       {/* Thumbnail & Info */}
                       <div className="flex items-start gap-5 min-w-0">
@@ -391,13 +419,12 @@ export const ManageDashboard: React.FC = () => {
                             </div>
                           )}
                           <span
-                            className={`absolute top-1.5 left-1.5 px-2 py-0.5 rounded text-[8px] font-mono uppercase tracking-wider font-bold ${
-                              listing.kind === 'project'
+                            className={`absolute top-1.5 left-1.5 px-2 py-0.5 rounded text-[8px] font-mono uppercase tracking-wider font-bold ${listing.kind === 'project'
                                 ? 'bg-sky-700 text-white'
                                 : unit
-                                ? 'bg-emerald-700 text-white'
-                                : 'bg-[#9A6B3B] text-white'
-                            }`}
+                                  ? 'bg-emerald-700 text-white'
+                                  : 'bg-[#9A6B3B] text-white'
+                              }`}
                           >
                             {listing.kind === 'project' ? 'project' : unit ? `unit ${unit.code}` : 'single'}
                           </span>
@@ -405,9 +432,17 @@ export const ManageDashboard: React.FC = () => {
 
                         <div className="min-w-0">
                           <div className="flex items-center gap-3 flex-wrap">
-                            <h3 className="font-display text-2xl text-[#181512] truncate">
-                              {listing.title}
+                            <h3
+                              lang={isPriceAsTitle(listing) ? 'bn' : undefined}
+                              className={`${isPriceAsTitle(listing) ? 'font-nakkhatra font-normal' : 'font-display'} text-2xl text-[#181512] truncate`}
+                            >
+                              {displayTitle(effective)}
                             </h3>
+                            {isPriceAsTitle(listing) && (
+                              <span className="px-2 py-0.5 rounded text-[9px] font-mono uppercase tracking-wider border border-[#9A6B3B]/35 bg-[#9A6B3B]/10 text-[#684724]">
+                                Price as Title{hasCustomName(listing) ? ` · ${listing.title}` : ''}
+                              </span>
+                            )}
                             {parent && (
                               <Link
                                 to={`/manage/edit/${parent.id}`}
@@ -415,7 +450,7 @@ export const ManageDashboard: React.FC = () => {
                               >
                                 <Building2 className="w-3 h-3 text-[#9A6B3B]" />
                                 <span>
-                                  {parent.title}
+                                  {displayTitle(parent)}
                                   {unit ? ` · ${unit.code}` : ''}
                                 </span>
                               </Link>
@@ -425,7 +460,7 @@ export const ManageDashboard: React.FC = () => {
                           <div className="flex flex-wrap items-center gap-4 text-xs font-mono text-[#5C5346] mt-2">
                             <span>{effective.location.area || effective.location.city}</span>
                             <span>·</span>
-                            <span className="text-gradient-gold font-semibold">
+                            <span lang="bn" className="font-nakkhatra text-sm text-gradient-gold font-normal tracking-normal">
                               {priceLabel(effective)}
                             </span>
                             {listing.kind === 'project' && (
@@ -460,13 +495,12 @@ export const ManageDashboard: React.FC = () => {
                         <div className="text-center" title="Listing Significance Quality Score">
                           <span className="mono-label block text-[9px]">Score</span>
                           <span
-                            className={`font-display text-lg font-medium ${
-                              score >= 80
+                            className={`font-display text-lg font-medium ${score >= 80
                                 ? 'text-emerald-700'
                                 : score >= 60
-                                ? 'text-[#9A6B3B]'
-                                : 'text-amber-700'
-                            }`}
+                                  ? 'text-[#9A6B3B]'
+                                  : 'text-amber-700'
+                              }`}
                           >
                             {score}%
                           </span>
@@ -476,12 +510,13 @@ export const ManageDashboard: React.FC = () => {
                         <button
                           type="button"
                           onClick={() => handleTogglePublish(listing)}
-                          className={`px-3 py-1.5 rounded-full text-[10px] font-mono uppercase tracking-widest border transition-all cursor-pointer font-medium ${
-                            listing.publish === 'published'
+                          className={`px-3 py-1.5 rounded-full text-[10px] font-mono uppercase tracking-widest border transition-all cursor-pointer font-medium ${listing.publish === 'published'
                               ? 'border-emerald-700/40 bg-emerald-600/10 text-emerald-800 hover:bg-emerald-600/20'
-                              : 'border-amber-700/40 bg-amber-500/12 text-amber-800 hover:bg-amber-500/20'
-                          }`}
-                          title="Click to toggle publish status"
+                              : listing.publish === 'archived'
+                                ? 'border-[#181512]/25 bg-[#181512]/[0.07] text-[#3D362E] hover:bg-[#181512]/12'
+                                : 'border-amber-700/40 bg-amber-500/12 text-amber-800 hover:bg-amber-500/20'
+                            }`}
+                          title={listing.publish === 'published' ? 'Click to unpublish to draft' : 'Click to publish live'}
                         >
                           {listing.publish}
                         </button>
@@ -513,6 +548,15 @@ export const ManageDashboard: React.FC = () => {
                             title="Duplicate Blueprint"
                           >
                             <Copy className="w-4 h-4" />
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => handleToggleArchive(listing)}
+                            className="p-2.5 rounded-lg border border-[#181512]/12 bg-[#ffffff] hover:border-[#9A6B3B] text-[#4A433B] hover:text-[#181512] transition-colors cursor-pointer"
+                            title={listing.publish === 'archived' ? 'Restore from Archive to Draft' : 'Archive Residence'}
+                          >
+                            {listing.publish === 'archived' ? <RotateCcw className="w-4 h-4" /> : <Archive className="w-4 h-4" />}
                           </button>
 
                           <button

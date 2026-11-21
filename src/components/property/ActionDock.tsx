@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { ArrowRight, Bookmark, Phone } from 'lucide-react';
-import { Listing } from '../../types/listing';
-import { priceLabel } from '../../lib/significance';
+import { CATEGORY_LABELS, Listing } from '../../types/listing';
+import { displayTitle, hasCustomName, isPriceAsTitle, priceLabel } from '../../lib/significance';
 import { useAuth } from '../../context/AuthContext';
 import { telHref } from '../../lib/contact';
 
@@ -45,8 +45,28 @@ export const ActionDock: React.FC<{ listing: Listing; onInquire: () => void }> =
     >
       <div className="panel-glass rounded-full pl-6 pr-2 py-2 flex items-center gap-4 shadow-[0_24px_60px_-20px_rgba(24,21,18,0.22)]">
         <div className="min-w-0 flex-1">
-          <div className="font-display text-lg leading-[1.3] truncate text-[#181512] py-0.5">{listing.title}</div>
-          <div className="text-[10px] font-mono tracking-[0.2em] uppercase text-gradient-gold font-semibold truncate">{priceLabel(listing)}</div>
+          <div
+            lang={isPriceAsTitle(listing) ? 'bn' : undefined}
+            className={`${
+              isPriceAsTitle(listing) ? 'font-nakkhatra font-normal' : 'font-display'
+            } text-lg leading-[1.3] truncate text-[#181512] py-0.5`}
+          >
+            {displayTitle(listing)}
+          </div>
+          <div
+            lang={!isPriceAsTitle(listing) ? 'bn' : undefined}
+            className={`${
+              !isPriceAsTitle(listing)
+                ? 'font-nakkhatra text-sm tracking-normal normal-case font-normal'
+                : 'text-[10px] font-mono tracking-[0.2em] uppercase font-semibold'
+            } text-gradient-gold truncate`}
+          >
+            {isPriceAsTitle(listing)
+              ? hasCustomName(listing)
+                ? listing.title
+                : listing.location.area || listing.location.city || CATEGORY_LABELS[listing.category]
+              : priceLabel(listing)}
+          </div>
         </div>
         <button
           id="dock-save"

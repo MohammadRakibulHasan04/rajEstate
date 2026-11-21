@@ -1,22 +1,24 @@
 import React, { useState } from 'react';
-import { Building2, Check, ExternalLink, FileCheck2, ShieldCheck } from 'lucide-react';
+import { Building2, Check, FileCheck2, ShieldCheck } from 'lucide-react';
 import { Listing, ListingSection } from '../../types/listing';
-import { getAmenityIconMeta, normalizeAmenities } from '../../lib/amenities';
+import { getAmenityIconMeta, normalizeAmenities, toBanglaAmenityDetail, toBanglaAmenityLabel } from '../../lib/amenities';
 import { customFacts } from '../../lib/significance';
 import { formatMonth, monthsUntil } from '../../lib/format';
-import { isImageUrl, videoEmbedUrl } from '../../lib/media';
+import { isImageUrl } from '../../lib/media';
 import { publicSectionId, SECTION_META } from '../../lib/sections';
 import { DetailList, PageSection } from './PageSection';
 import { ProximityRings } from './ProximityRings';
+import { ProjectVideoSection } from './ProjectVideoSection';
 
 interface Props {
   listing: Listing;
   section: ListingSection;
   onOpenPlan: (index: number) => void;
+  onOpenSatellite?: () => void;
 }
 
 /** Renders one admin-configured section of the detail page. */
-export const ListingSectionView: React.FC<Props> = ({ listing, section, onOpenPlan }) => {
+export const ListingSectionView: React.FC<Props> = ({ listing, section, onOpenPlan, onOpenSatellite }) => {
   const id = publicSectionId(section);
 
   switch (section.type) {
@@ -30,21 +32,28 @@ export const ListingSectionView: React.FC<Props> = ({ listing, section, onOpenPl
     case 'floorPlans':
       return <FloorPlans id={id} listing={listing} onOpen={onOpenPlan} />;
 
+    case 'satellite':
+      return <SatelliteView id={id} listing={listing} onOpen={onOpenSatellite} />;
+
     case 'amenities': {
       const amenities = normalizeAmenities(listing.amenities).filter((a) => a.label.trim());
       return (
-        <PageSection id={id} title={SECTION_META.amenities.label} aside={<span className="mono-label">{amenities.length} Features</span>}>
+        <PageSection id={id} title={SECTION_META.amenities.label} aside={<span className="mono-label">{amenities.length}টি সুবিধা</span>}>
           <ul className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
             {amenities.map((item, idx) => {
-              const { Icon, category } = getAmenityIconMeta(item.icon, item.label);
+              const { Icon } = getAmenityIconMeta(item.icon, item.label);
+              const labelBn = toBanglaAmenityLabel(item.label);
+              const detailBn = toBanglaAmenityDetail(item.detail);
               return (
                 <li key={`${item.label}-${idx}`} className="flex items-center gap-3.5 rounded-xl border border-[#181512]/[0.09] bg-white p-3.5">
                   <span className="w-10 h-10 rounded-lg bg-[#9A6B3B]/10 border border-[#9A6B3B]/25 text-[#855B30] flex items-center justify-center shrink-0">
                     <Icon className="w-[18px] h-[18px]" />
                   </span>
-                  <span className="min-w-0">
-                    <span className="block text-sm font-medium text-[#181512] truncate">{item.label}</span>
-                    <span className="block text-xs text-[#786F63] truncate">{item.detail || category}</span>
+                  <span className="min-w-0" lang="bn">
+                    <span className="block text-sm font-bn font-medium text-[#181512] truncate">{labelBn}</span>
+                    {detailBn ? (
+                      <span className="block text-xs font-bn text-[#786F63] truncate mt-0.5">{detailBn}</span>
+                    ) : null}
                   </span>
                 </li>
               );
@@ -88,36 +97,15 @@ export const ListingSectionView: React.FC<Props> = ({ listing, section, onOpenPl
     case 'progress':
       return <Progress id={id} listing={listing} />;
 
-    case 'video': {
-      const embed = videoEmbedUrl(listing.media.videoUrl);
-      return (
-        <PageSection id={id} title={SECTION_META.video.label}>
-          {embed ? (
-            <div className="rounded-2xl overflow-hidden border border-[#181512]/12 aspect-video bg-black">
-              <iframe
-                src={embed}
-                title={`${listing.title} video tour`}
-                className="w-full h-full"
-                loading="lazy"
-                allow="accelerometer; encrypted-media; gyroscope; picture-in-picture; fullscreen"
-                allowFullScreen
-              />
-            </div>
-          ) : (
-            <a href={listing.media.videoUrl} target="_blank" rel="noopener noreferrer" className="btn-quiet">
-              Watch Video <ExternalLink className="w-3.5 h-3.5" />
-            </a>
-          )}
-        </PageSection>
-      );
-    }
+    case 'video':
+      return <ProjectVideoSection id={id} listing={listing} />;
 
     case 'custom':
       return (
         <PageSection id={id} title={section.title}>
           <div className={isImageUrl(section.imageUrl) ? 'grid md:grid-cols-2 gap-8 items-start' : ''}>
             {section.body.trim() && (
-              <p lang="bn" className="text-[15.5px] leading-[1.9] text-[#3D362E] whitespace-pre-line">
+              <p lang="bn" className="font-bn text-[17px] sm:text-[18px] leading-[1.85] text-[#2E2822] whitespace-pre-line">
                 {section.body}
               </p>
             )}
@@ -156,6 +144,36 @@ const FloorPlans: React.FC<{ id: string; listing: Listing; onOpen: (i: number) =
         <img src={plan.url} alt={plan.caption || 'Floor plan'} loading="lazy" className="w-full max-h-[620px] object-contain transition-transform duration-700 group-hover:scale-[1.01]" />
       </button>
       {plan.caption && plans.length === 1 && <p className="mt-3 text-sm text-[#6E6559]">{plan.caption}</p>}
+    </PageSection>
+  );
+};
+
+const SatelliteView: React.FC<{ id: string; listing: Listing; onOpen?: () => void }> = ({ id, listing, onOpen }) => {
+  const sat = listing.media.satelliteImage;
+  if (!sat || !isImageUrl(sat.url)) return null;
+  return (
+    <PageSection id={id} title={SECTION_META.satellite.label}>
+      <button
+        type="button"
+        id="satellite-open"
+        onClick={() => onOpen?.()}
+        className="block w-full rounded-2xl overflow-hidden border border-[#181512]/12 bg-white p-3 md:p-4 cursor-zoom-in group shadow-[0_14px_38px_-18px_rgba(24,21,18,0.12)]"
+        aria-label={`Enlarge ${sat.caption || 'satellite image'}`}
+      >
+        <div className="relative overflow-hidden rounded-xl bg-[#EAE3D7]">
+          <img
+            src={sat.url}
+            alt={sat.caption || `${listing.title} satellite view`}
+            loading="lazy"
+            className="w-full max-h-[620px] object-cover transition-transform duration-700 group-hover:scale-[1.015]"
+          />
+        </div>
+      </button>
+      {sat.caption && (
+        <p lang="bn" className="mt-3 text-sm font-bn text-[#6E6559]">
+          {sat.caption}
+        </p>
+      )}
     </PageSection>
   );
 };

@@ -4,6 +4,7 @@ import { Listing } from '../../types/listing';
 import { TourInquiry } from '../../types/property';
 import { useAuth } from '../../context/AuthContext';
 import { isValidEmail, isValidPhone } from '../../lib/contact';
+import { displayTitle, hasCustomName, isPriceAsTitle } from '../../lib/significance';
 
 /** @deprecated import from lib/contact instead. */
 export { telHref, waHref } from '../../lib/contact';
@@ -46,6 +47,11 @@ export const InquiryPanel: React.FC<{ listing: Listing; prefill?: string }> = ({
   };
   const valid = !Object.values(errors).some(Boolean);
 
+  const titleLabel =
+    isPriceAsTitle(listing) && hasCustomName(listing)
+      ? `${displayTitle(listing)} (${listing.title})`
+      : displayTitle(listing);
+
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setTouched(true);
@@ -59,7 +65,7 @@ export const InquiryPanel: React.FC<{ listing: Listing; prefill?: string }> = ({
         phone: form.phone.trim(),
         message: form.message.trim(),
         propertyId: listing.id,
-        propertyTitle: listing.title,
+        propertyTitle: titleLabel,
       });
       setStatus(ok ? 'sent' : 'error');
     } catch {
@@ -87,7 +93,7 @@ export const InquiryPanel: React.FC<{ listing: Listing; prefill?: string }> = ({
             <div className="panel p-10 text-center flex flex-col items-center" role="status">
               <CheckCircle2 className="w-12 h-12 text-[#9A6B3B]" />
               <h3 className="mt-5 font-display text-3xl text-[#181512]">Thank you, {form.fullName.trim().split(' ')[0]}</h3>
-              <p className="mt-3 text-[#4A433B] max-w-sm">Your request for {listing.title} has been received. We will contact you shortly.</p>
+              <p className="mt-3 text-[#4A433B] max-w-sm">Your request for {displayTitle(listing)} has been received. We will contact you shortly.</p>
             </div>
           ) : (
             <form onSubmit={submit} className="panel p-7 md:p-9 space-y-6" noValidate>

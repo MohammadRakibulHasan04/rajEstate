@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { ArrowDown, ArrowUp, Image as ImageIcon, Plus, Star, Trash2 } from 'lucide-react';
+import { ArrowDown, ArrowUp, CheckCircle2, ExternalLink, Film, Image as ImageIcon, Plus, Star, Trash2 } from 'lucide-react';
 import { MediaImage } from '../../types/listing';
-import { isImageUrl, parseImageUrls, videoEmbedUrl } from '../../lib/media';
+import { extractEmbedSrc, isImageUrl, parseImageUrls, parseVideoEmbed } from '../../lib/media';
 import { Field, TextInput } from './fields';
 
 const ROOM_OPTIONS = ['Exterior', 'Living', 'Dining', 'Bedroom', 'Kitchen', 'Bath', 'Balcony', 'Terrace', 'Aerial', 'Amenities', 'Detail'];
@@ -228,22 +228,178 @@ export const FloorPlansEditor: React.FC<{ plans: MediaImage[]; onChange: (p: Med
   </div>
 );
 
-/* ── Video ─────────────────────────────────────────────────────── */
+/* ── Project Overview Video ─────────────────────────────────────── */
 
-export const VideoEditor: React.FC<{ url?: string; onChange: (url: string) => void }> = ({ url, onChange }) => {
-  const embed = videoEmbedUrl(url);
+export const VideoEditor: React.FC<{
+  url?: string;
+  onChange: (url: string) => void;
+  inheritedUrl?: string;
+  isProject?: boolean;
+}> = ({ url, onChange, inheritedUrl, isProject = false }) => {
+  const cleanUrl = url?.trim() || '';
+  const meta = parseVideoEmbed(cleanUrl || inheritedUrl);
+
+  const handleInput = (raw: string) => {
+    // Automatically extract src if user pastes a full <iframe ...> embed snippet
+    const next = /<iframe/i.test(raw) ? extractEmbedSrc(raw) : raw;
+    onChange(next);
+  };
+
+  return (
+    <div id="project-video" className="scroll-mt-28 rounded-xl border border-[#181512]/12 bg-[#F6F2EA]/65 p-5 space-y-4">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div className="flex items-center gap-2">
+          <Film className="w-4 h-4 text-[#9A6B3B]" />
+          <span className="mono-label text-[#181512]">
+            {isProject ? 'Project Overview Video (Multi-Unit Project)' : 'Project Overview Video'}
+          </span>
+        </div>
+        {cleanUrl ? (
+          meta ? (
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-600/12 border border-emerald-700/30 text-[10px] font-mono uppercase tracking-wider text-emerald-800">
+              <CheckCircle2 className="w-3 h-3" /> {meta.providerLabel} Ready
+            </span>
+          ) : (
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-amber-500/12 border border-amber-700/30 text-[10px] font-mono uppercase tracking-wider text-amber-800">
+              External Video Link
+            </span>
+          )
+        ) : inheritedUrl ? (
+          <span className="text-[11px] font-mono text-[#6E6559]">Inheriting project overview video</span>
+        ) : null}
+      </div>
+
+      <Field
+        label="Video URL or Embed Code"
+        htmlFor="video-url"
+        hint={
+          cleanUrl
+            ? meta
+              ? isProject
+                ? 'Embedded player ready. Shown after Basic Info and before Overview on the project page, and automatically inherited by unit pages.'
+                : 'Embedded player ready. Shown after Basic Info and before the Overview section on the property page.'
+              : 'Not a direct embed link — visitors will see a button to open the video.'
+            : isProject
+              ? 'Paste a YouTube, Vimeo, Google Drive, Facebook, direct MP4 link, or <iframe> embed code for the overall description of this project. Linked apartment unit pages will also inherit this video.'
+              : 'Paste a YouTube, Vimeo, Google Drive, Facebook, direct MP4 link, or a full <iframe> embed code for the overall project description.'
+        }
+      >
+        <div className="flex gap-2.5">
+          <TextInput
+            id="video-url"
+            className="flex-1"
+            value={url}
+            placeholder={inheritedUrl || 'https://www.youtube.com/watch?v=… or paste <iframe> embed code'}
+            onChange={handleInput}
+          />
+          {cleanUrl && (
+            <button
+              type="button"
+              onClick={() => onChange('')}
+              className="btn-quiet !py-2 !px-3.5 shrink-0"
+              title="Remove video"
+            >
+              <Trash2 className="w-3.5 h-3.5" /> Clear
+            </button>
+          )}
+        </div>
+      </Field>
+
+      {meta && (
+        <div className="rounded-xl overflow-hidden border border-[#181512]/15 bg-[#141210] shadow-md">
+          <div className="flex items-center justify-between px-4 py-2.5 bg-[#181512] border-b border-white/10 text-[10px] font-mono uppercase tracking-[0.2em] text-[#E5D2B3]">
+            <span>Embedded Player Preview · {meta.providerLabel}</span>
+            <a
+              href={meta.sourceUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 text-white/70 hover:text-white transition-colors"
+            >
+              Open Source <ExternalLink className="w-3 h-3" />
+            </a>
+          </div>
+          <div className="aspect-video w-full bg-black">
+            {meta.provider === 'direct' ? (
+              <video src={meta.embedUrl} controls playsInline preload="metadata" className="w-full h-full object-contain" />
+            ) : (
+              <iframe
+                src={meta.embedUrl}
+                title="Project overview video preview"
+                className="w-full h-full border-0"
+                loading="lazy"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
+                referrerPolicy="strict-origin-when-cross-origin"
+                allowFullScreen
+              />
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+/* ── Satellite Image ────────────────────────────────────────────── */
+
+export const SatelliteImageEditor: React.FC<{
+  image?: MediaImage;
+  inheritedImage?: MediaImage;
+  onChange: (next?: MediaImage) => void;
+}> = ({ image, inheritedImage, onChange }) => {
+  const url = image?.url || '';
+  const caption = image?.caption || '';
+  const previewUrl = url.trim() || inheritedImage?.url?.trim() || '';
+  const isInherited = !url.trim() && Boolean(inheritedImage?.url?.trim());
+
   return (
     <div className="space-y-4">
-      <Field
-        label="Video Link"
-        htmlFor="video-url"
-        hint={url?.trim() ? (embed ? 'Recognised. The video will play on the page.' : 'Not a YouTube/Vimeo link. Visitors will get a "Watch Video" button instead.') : 'YouTube or Vimeo watch / share link.'}
-      >
-        <TextInput id="video-url" value={url} placeholder="https://www.youtube.com/watch?v=…" onChange={onChange} />
-      </Field>
-      {embed && (
-        <div className="max-w-lg rounded-xl overflow-hidden border border-[#181512]/12 aspect-video bg-black">
-          <iframe src={embed} title="Video preview" className="w-full h-full" loading="lazy" allowFullScreen />
+      <div className="grid sm:grid-cols-2 gap-4">
+        <Field label="Satellite Image Link (URL)" htmlFor="satellite-image-url" hint="Paste a direct https:// image URL or /path of the satellite view.">
+          <TextInput
+            id="satellite-image-url"
+            value={url}
+            placeholder={inheritedImage?.url || 'https://…/satellite-view.jpg'}
+            onChange={(nextUrl) =>
+              onChange(nextUrl.trim() || caption.trim() ? { url: nextUrl, ...(caption ? { caption } : {}) } : undefined)
+            }
+          />
+        </Field>
+        <Field label="Caption (Optional)" htmlFor="satellite-image-caption" hint="Optional note shown below the satellite image.">
+          <TextInput
+            id="satellite-image-caption"
+            lang="bn"
+            value={caption}
+            placeholder="যেমন: প্রজেক্টের স্যাটেলাইট ভিউ ও আশেপাশের সংযোগ সড়ক"
+            onChange={(nextCaption) =>
+              onChange(url.trim() || nextCaption.trim() ? { url, ...(nextCaption ? { caption: nextCaption } : {}) } : undefined)
+            }
+          />
+        </Field>
+      </div>
+
+      {previewUrl ? (
+        <div className="rounded-xl border border-[#181512]/12 bg-[#FCFBF8] p-3.5 space-y-3">
+          <div className="flex items-center justify-between gap-2">
+            <span className="mono-label text-[#684724]">
+              {isInherited ? 'Inherited Satellite Image Preview (from Project)' : 'Satellite Image Preview'}
+            </span>
+            {url.trim() && (
+              <button
+                type="button"
+                onClick={() => onChange(undefined)}
+                className="btn-quiet !py-1.5 !px-3 !text-[10.5px]"
+              >
+                <Trash2 className="w-3.5 h-3.5" /> Remove Image
+              </button>
+            )}
+          </div>
+          <div className="relative aspect-[16/9] max-h-[360px] w-full rounded-lg overflow-hidden border border-[#181512]/10 bg-[#EAE3D7]">
+            <Thumb url={previewUrl} alt={caption || 'Satellite view'} />
+          </div>
+        </div>
+      ) : (
+        <div className="rounded-xl border border-dashed border-[#181512]/15 bg-[#F6F2EA]/50 p-6 text-center text-xs text-[#786F63]">
+          No satellite image added yet. Paste an image URL above to display a satellite view section on the property page.
         </div>
       )}
     </div>

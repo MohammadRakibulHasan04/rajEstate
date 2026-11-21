@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { ArrowRight, ArrowUpRight, Compass, Layers, Ruler, BedDouble, Bath } from 'lucide-react';
+import { ArrowRight, ArrowUpRight, Compass, Fence, Layers, Ruler, BedDouble, Bath } from 'lucide-react';
 import { Listing, Unit, UnitStatus } from '../../types/listing';
 import { facingWhy, floorWhy, unitStats } from '../../lib/significance';
 import { formatBdt, formatNumber, ordinal } from '../../lib/format';
@@ -134,22 +134,23 @@ export const UnitStack: React.FC<Props> = ({ listing, onInquireUnit, unitPages =
                 </span>
               </div>
 
-              <div className="mt-7 font-display text-3xl text-gradient-gold">{formatBdt(selected.price)}</div>
+              <div lang="bn" className="mt-7 font-nakkhatra font-normal text-3xl text-gradient-gold">{formatBdt(selected.price)}</div>
               {selected.price > 0 && selected.sizeSqft > 0 && (
                 <div className="text-[11px] font-mono tracking-[0.18em] uppercase text-[#786F63] mt-1">
                   ৳ {formatNumber(Math.round(selected.price / selected.sizeSqft))} / sq ft
                 </div>
               )}
 
-              <dl className="mt-7 grid grid-cols-3 gap-px rounded-xl overflow-hidden bg-[#181512]/10 border border-[#181512]/10">
+              <dl className="mt-7 grid grid-cols-2 sm:grid-cols-4 gap-px rounded-xl overflow-hidden bg-[#181512]/10 border border-[#181512]/10">
                 {[
-                  { i: <Ruler className="w-4 h-4" />, l: 'Area', v: `${formatNumber(selected.sizeSqft)} ft²` },
                   { i: <BedDouble className="w-4 h-4" />, l: 'Beds', v: selected.beds },
                   { i: <Bath className="w-4 h-4" />, l: 'Baths', v: selected.baths },
+                  { i: <Fence className="w-4 h-4" />, l: 'Balcony', v: selected.balconies ?? 0 },
+                  { i: <Ruler className="w-4 h-4" />, l: 'Area', v: `${formatNumber(selected.sizeSqft)} ft²` },
                 ].map((x) => (
                   <div key={x.l} className="bg-[#ffffff] p-4">
                     <dt className="flex items-center gap-1.5 mono-label !text-[#9A6B3B]">{x.i}{x.l}</dt>
-                    <dd className="mt-2 font-display text-xl text-[#181512]">{x.v}</dd>
+                    <dd className="mt-2 font-stat font-semibold text-xl text-[#181512]">{x.v}</dd>
                   </div>
                 ))}
               </dl>
