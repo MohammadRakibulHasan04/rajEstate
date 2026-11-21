@@ -36,7 +36,7 @@ export const ListingCard: React.FC<ListingCardProps> = ({ listing, index = 0, si
       className="group block"
       aria-label={`${headline}, ${listing.location.area}`}
     >
-      <figure className={`parallax-figure ${size === 'large' ? 'aspect-[16/11]' : 'aspect-[4/5]'} rounded-2xl border border-[#181512]/10 shadow-[0_18px_45px_-18px_rgba(24,21,18,0.16)]`}>
+      <figure className="parallax-figure aspect-[4/5] rounded-2xl border border-[#181512]/10 shadow-[0_18px_45px_-18px_rgba(24,21,18,0.16)]">
         {listing.media.hero.url ? (
           <img
             src={listing.media.hero.url}

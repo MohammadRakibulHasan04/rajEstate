@@ -119,7 +119,6 @@ export const ResidencesShowcase: React.FC = () => {
                 <ListingCard
                   listing={listing}
                   index={index}
-                  size={index === 0 && filtered.length > 2 ? 'large' : 'normal'}
                 />
               </div>
             ))}
