@@ -749,36 +749,120 @@ export async function seedListings(uid: string, which: Listing[] = SEED_LISTINGS
 
 /* ── Inquiries (admin inbox) ───────────────────────────────────── */
 
+const LOCAL_INQUIRIES_KEY = 'jonopod_contact_inquiries';
+
+function readLocalInquiries(): TourInquiry[] {
+  if (typeof localStorage === 'undefined') return [];
+  try {
+    const raw = localStorage.getItem(LOCAL_INQUIRIES_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    return parsed.map((item, idx) => ({
+      ...item,
+      id: item.id || `local-${idx}`,
+      status: item.status || 'pending',
+    }));
+  } catch {
+    return [];
+  }
+}
+
+function mergeInquiries(remote: TourInquiry[], local: TourInquiry[]): TourInquiry[] {
+  const remoteKeys = new Set(
+    remote.map((r) => `${r.fullName}|${r.phone}|${(r.createdAt || '').slice(0, 16)}`)
+  );
+  const uniqueLocal = local.filter(
+    (l) => !remoteKeys.has(`${l.fullName}|${l.phone}|${(l.createdAt || '').slice(0, 16)}`)
+  );
+  return [...remote, ...uniqueLocal].sort((a, b) =>
+    (b.createdAt || '').localeCompare(a.createdAt || '')
+  );
+}
+
+const inquirySubscribers = new Set<
+  React.Dispatch<React.SetStateAction<{ items: TourInquiry[]; loading: boolean; error: string | null }>>
+>();
+
+function notifyInquiries(items: TourInquiry[]) {
+  cache.inquiries = items;
+  inquirySubscribers.forEach((fn) => fn({ items, loading: false, error: null }));
+}
+
 export function useInquiries(enabled: boolean) {
   const [state, setState] = useState<{ items: TourInquiry[]; loading: boolean; error: string | null }>(() =>
     cache.inquiries
       ? { items: cache.inquiries, loading: false, error: null }
-      : { items: [], loading: true, error: null }
+      : { items: readLocalInquiries(), loading: true, error: null }
   );
   useEffect(() => {
     if (!enabled) return;
+    inquirySubscribers.add(setState);
     if (cache.inquiries) {
       setState({ items: cache.inquiries, loading: false, error: null });
     }
-    return onSnapshot(
+    const unsub = onSnapshot(
       collection(db, 'inquiries'),
       (snap) => {
-        const items = snap.docs
-          .map((d) => ({ ...(d.data() as TourInquiry), id: d.id }))
-          .sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''));
-        cache.inquiries = items;
-        setState({ items, loading: false, error: null });
+        const remote = snap.docs.map((d) => ({ ...(d.data() as TourInquiry), id: d.id }));
+        const items = mergeInquiries(remote, readLocalInquiries());
+        notifyInquiries(items);
       },
-      (err) => setState((prev) => ({ items: prev.items, loading: false, error: err.message }))
+      (err) => {
+        const local = readLocalInquiries();
+        setState((prev) => ({
+          items: prev.items.length > 0 ? prev.items : local,
+          loading: false,
+          error: err.message,
+        }));
+      }
     );
+    return () => {
+      inquirySubscribers.delete(setState);
+      unsub();
+    };
   }, [enabled]);
   return state;
 }
 
 export async function setInquiryStatus(id: string, status: TourInquiry['status']) {
+  if (cache.inquiries) {
+    notifyInquiries(cache.inquiries.map((item) => (item.id === id ? { ...item, status } : item)));
+  }
+  if (id.startsWith('local-')) {
+    try {
+      const list = readLocalInquiries().map((item) =>
+        item.id === id ? { ...item, status } : item
+      );
+      localStorage.setItem(LOCAL_INQUIRIES_KEY, JSON.stringify(list));
+    } catch {
+      // ignore localStorage errors
+    }
+    return;
+  }
   try {
     await updateDoc(doc(db, 'inquiries', id), { status });
   } catch (err) {
     handleFirestoreError(err, OperationType.UPDATE, `inquiries/${id}`);
+  }
+}
+
+export async function deleteInquiry(id: string) {
+  if (cache.inquiries) {
+    notifyInquiries(cache.inquiries.filter((item) => item.id !== id));
+  }
+  if (id.startsWith('local-')) {
+    try {
+      const list = readLocalInquiries().filter((item) => item.id !== id);
+      localStorage.setItem(LOCAL_INQUIRIES_KEY, JSON.stringify(list));
+    } catch {
+      // ignore localStorage errors
+    }
+    return;
+  }
+  try {
+    await deleteDoc(doc(db, 'inquiries', id));
+  } catch (err) {
+    handleFirestoreError(err, OperationType.DELETE, `inquiries/${id}`);
   }
 }

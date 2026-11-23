@@ -31,6 +31,7 @@ import {
   setPublishState,
   seedListings,
   setInquiryStatus,
+  deleteInquiry,
 } from '../../lib/listings';
 import { validateListing } from '../../lib/listingValidation';
 import { displayTitle, hasCustomName, isPriceAsTitle, priceLabel } from '../../lib/significance';
@@ -39,6 +40,7 @@ import { linkedUnit, withParent } from '../../lib/hierarchy';
 import { useAuth } from '../../context/AuthContext';
 import { Link, navigate } from '../../lib/router';
 import { Listing, PublishState } from '../../types/listing';
+import { TourInquiry } from '../../types/property';
 import { useToasts, errorText } from '../../components/manage/fields';
 import logoImg from '../../assets/logo.png';
 
@@ -53,6 +55,7 @@ export const ManageDashboard: React.FC = () => {
   const [filterState, setFilterState] = useState<'all' | 'published' | 'draft' | 'archived'>('all');
   const [filterKind, setFilterKind] = useState<'all' | 'single' | 'project'>('all');
   const [deleteModalListing, setDeleteModalListing] = useState<Listing | null>(null);
+  const [deleteModalInquiry, setDeleteModalInquiry] = useState<TourInquiry | null>(null);
   const [seeding, setSeeding] = useState(false);
 
   // Statistics calculation
@@ -162,6 +165,17 @@ export const ManageDashboard: React.FC = () => {
       await deleteListing(deleteModalListing.id);
       toast(`Deleted "${deleteModalListing.title}"`, 'ok');
       setDeleteModalListing(null);
+    } catch (err) {
+      toast(errorText(err), 'error');
+    }
+  };
+
+  const confirmDeleteInquiry = async () => {
+    if (!deleteModalInquiry?.id) return;
+    try {
+      await deleteInquiry(deleteModalInquiry.id);
+      toast(`Deleted inquiry from "${deleteModalInquiry.fullName}"`, 'ok');
+      setDeleteModalInquiry(null);
     } catch (err) {
       toast(errorText(err), 'error');
     }
@@ -585,87 +599,138 @@ export const ManageDashboard: React.FC = () => {
             ) : inquiries.length === 0 ? (
               <div className="panel p-16 text-center space-y-4">
                 <Inbox className="w-10 h-10 text-[#9A6B3B] mx-auto" />
-                <h3 className="font-display text-2xl text-[#181512]">No client tour inquiries yet</h3>
+                <h3 className="font-display text-2xl text-[#181512]">No client inquiries yet</h3>
                 <p className="text-sm text-[#6E6559] max-w-sm mx-auto">
-                  When clients request a private viewing or architectural consultation, their message will appear here.
+                  When sellers or buyers send a message through the Contact section or request a property visit, it will appear here.
                 </p>
               </div>
             ) : (
               <div className="space-y-4">
-                {inquiries.map((inq) => (
-                  <div
-                    key={inq.id}
-                    className="panel p-6 space-y-4 hover:border-[#9A6B3B]/40 transition-colors"
-                  >
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                      <div>
-                        <div className="flex items-center gap-3">
-                          <h4 className="font-display text-xl text-[#181512]">{inq.fullName}</h4>
-                          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono tracking-wider uppercase border border-sky-700/35 bg-sky-600/10 text-sky-800">
-                            {inq.tourType}
+                {inquiries.map((inq) => {
+                  const badgeLabel =
+                    inq.intent === 'sell'
+                      ? 'Sell Property'
+                      : inq.intent === 'buy'
+                        ? 'Buy / Visit'
+                        : inq.intent === 'general'
+                          ? 'General Contact'
+                          : inq.tourType;
+                  const badgeStyle =
+                    inq.intent === 'sell'
+                      ? 'border-amber-700/35 bg-amber-600/12 text-amber-900'
+                      : inq.intent === 'buy'
+                        ? 'border-emerald-700/35 bg-emerald-600/12 text-emerald-900'
+                        : 'border-sky-700/35 bg-sky-600/10 text-sky-800';
+
+                  return (
+                    <div
+                      key={inq.id}
+                      className="panel p-6 space-y-4 hover:border-[#9A6B3B]/40 transition-colors"
+                    >
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div>
+                          <div className="flex flex-wrap items-center gap-2.5">
+                            <h4 className="font-display text-xl text-[#181512]">{inq.fullName}</h4>
+                            <span
+                              className={`px-2.5 py-0.5 rounded-full text-[10px] font-mono tracking-wider uppercase border ${badgeStyle}`}
+                            >
+                              {badgeLabel}
+                            </span>
+                            {inq.source === 'contact-section' && (
+                              <span className="px-2 py-0.5 rounded-full text-[9.5px] font-mono tracking-wider uppercase bg-[#181512]/[0.06] text-[#5C5346]">
+                                Contact Section
+                              </span>
+                            )}
+                          </div>
+                          <div className="text-xs font-mono text-[#9A6B3B] mt-1">
+                            Concerning: {inq.propertyTitle}
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-2.5">
+                          <select
+                            className="lux-select !py-1.5 !text-xs !w-36"
+                            value={inq.status}
+                            onChange={(e) => {
+                              if (inq.id) {
+                                setInquiryStatus(inq.id, e.target.value as typeof inq.status);
+                                toast(`Inquiry status updated to ${e.target.value}`, 'ok');
+                              }
+                            }}
+                          >
+                            <option value="pending">Pending</option>
+                            <option value="confirmed">Confirmed</option>
+                            <option value="completed">Completed</option>
+                          </select>
+                          {inq.id && (
+                            <button
+                              type="button"
+                              onClick={() => setDeleteModalInquiry(inq)}
+                              className="p-2 rounded-lg border border-[#181512]/12 bg-[#ffffff] hover:border-red-500/50 text-[#6E6559] hover:text-red-600 transition-colors cursor-pointer"
+                              title="Delete Inquiry"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          )}
+                        </div>
+                      </div>
+
+                      {(inq.location || inq.propertySpec) && (
+                        <div className="flex flex-wrap gap-2">
+                          {inq.location && (
+                            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-[#FAF8F5] border border-[#181512]/10 text-xs text-[#3D362E]">
+                              <strong className="font-mono text-[10px] uppercase text-[#786F63]">Location:</strong>{' '}
+                              {inq.location}
+                            </span>
+                          )}
+                          {inq.propertySpec && (
+                            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-[#FAF8F5] border border-[#181512]/10 text-xs text-[#3D362E]">
+                              <strong className="font-mono text-[10px] uppercase text-[#786F63]">Property:</strong>{' '}
+                              {inq.propertySpec}
+                            </span>
+                          )}
+                        </div>
+                      )}
+
+                      {inq.message && (
+                        <p className="text-sm text-[#3D362E] bg-[#F3EFE7] p-4 rounded-xl border border-[#181512]/[0.07] leading-relaxed">
+                          "{inq.message}"
+                        </p>
+                      )}
+
+                      <div className="flex flex-wrap items-center gap-6 text-xs font-mono text-[#5C5346] pt-2 border-t border-[#181512]/[0.07]">
+                        {inq.phone && (
+                          <a href={`tel:${inq.phone}`} className="flex items-center gap-2 text-[#3D362E] hover:text-[#9A6B3B]">
+                            <Phone className="w-3.5 h-3.5 text-[#9A6B3B]" />
+                            <span>{inq.phone}</span>
+                          </a>
+                        )}
+                        {inq.email && (
+                          <a href={`mailto:${inq.email}`} className="flex items-center gap-2 text-[#3D362E] hover:text-[#9A6B3B]">
+                            <Mail className="w-3.5 h-3.5 text-[#9A6B3B]" />
+                            <span>{inq.email}</span>
+                          </a>
+                        )}
+                        {inq.preferredDate && (
+                          <span className="flex items-center gap-2">
+                            <Calendar className="w-3.5 h-3.5 text-[#786F63]" />
+                            <span>Date: {inq.preferredDate}</span>
                           </span>
-                        </div>
-                        <div className="text-xs font-mono text-[#9A6B3B] mt-1">
-                          Concerning: {inq.propertyTitle}
-                        </div>
-                      </div>
-
-                      <div className="flex items-center gap-3">
-                        <select
-                          className="lux-select !py-1.5 !text-xs !w-36"
-                          value={inq.status}
-                          onChange={(e) => {
-                            if (inq.id) {
-                              setInquiryStatus(inq.id, e.target.value as typeof inq.status);
-                              toast(`Inquiry status updated to ${e.target.value}`, 'ok');
-                            }
-                          }}
-                        >
-                          <option value="pending">Pending</option>
-                          <option value="confirmed">Confirmed</option>
-                          <option value="completed">Completed</option>
-                        </select>
-                      </div>
-                    </div>
-
-                    {inq.message && (
-                      <p className="text-sm text-[#3D362E] bg-[#F3EFE7] p-4 rounded-xl border border-[#181512]/[0.07] leading-relaxed">
-                        "{inq.message}"
-                      </p>
-                    )}
-
-                    <div className="flex flex-wrap items-center gap-6 text-xs font-mono text-[#5C5346] pt-2 border-t border-[#181512]/[0.07]">
-                      {inq.phone && (
-                        <a href={`tel:${inq.phone}`} className="flex items-center gap-2 text-[#3D362E] hover:text-[#9A6B3B]">
-                          <Phone className="w-3.5 h-3.5 text-[#9A6B3B]" />
-                          <span>{inq.phone}</span>
-                        </a>
-                      )}
-                      {inq.email && (
-                        <a href={`mailto:${inq.email}`} className="flex items-center gap-2 text-[#3D362E] hover:text-[#9A6B3B]">
-                          <Mail className="w-3.5 h-3.5 text-[#9A6B3B]" />
-                          <span>{inq.email}</span>
-                        </a>
-                      )}
-                      {inq.preferredDate && (
-                        <span className="flex items-center gap-2">
-                          <Calendar className="w-3.5 h-3.5 text-[#786F63]" />
-                          <span>Preferred Date: {inq.preferredDate}</span>
+                        )}
+                        <span className="ml-auto text-[#786F63] text-[11px]">
+                          Received: {inq.createdAt ? new Date(inq.createdAt).toLocaleDateString() : 'Recent'}
                         </span>
-                      )}
-                      <span className="ml-auto text-[#786F63] text-[11px]">
-                        Received: {inq.createdAt ? new Date(inq.createdAt).toLocaleDateString() : 'Recent'}
-                      </span>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>
         )}
       </main>
 
-      {/* Delete Confirmation Modal */}
+      {/* Delete Listing Confirmation Modal */}
       {deleteModalListing && (
         <div className="fixed inset-0 z-50 bg-[#181512]/45 backdrop-blur-md flex items-center justify-center p-6">
           <div className="panel panel-glass max-w-md w-full p-8 text-center space-y-6">
@@ -694,6 +759,41 @@ export const ManageDashboard: React.FC = () => {
               <button
                 type="button"
                 onClick={confirmDelete}
+                className="btn-danger btn-quiet !py-3 !px-6"
+              >
+                Delete permanently
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Inquiry Confirmation Modal */}
+      {deleteModalInquiry && (
+        <div className="fixed inset-0 z-50 bg-[#181512]/45 backdrop-blur-md flex items-center justify-center p-6">
+          <div className="panel panel-glass max-w-md w-full p-8 text-center space-y-6">
+            <div className="w-12 h-12 rounded-full bg-red-500/12 text-red-600 flex items-center justify-center mx-auto">
+              <AlertTriangle className="w-6 h-6" />
+            </div>
+            <div>
+              <h3 className="font-display text-2xl text-[#181512]">Delete Client Inquiry?</h3>
+              <p className="text-sm text-[#4A433B] mt-2">
+                Are you sure you want to permanently delete the inquiry from{' '}
+                <strong className="text-[#181512]">"{deleteModalInquiry.fullName}"</strong> concerning{' '}
+                <strong className="text-[#181512]">"{deleteModalInquiry.propertyTitle}"</strong>? This action cannot be undone.
+              </p>
+            </div>
+            <div className="flex items-center justify-center gap-3">
+              <button
+                type="button"
+                onClick={() => setDeleteModalInquiry(null)}
+                className="btn-ghost"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={confirmDeleteInquiry}
                 className="btn-danger btn-quiet !py-3 !px-6"
               >
                 Delete permanently

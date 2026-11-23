@@ -74,4 +74,8 @@ export interface TourInquiry {
   message: string;
   status: 'pending' | 'confirmed' | 'completed';
   createdAt: string;
+  intent?: 'sell' | 'buy' | 'general';
+  location?: string;
+  propertySpec?: string;
+  source?: 'contact-section' | 'property-page' | 'modal';
 }

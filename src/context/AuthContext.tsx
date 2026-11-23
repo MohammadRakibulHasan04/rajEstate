@@ -48,7 +48,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [savedPropertyIds, setSavedPropertyIds] = useState<string[]>(() => {
     try {
       const local = localStorage.getItem('jonopod_saved_properties');
-      return local ? JSON.parse(local) : [];
+      const parsed = local ? JSON.parse(local) : [];
+      return Array.isArray(parsed) ? parsed : [];
     } catch {
       return [];
     }
@@ -56,6 +57,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [authError, setAuthError] = useState<string | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [adminChecking, setAdminChecking] = useState(true);
+
+  // Keep saved properties synced across browser tabs via localStorage
+  useEffect(() => {
+    const onStorage = (e: StorageEvent) => {
+      if (e.key === 'jonopod_saved_properties') {
+        try {
+          const parsed = e.newValue ? JSON.parse(e.newValue) : [];
+          if (Array.isArray(parsed)) setSavedPropertyIds(parsed);
+        } catch {
+          // ignore malformed local storage
+        }
+      }
+    };
+    window.addEventListener('storage', onStorage);
+    return () => window.removeEventListener('storage', onStorage);
+  }, []);
 
   useEffect(() => {
     if (loading) return;
@@ -102,30 +119,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return () => unsubscribe();
   }, []);
 
-  useEffect(() => {
-    if (!user) {
-      return;
-    }
-
-    const savedColPath = `users/${user.uid}/saved`;
-    const savedCol = collection(db, 'users', user.uid, 'saved');
-
-    const unsubscribe = onSnapshot(
-      savedCol,
-      (snapshot) => {
-        const ids = snapshot.docs.map((d) => d.id);
-        setSavedPropertyIds(ids);
-        localStorage.setItem('jonopod_saved_properties', JSON.stringify(ids));
-      },
-      (error) => {
-        console.warn('Real-time saved properties sync error:', error);
-        handleFirestoreError(error, OperationType.GET, savedColPath);
-      }
-    );
-
-    return () => unsubscribe();
-  }, [user]);
-
   const signInWithGoogle = async () => {
     setAuthError(null);
     try {
@@ -149,33 +142,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const toggleSaveProperty = async (propertyId: string): Promise<boolean> => {
-    const isCurrentlySaved = savedPropertyIds.includes(propertyId);
-    const newSaved = isCurrentlySaved
-      ? savedPropertyIds.filter((id) => id !== propertyId)
-      : [...savedPropertyIds, propertyId];
-
-    setSavedPropertyIds(newSaved);
-    localStorage.setItem('jonopod_saved_properties', JSON.stringify(newSaved));
-
-    if (user) {
-      const docPath = `users/${user.uid}/saved/${propertyId}`;
-      const savedDocRef = doc(db, 'users', user.uid, 'saved', propertyId);
+    let added = false;
+    setSavedPropertyIds((prev) => {
+      const isCurrentlySaved = prev.includes(propertyId);
+      added = !isCurrentlySaved;
+      const newSaved = isCurrentlySaved
+        ? prev.filter((id) => id !== propertyId)
+        : [...prev, propertyId];
       try {
-        if (isCurrentlySaved) {
-          await deleteDoc(savedDocRef);
-        } else {
-          await setDoc(savedDocRef, {
-            propertyId,
-            userId: user.uid,
-            savedAt: new Date().toISOString(),
-          });
-        }
+        localStorage.setItem('jonopod_saved_properties', JSON.stringify(newSaved));
       } catch (err) {
-        handleFirestoreError(err, isCurrentlySaved ? OperationType.DELETE : OperationType.WRITE, docPath);
+        console.warn('Unable to cache saved properties in localStorage:', err);
       }
-    }
-
-    return !isCurrentlySaved;
+      return newSaved;
+    });
+    return added;
   };
 
   const isPropertySaved = (propertyId: string) => {

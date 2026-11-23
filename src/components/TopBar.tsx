@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { Bookmark, LogOut, LayoutDashboard } from 'lucide-react';
+import { Bookmark, LayoutDashboard } from 'lucide-react';
 import { Link } from '../lib/router';
 import logoImg from '../assets/logo.png';
 
@@ -10,17 +10,16 @@ interface TopBarProps {
 }
 
 const NAV_ITEMS = [
-  { id: 'manifesto', label: 'Philosophy' },
-  { id: 'showcase', label: 'Residences' },
-  { id: 'advisory', label: 'Advisory' },
+  { key: 'buy', id: 'showcase', label: 'Buy' },
+  { key: 'sell', id: 'sell', label: 'Sell' },
+  { key: 'contact', id: 'contact', label: 'Contact' },
 ];
 
 export const TopBar: React.FC<TopBarProps> = ({
   onNavigate,
   onOpenSavedDrawer,
 }) => {
-  const { user, isAdmin, signInWithGoogle, logOut, savedPropertyIds } = useAuth();
-  const [showUserDropdown, setShowUserDropdown] = useState(false);
+  const { isAdmin, savedPropertyIds } = useAuth();
   const [scrolled, setScrolled] = useState(false);
   const [hidden, setHidden] = useState(false);
   const lastY = useRef(0);
@@ -51,7 +50,7 @@ export const TopBar: React.FC<TopBarProps> = ({
         scrolled
           ? 'is-scrolled backdrop-blur-xl bg-[#ffffff]/92 border-b border-[#181512]/[0.09] shadow-[0_10px_30px_-16px_rgba(24,21,18,0.08)]'
           : 'bg-transparent border-b border-transparent shadow-none'
-      } ${hidden && !showUserDropdown ? '-translate-y-full' : 'translate-y-0'}`}
+      } ${hidden ? '-translate-y-full' : 'translate-y-0'}`}
     >
       <div className="px-6 md:px-12 lg:px-20 h-20 flex items-center justify-between">
         <a
@@ -77,8 +76,8 @@ export const TopBar: React.FC<TopBarProps> = ({
         >
           {NAV_ITEMS.map((item) => (
             <button
-              key={item.id}
-              id={`nav-${item.id}`}
+              key={item.key}
+              id={`nav-${item.key}`}
               onClick={() => onNavigate(item.id)}
               className="relative py-2 hover:text-[#181512] transition-colors cursor-pointer after:absolute after:left-0 after:-bottom-0.5 after:h-px after:w-full after:bg-[#9A6B3B] after:origin-right after:scale-x-0 hover:after:origin-left hover:after:scale-x-100 after:transition-transform after:duration-500"
             >
@@ -115,75 +114,6 @@ export const TopBar: React.FC<TopBarProps> = ({
               </span>
             )}
           </button>
-
-          {user ? (
-            <div className="relative">
-              <button
-                onClick={() => setShowUserDropdown(!showUserDropdown)}
-                className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border text-[#181512] text-xs font-mono cursor-pointer transition-colors ${
-                  scrolled
-                    ? 'bg-[#ffffff] border-[#181512]/12 hover:border-[#9A6B3B]/50 shadow-xs'
-                    : 'bg-white/25 backdrop-blur-sm border-[#181512]/20 hover:bg-white/45'
-                }`}
-              >
-                <div className="w-5 h-5 rounded-full bg-[#9A6B3B]/15 text-[#7C5329] flex items-center justify-center text-[10px] font-bold">
-                  {user.displayName ? user.displayName[0].toUpperCase() : 'U'}
-                </div>
-                <span className="hidden sm:inline max-w-[100px] truncate">{user.displayName || 'Patron'}</span>
-              </button>
-
-              {showUserDropdown && (
-                <div className="absolute right-0 mt-2 w-56 bg-[#ffffff] border border-[#181512]/12 rounded-xl p-2 shadow-[0_20px_50px_-12px_rgba(24,21,18,0.16)] z-50 text-xs font-mono">
-                  <div className="px-3 py-2 border-b border-[#181512]/10 text-[#786F63]">
-                    <span className="text-[10px] uppercase text-[#9A6B3B] font-semibold block">
-                      {isAdmin ? 'Architectural Admin' : 'Authenticated Patron'}
-                    </span>
-                    <span className="text-[#181512] truncate block mt-0.5">{user.email}</span>
-                  </div>
-
-                  {isAdmin && (
-                    <Link
-                      to="/manage"
-                      onClick={() => setShowUserDropdown(false)}
-                      className="w-full text-left px-3 py-2 text-[#684724] hover:bg-[#F8F7F4] rounded-lg flex items-center gap-2 mt-1 cursor-pointer"
-                    >
-                      <LayoutDashboard className="w-3.5 h-3.5 text-[#9A6B3B]" />
-                      <span>Studio Dashboard</span>
-                    </Link>
-                  )}
-
-                  <button
-                    onClick={() => {
-                      setShowUserDropdown(false);
-                      onOpenSavedDrawer();
-                    }}
-                    className="w-full text-left px-3 py-2 text-[#3D362E] hover:bg-[#F8F7F4] rounded-lg flex items-center gap-2 mt-1 cursor-pointer"
-                  >
-                    <Bookmark className="w-3.5 h-3.5 text-[#9A6B3B]" />
-                    <span>My Saved Collection ({savedPropertyIds.length})</span>
-                  </button>
-                  <button
-                    onClick={() => {
-                      setShowUserDropdown(false);
-                      logOut();
-                    }}
-                    className="w-full text-left px-3 py-2 text-red-700 hover:bg-red-50 rounded-lg flex items-center gap-2 mt-1 cursor-pointer"
-                  >
-                    <LogOut className="w-3.5 h-3.5" />
-                    <span>Sign Out</span>
-                  </button>
-                </div>
-              )}
-            </div>
-          ) : (
-            <button
-              id="sign-in-btn"
-              onClick={() => signInWithGoogle()}
-              className="ml-1 px-5 py-2.5 text-[10.5px] font-mono tracking-[0.22em] uppercase text-[#ffffff] bg-[#181512] hover:bg-[#9A6B3B] rounded-full transition-colors duration-500 whitespace-nowrap cursor-pointer shadow-xs"
-            >
-              Sign in
-            </button>
-          )}
         </div>
       </div>
     </header>
